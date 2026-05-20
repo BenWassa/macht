@@ -1,14 +1,17 @@
-# Graph Report - .  (2026-05-20)
+# Graph Report - . (2026-05-20)
 
 ## Corpus Check
+
 - Corpus is ~14,611 words - fits in a single context window. You may not need a graph.
 
 ## Summary
+
 - 98 nodes · 63 edges · 42 communities detected
 - Extraction: 92% EXTRACTED · 8% INFERRED · 0% AMBIGUOUS · INFERRED: 5 edges (avg confidence: 0.88)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
+
 - [[_COMMUNITY_Core Application Logic|Core Application Logic]]
 - [[_COMMUNITY_Formatting Utilities|Formatting Utilities]]
 - [[_COMMUNITY_Domain Calculation Models|Domain Calculation Models]]
@@ -53,6 +56,7 @@
 - [[_COMMUNITY_Index HTML Entry|Index HTML Entry]]
 
 ## God Nodes (most connected - your core abstractions)
+
 1. `Core Type Definitions` - 5 edges
 2. `Injury Store` - 5 edges
 3. `History Store` - 4 edges
@@ -65,18 +69,20 @@
 10. `RestTimerBanner()` - 2 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `WorkoutScreen` --implements--> `Injury Adaptation System`  [INFERRED]
+
+- `WorkoutScreen` --implements--> `Injury Adaptation System` [INFERRED]
   src/screens/WorkoutScreen.tsx → docs/MACHT_Sprint_Commission.md
-- `ProgressScreen` --cites--> `Brzycki 1RM Formula`  [EXTRACTED]
+- `ProgressScreen` --cites--> `Brzycki 1RM Formula` [EXTRACTED]
   src/screens/ProgressScreen.tsx → docs/MACHT_Sprint_Commission.md
-- `Sprint Commission Document` --rationale_for--> `v0.2.0 Monolith Reference`  [EXTRACTED]
-  docs/MACHT_Sprint_Commission.md → _archive/macht_v0_2_0.jsx
-- `RestTimerBanner()` --calls--> `formatTime()`  [INFERRED]
+- `Sprint Commission Document` --rationale_for--> `v0.2.0 Monolith Reference` [EXTRACTED]
+  docs/MACHT_Sprint_Commission.md → \_archive/macht_v0_2_0.jsx
+- `RestTimerBanner()` --calls--> `formatTime()` [INFERRED]
   src\components\RestTimerBanner.tsx → src\lib\format.ts
-- `App()` --calls--> `formatTime()`  [INFERRED]
-  _archive\macht_v0_2_0.jsx → src\lib\format.ts
+- `App()` --calls--> `formatTime()` [INFERRED]
+  \_archive\macht_v0_2_0.jsx → src\lib\format.ts
 
 ## Hyperedges (group relationships)
+
 - **Workout Session Lifecycle** — app_main, hook_session_clock, modal_finish_session [INFERRED 0.90]
 - **Injury-Aware Exercise System** — domain_injuries, domain_exercises, modal_finish_session [INFERRED 0.90]
 - **Intra-workout Rest Feedback** — app_main, hook_rest_timer, banner_rest_timer [INFERRED 0.85]
@@ -86,174 +92,217 @@
 ## Communities
 
 ### Community 0 - "Core Application Logic"
+
 Cohesion: 0.21
 Nodes (13): v0.2.0 Monolith Reference, Brzycki 1RM Formula, Injury Adaptation System, Sprint Commission Document, InjuryModal, HomeScreen, ProfileScreen, ProgressScreen (+5 more)
 
 ### Community 1 - "Formatting Utilities"
+
 Cohesion: 0.22
 Nodes (3): formatTime(), App(), RestTimerBanner()
 
 ### Community 2 - "Domain Calculation Models"
+
 Cohesion: 0.28
 Nodes (9): E1RM Calculations, Exercise Library, Injury Logic, Plate Loading Logic, Core Type Definitions, Finish Session Modal, Injury Tag Taxonomy Design, Set Entry Row (+1 more)
 
 ### Community 3 - "Injury Logic Helpers"
+
 Cohesion: 0.67
 Nodes (2): getAlternativeFor(), getExerciseConflict()
 
 ### Community 4 - "Workout Session State"
+
 Cohesion: 0.5
 Nodes (4): Main App Component, Rest Timer Banner, Rest Timer Hook, Session Clock Hook
 
 ### Community 5 - "1RM Calculation Logic"
+
 Cohesion: 0.67
-Nodes (0): 
+Nodes (0):
 
 ### Community 6 - "Plate Loading Math"
+
 Cohesion: 0.67
-Nodes (0): 
+Nodes (0):
 
 ### Community 7 - "Injury Modal UI"
+
 Cohesion: 0.67
-Nodes (0): 
+Nodes (0):
 
 ### Community 8 - "Home Screen Controller"
+
 Cohesion: 0.67
-Nodes (0): 
+Nodes (0):
 
 ### Community 9 - "User Settings & Export"
+
 Cohesion: 0.67
-Nodes (0): 
+Nodes (0):
 
 ### Community 10 - "In-Workout Controls"
+
 Cohesion: 0.67
-Nodes (0): 
+Nodes (0):
 
 ### Community 11 - "Workout Data Seeding"
+
 Cohesion: 0.67
-Nodes (0): 
+Nodes (0):
 
 ### Community 12 - "App Navigation"
+
 Cohesion: 1.0
-Nodes (0): 
+Nodes (0):
 
 ### Community 13 - "Exercise Input Helpers"
+
 Cohesion: 1.0
-Nodes (0): 
+Nodes (0):
 
 ### Community 14 - "Charts & Visualization"
+
 Cohesion: 1.0
-Nodes (0): 
+Nodes (0):
 
 ### Community 15 - "Exercise Library Logic"
+
 Cohesion: 1.0
-Nodes (0): 
+Nodes (0):
 
 ### Community 16 - "Rest Timer Logic"
+
 Cohesion: 1.0
-Nodes (0): 
+Nodes (0):
 
 ### Community 17 - "Session Timing Hook"
+
 Cohesion: 1.0
-Nodes (0): 
+Nodes (0):
 
 ### Community 18 - "Finish Session Controller"
+
 Cohesion: 1.0
-Nodes (0): 
+Nodes (0):
 
 ### Community 19 - "Template Management"
+
 Cohesion: 1.0
-Nodes (0): 
+Nodes (0):
 
 ### Community 20 - "ESLint Configuration"
+
 Cohesion: 1.0
-Nodes (0): 
+Nodes (0):
 
 ### Community 21 - "Tailwind Config"
+
 Cohesion: 1.0
-Nodes (0): 
+Nodes (0):
 
 ### Community 22 - "Vite Project Config"
+
 Cohesion: 1.0
-Nodes (0): 
+Nodes (0):
 
 ### Community 23 - "App Root"
+
 Cohesion: 1.0
-Nodes (0): 
+Nodes (0):
 
 ### Community 24 - "App Entry Point"
+
 Cohesion: 1.0
-Nodes (0): 
+Nodes (0):
 
 ### Community 25 - "Plate Visualizer Component"
+
 Cohesion: 1.0
-Nodes (0): 
+Nodes (0):
 
 ### Community 26 - "Mock Data Seeding"
+
 Cohesion: 1.0
-Nodes (0): 
+Nodes (0):
 
 ### Community 27 - "Core Domain Types"
+
 Cohesion: 1.0
-Nodes (0): 
+Nodes (0):
 
 ### Community 28 - "Progress Screen"
+
 Cohesion: 1.0
-Nodes (0): 
+Nodes (0):
 
 ### Community 29 - "History State Management"
+
 Cohesion: 1.0
-Nodes (0): 
+Nodes (0):
 
 ### Community 30 - "Injury State Management"
+
 Cohesion: 1.0
-Nodes (0): 
+Nodes (0):
 
 ### Community 31 - "User Settings Store"
+
 Cohesion: 1.0
-Nodes (0): 
+Nodes (0):
 
 ### Community 32 - "ESLint Metadata"
+
 Cohesion: 1.0
 Nodes (1): ESLint Configuration
 
 ### Community 33 - "Tailwind Metadata"
+
 Cohesion: 1.0
 Nodes (1): Tailwind Configuration
 
 ### Community 34 - "Vite Metadata"
+
 Cohesion: 1.0
 Nodes (1): Vite Configuration
 
 ### Community 35 - "Main Loop Entry"
+
 Cohesion: 1.0
 Nodes (1): Application Entry Point
 
 ### Community 36 - "Bottom Nav UI"
+
 Cohesion: 1.0
 Nodes (1): Bottom Navigation
 
 ### Community 37 - "Sparkline Chart UI"
+
 Cohesion: 1.0
 Nodes (1): Progression Sparkline
 
 ### Community 38 - "Mock Data Reference"
+
 Cohesion: 1.0
 Nodes (1): Mock History & Injuries
 
 ### Community 39 - "Formatting Utils (Sem)"
+
 Cohesion: 1.0
 Nodes (1): Formatting Utilities
 
 ### Community 40 - "Settings Store"
+
 Cohesion: 1.0
 Nodes (1): Settings Store
 
 ### Community 41 - "Index HTML Entry"
+
 Cohesion: 1.0
 Nodes (1): Application Entry
 
 ## Knowledge Gaps
+
 - **17 isolated node(s):** `ESLint Configuration`, `Tailwind Configuration`, `Vite Configuration`, `Application Entry Point`, `Bottom Navigation` (+12 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **Thin community `App Navigation`** (2 nodes): `BottomNav()`, `BottomNav.tsx`
@@ -318,6 +367,7 @@ Nodes (1): Application Entry
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
+
 _Questions this graph is uniquely positioned to answer:_
 
 - **Are the 2 inferred relationships involving `formatTime()` (e.g. with `RestTimerBanner()` and `App()`) actually correct?**

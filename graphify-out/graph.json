@@ -6,11 +6,7 @@
       {
         "id": "workout_lifecycle",
         "label": "Workout Session Lifecycle",
-        "nodes": [
-          "app_main",
-          "hook_session_clock",
-          "modal_finish_session"
-        ],
+        "nodes": ["app_main", "hook_session_clock", "modal_finish_session"],
         "relation": "participate_in",
         "confidence": "INFERRED",
         "confidence_score": 0.9,
@@ -32,11 +28,7 @@
       {
         "id": "rest_recovery_loop",
         "label": "Intra-workout Rest Feedback",
-        "nodes": [
-          "app_main",
-          "hook_rest_timer",
-          "banner_rest_timer"
-        ],
+        "nodes": ["app_main", "hook_rest_timer", "banner_rest_timer"],
         "relation": "form",
         "confidence": "INFERRED",
         "confidence_score": 0.85,
@@ -1861,11 +1853,7 @@
     {
       "id": "workout_lifecycle",
       "label": "Workout Session Lifecycle",
-      "nodes": [
-        "app_main",
-        "hook_session_clock",
-        "modal_finish_session"
-      ],
+      "nodes": ["app_main", "hook_session_clock", "modal_finish_session"],
       "relation": "participate_in",
       "confidence": "INFERRED",
       "confidence_score": 0.9,
@@ -1874,11 +1862,7 @@
     {
       "id": "injury_protection_system",
       "label": "Injury-Aware Exercise System",
-      "nodes": [
-        "domain_injuries",
-        "domain_exercises",
-        "modal_finish_session"
-      ],
+      "nodes": ["domain_injuries", "domain_exercises", "modal_finish_session"],
       "relation": "implement",
       "confidence": "INFERRED",
       "confidence_score": 0.9,
@@ -1887,11 +1871,7 @@
     {
       "id": "rest_recovery_loop",
       "label": "Intra-workout Rest Feedback",
-      "nodes": [
-        "app_main",
-        "hook_rest_timer",
-        "banner_rest_timer"
-      ],
+      "nodes": ["app_main", "hook_rest_timer", "banner_rest_timer"],
       "relation": "form",
       "confidence": "INFERRED",
       "confidence_score": 0.85,

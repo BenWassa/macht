@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { useWorkoutStore } from '@/state/useWorkoutStore';
+import { useEffect } from "react";
+import { useWorkoutStore } from "@/state/useWorkoutStore";
 
 export function useSessionClock(): void {
   const workoutActive = useWorkoutStore((state) => state.workoutActive);

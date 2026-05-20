@@ -1,8 +1,8 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { ExerciseInjury, SessionLog, Settings } from '@/domain/types';
-import { MOCK_HISTORY } from '@/data/mockData';
-import { todayIso } from '@/lib/format';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import type { ExerciseInjury, SessionLog, Settings } from "@/domain/types";
+import { MOCK_HISTORY } from "@/data/mockData";
+import { todayIso } from "@/lib/format";
 
 export interface MachtBackup {
   version: 1;
@@ -40,8 +40,11 @@ export const useHistoryStore = create<HistoryState>()(
       }),
     }),
     {
-      name: 'macht_history',
-      partialize: (state) => ({ sessions: state.sessions, snapshots: state.snapshots }),
+      name: "macht_history",
+      partialize: (state) => ({
+        sessions: state.sessions,
+        snapshots: state.snapshots,
+      }),
     },
   ),
 );

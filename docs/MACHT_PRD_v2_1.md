@@ -1,4 +1,5 @@
 # Macht — PRD v2.1
+
 **Updated:** 2026-05-20  
 **Delta from v2:** Name locked, web prototype tier added, voice rules codified, mockup-confirmed features absorbed, sprint commission referenced.
 
@@ -24,7 +25,7 @@ Stack: React + Vite + TypeScript + Tailwind + Zustand
 Purpose: Design iteration, feature validation, data model proof-of-concept  
 Storage: localStorage via Zustand persist  
 Design reference: `macht_v0_2_0.jsx`  
-Backup: JSON export/import  
+Backup: JSON export/import
 
 **Tier 2 — Native app** (Phase 2, separate repo)  
 Stack: React Native + Expo + TypeScript + NativeWind + Zustand  
@@ -37,27 +38,27 @@ Migration: Domain types, store logic, and component structure port directly. Sty
 
 ## Decisions locked
 
-| Decision | Choice |
-|---|---|
-| e1RM formula | Brzycki (most conservative, best sub-5-rep accuracy) |
-| Default units | lbs (toggle to kg in settings) |
-| Default effort scale | RPE 1–10 (toggle to RIR in settings) |
-| Default rest | 90 seconds (adjustable: 60 / 90 / 120 / 150) |
-| Voice | Plain English. No jargon. No exclamation marks. See Design.md. |
-| Visual system | Brutalist dark. See Design.md. |
-| Backup | JSON export (Tier 1). Drive push (Tier 2). |
-| Consistency metric | Sessions per week, rolling 6 weeks. Floor: 2. Stretch: 4. |
-| Minimum session | Self-attested toggle. Counts toward consistency. No penalty. |
+| Decision             | Choice                                                         |
+| -------------------- | -------------------------------------------------------------- |
+| e1RM formula         | Brzycki (most conservative, best sub-5-rep accuracy)           |
+| Default units        | lbs (toggle to kg in settings)                                 |
+| Default effort scale | RPE 1–10 (toggle to RIR in settings)                           |
+| Default rest         | 90 seconds (adjustable: 60 / 90 / 120 / 150)                   |
+| Voice                | Plain English. No jargon. No exclamation marks. See Design.md. |
+| Visual system        | Brutalist dark. See Design.md.                                 |
+| Backup               | JSON export (Tier 1). Drive push (Tier 2).                     |
+| Consistency metric   | Sessions per week, rolling 6 weeks. Floor: 2. Stretch: 4.      |
+| Minimum session      | Self-attested toggle. Counts toward consistency. No penalty.   |
 
 ---
 
 ## Open decisions (resolve before Sprint 3)
 
-| # | Decision | Options |
-|---|---|---|
-| 1 | Default template split | PPL / Upper-Lower |
-| 2 | Canonical e1RM lift list | Squat, Deadlift, Floor Press, RDL (+Bench paused) — confirm |
-| 3 | Sport profile activation order | Wrestling first / Generic first |
+| #   | Decision                       | Options                                                     |
+| --- | ------------------------------ | ----------------------------------------------------------- |
+| 1   | Default template split         | PPL / Upper-Lower                                           |
+| 2   | Canonical e1RM lift list       | Squat, Deadlift, Floor Press, RDL (+Bench paused) — confirm |
+| 3   | Sport profile activation order | Wrestling first / Generic first                             |
 
 ---
 
@@ -75,11 +76,13 @@ Migration: Domain types, store logic, and component structure port directly. Sty
 ## MVP feature set (confirmed in v0.2.0)
 
 ### Exercise library
+
 - 21 curated exercises (see `domain/exercises.ts`)
 - Each tagged: joints loaded, positions, structures stressed
 - Sport relevance tags seeded but inactive (Phase 2)
 
 ### Injury system
+
 - Add / edit / remove / clear injuries
 - Per-injury: name, severity (`avoid` / `caution`), forbidden movement tags, notes, dateAdded, targetReturn, clearedDate
 - Conflict detection: exercise tags ∩ injury forbidden tags → hide / warn / substitute
@@ -89,6 +92,7 @@ Migration: Domain types, store logic, and component structure port directly. Sty
 - Return-to-lift: on clearing an injury, prompt 60% deload re-entry for affected lifts
 
 ### Workout logging
+
 - Preset sets auto-populate from template
 - Per-set: weight, reps, RPE (or RIR), completion checkbox
 - "Last time" panel per exercise: derived from previous session in history store
@@ -101,24 +105,28 @@ Migration: Domain types, store logic, and component structure port directly. Sty
 - End session → confirm modal → saves to history
 
 ### Progress
+
 - Estimated 1RM per canonical lift: Brzycki formula
 - Sparkline chart: 12-week trailing view
 - Current / best / 6-week delta per lift
 - Paused state: auto-derived from active injuries (not hardcoded)
 
 ### Consistency dashboard
+
 - Rolling 6-week sessions/week bar chart
 - Floor (2/wk) and stretch (4/wk) reference lines
 - Injury weeks flagged visually (not penalised)
 - Recent sessions list: date, template name, duration, volume, adapted badge
 
 ### Templates
+
 - Template card: exercise list, target sets/reps per exercise
 - Injury adaptation badge + count of substituted exercises
 - Edit: reorder, remove, add from library (Sprint 5)
 - One active template at MVP; multiple in Sprint 5
 
 ### Profile
+
 - Active injuries: CRUD, severity badges, forbidden tag chips
 - Past injuries: cleared injuries with dates (collapsed)
 - Settings: units, default rest, effort scale
@@ -146,11 +154,11 @@ Migration: Domain types, store logic, and component structure port directly. Sty
 
 ## Reference documents
 
-| Document | Purpose |
-|---|---|
-| `macht_v0_2_0.jsx` | Visual and interaction reference. Read-only. |
-| `Design.md` | Design system: tokens, components, voice rules |
-| `MACHT_Sprint_Commission.md` | Sprint gates and deliverable checklists |
+| Document                     | Purpose                                        |
+| ---------------------------- | ---------------------------------------------- |
+| `macht_v0_2_0.jsx`           | Visual and interaction reference. Read-only.   |
+| `Design.md`                  | Design system: tokens, components, voice rules |
+| `MACHT_Sprint_Commission.md` | Sprint gates and deliverable checklists        |
 
 ---
 

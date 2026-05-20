@@ -1,6 +1,6 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { EffortMode, Settings, Units } from '@/domain/types';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import type { EffortMode, Settings, Units } from "@/domain/types";
 
 interface SettingsState extends Settings {
   setUnits: (units: Units) => void;
@@ -12,14 +12,14 @@ interface SettingsState extends Settings {
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
-      units: 'lbs',
+      units: "lbs",
       defaultRest: 90,
-      rpeMode: 'RPE',
+      rpeMode: "RPE",
       setUnits: (units) => set({ units }),
       setDefaultRest: (defaultRest) => set({ defaultRest }),
       setRpeMode: (rpeMode) => set({ rpeMode }),
       hydrateSettings: (settings) => set(settings),
     }),
-    { name: 'macht_settings' },
+    { name: "macht_settings" },
   ),
 );

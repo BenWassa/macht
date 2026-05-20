@@ -1,11 +1,11 @@
-import { create } from 'zustand';
-import { DEFAULT_TEMPLATE } from '@/domain/exercises';
-import type { SetEntry, TemplatePlan, WorkoutSets } from '@/domain/types';
+import { create } from "zustand";
+import { DEFAULT_TEMPLATE } from "@/domain/exercises";
+import type { SetEntry, TemplatePlan, WorkoutSets } from "@/domain/types";
 
 // SPLIT TRIGGER: if this file exceeds 160 lines, extract useWorkoutCursor.ts
 // containing: selectedExIndex, selectedSetIndex, setSelectedExIndex, setSelectedSetIndex.
 
-const makeDefaultSets = (last = '-'): SetEntry[] => [
+const makeDefaultSets = (last = "-"): SetEntry[] => [
   { id: 1, weight: 80, reps: 8, rpe: null, completed: false, last },
   { id: 2, weight: 80, reps: 8, rpe: null, completed: false, last },
   { id: 3, weight: 75, reps: 10, rpe: null, completed: false, last },
@@ -28,13 +28,21 @@ interface WorkoutState {
   isMinimumSession: boolean;
   deloadWeights: Record<string, number>;
   tick: () => void;
-  startTemplate: (template?: TemplatePlan, deloadWeights?: Record<string, number>) => void;
+  startTemplate: (
+    template?: TemplatePlan,
+    deloadWeights?: Record<string, number>,
+  ) => void;
   endSession: () => void;
   setSelectedExIndex: (index: number) => void;
   setSelectedSetIndex: (index: number) => void;
   setIsMinimumSession: (value: boolean) => void;
   toggleComplete: (exerciseId: string, setIndex: number) => boolean;
-  updateSetField: <K extends keyof SetEntry>(exerciseId: string, setIndex: number, field: K, value: SetEntry[K]) => void;
+  updateSetField: <K extends keyof SetEntry>(
+    exerciseId: string,
+    setIndex: number,
+    field: K,
+    value: SetEntry[K],
+  ) => void;
   substituteExercise: (targetId: string, subId: string) => void;
   applyDeloadWeight: (exerciseId: string, weight: number) => void;
 }
@@ -49,7 +57,12 @@ export const useWorkoutStore = create<WorkoutState>()((set) => ({
   selectedSetIndex: 0,
   isMinimumSession: false,
   deloadWeights: {},
-  tick: () => set((state) => (state.workoutActive ? { workoutDuration: state.workoutDuration + 1 } : state)),
+  tick: () =>
+    set((state) =>
+      state.workoutActive
+        ? { workoutDuration: state.workoutDuration + 1 }
+        : state,
+    ),
   startTemplate: (template = DEFAULT_TEMPLATE, deloadWeights = {}) =>
     set({
       workoutActive: true,
@@ -59,9 +72,16 @@ export const useWorkoutStore = create<WorkoutState>()((set) => ({
       workoutSets: template.exercises.reduce<WorkoutSets>((acc, exerciseId) => {
         const weight = deloadWeights[exerciseId] ?? 80;
         acc[exerciseId] = [
-          { id: 1, weight, reps: 8, rpe: null, completed: false, last: '-' },
-          { id: 2, weight, reps: 8, rpe: null, completed: false, last: '-' },
-          { id: 3, weight: Math.max(0, weight - 5), reps: 10, rpe: null, completed: false, last: '-' },
+          { id: 1, weight, reps: 8, rpe: null, completed: false, last: "-" },
+          { id: 2, weight, reps: 8, rpe: null, completed: false, last: "-" },
+          {
+            id: 3,
+            weight: Math.max(0, weight - 5),
+            reps: 10,
+            rpe: null,
+            completed: false,
+            last: "-",
+          },
         ];
         return acc;
       }, {}),
@@ -78,7 +98,8 @@ export const useWorkoutStore = create<WorkoutState>()((set) => ({
       selectedSetIndex: 0,
       isMinimumSession: false,
     }),
-  setSelectedExIndex: (selectedExIndex) => set({ selectedExIndex, selectedSetIndex: 0 }),
+  setSelectedExIndex: (selectedExIndex) =>
+    set({ selectedExIndex, selectedSetIndex: 0 }),
   setSelectedSetIndex: (selectedSetIndex) => set({ selectedSetIndex }),
   setIsMinimumSession: (isMinimumSession) => set({ isMinimumSession }),
   toggleComplete: (exerciseId, setIndex) => {
@@ -100,7 +121,9 @@ export const useWorkoutStore = create<WorkoutState>()((set) => ({
       return {
         workoutSets: {
           ...state.workoutSets,
-          [exerciseId]: sets.map((entry, index) => (index === setIndex ? { ...entry, [field]: value } : entry)),
+          [exerciseId]: sets.map((entry, index) =>
+            index === setIndex ? { ...entry, [field]: value } : entry,
+          ),
         },
       };
     }),

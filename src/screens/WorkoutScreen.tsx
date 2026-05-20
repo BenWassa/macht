@@ -1,19 +1,22 @@
-import { AlertTriangle } from 'lucide-react';
-import { PlateVisualizer } from '@/components/PlateVisualizer';
-import { SetRow } from '@/components/SetRow';
-import { getExerciseById } from '@/domain/exercises';
-import { getExerciseConflict } from '@/domain/injuries';
-import type { SetEntry } from '@/domain/types';
-import { useInjuryStore } from '@/state/useInjuryStore';
-import { useSettingsStore } from '@/state/useSettingsStore';
-import { useWorkoutStore } from '@/state/useWorkoutStore';
+import { AlertTriangle } from "lucide-react";
+import { PlateVisualizer } from "@/components/PlateVisualizer";
+import { SetRow } from "@/components/SetRow";
+import { getExerciseById } from "@/domain/exercises";
+import { getExerciseConflict } from "@/domain/injuries";
+import type { SetEntry } from "@/domain/types";
+import { useInjuryStore } from "@/state/useInjuryStore";
+import { useSettingsStore } from "@/state/useSettingsStore";
+import { useWorkoutStore } from "@/state/useWorkoutStore";
 
 interface WorkoutScreenProps {
   onFinish: () => void;
   onSetCompleted: () => void;
 }
 
-export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) {
+export function WorkoutScreen({
+  onFinish,
+  onSetCompleted,
+}: WorkoutScreenProps) {
   const settings = useSettingsStore();
   const injuries = useInjuryStore((state) => state.injuries);
   const workout = useWorkoutStore();
@@ -22,11 +25,17 @@ export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) 
     return (
       <div className="animate-fadeIn">
         <div className="mb-10">
-          <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-neutral-500">Active workout</p>
-          <h1 className="font-mono text-xl font-bold uppercase tracking-tight">Session</h1>
+          <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-neutral-500">
+            Active workout
+          </p>
+          <h1 className="font-mono text-xl font-bold uppercase tracking-tight">
+            Session
+          </h1>
         </div>
         <div className="border border-dashed border-edge bg-well p-8 text-center">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-neutral-500">No session active. Go to Plans to start.</p>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-neutral-500">
+            No session active. Go to Plans to start.
+          </p>
         </div>
       </div>
     );
@@ -42,7 +51,11 @@ export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) 
     if (completedNow) onSetCompleted();
   };
 
-  const updateSet = <K extends keyof SetEntry>(setIndex: number, field: K, value: SetEntry[K]) => {
+  const updateSet = <K extends keyof SetEntry>(
+    setIndex: number,
+    field: K,
+    value: SetEntry[K],
+  ) => {
     workout.updateSetField(selectedExerciseId, setIndex, field, value);
   };
 
@@ -50,29 +63,45 @@ export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) 
     <div className="animate-fadeIn">
       <div className="mb-8 flex items-start justify-between gap-4">
         <div>
-          <p className="mb-1 font-mono text-[11px] uppercase tracking-widest text-neutral-400">Active workout</p>
-          <h1 className="font-mono text-2xl font-bold uppercase tracking-tight">{workout.workoutName}</h1>
+          <p className="mb-1 font-mono text-[11px] uppercase tracking-widest text-neutral-400">
+            Active workout
+          </p>
+          <h1 className="font-mono text-2xl font-bold uppercase tracking-tight">
+            {workout.workoutName}
+          </h1>
         </div>
-        <button onClick={onFinish} className="shrink-0 bg-emerald-600 px-6 py-3 font-mono text-xs font-bold uppercase tracking-widest text-white transition hover:bg-emerald-700 active:bg-emerald-800">Finish</button>
-      </div>
-
-      <div className="mb-6 flex items-center justify-between px-0.5">
-        <span className="font-mono text-[11px] uppercase tracking-widest text-neutral-500">Minimum session</span>
         <button
-          onClick={() => workout.setIsMinimumSession(!workout.isMinimumSession)}
-          className={`h-7 w-14 border p-1 transition ${workout.isMinimumSession ? 'border-blue-700 bg-blue-950' : 'border-[#222] bg-black'}`}
-          aria-label="Toggle minimum session"
+          onClick={onFinish}
+          className="shrink-0 bg-emerald-600 px-6 py-3 font-mono text-xs font-bold uppercase tracking-widest text-white transition hover:bg-emerald-700 active:bg-emerald-800"
         >
-          <span className={`block h-4 w-4 bg-neutral-200 transition-transform ${workout.isMinimumSession ? 'translate-x-7' : 'translate-x-0'}`} />
+          Finish
         </button>
       </div>
 
-      <div className="mb-8 flex border-b border-edge bg-black scrollbar-none overflow-x-auto" role="tablist">
+      <div className="mb-6 flex items-center justify-between px-0.5">
+        <span className="font-mono text-[11px] uppercase tracking-widest text-neutral-500">
+          Minimum session
+        </span>
+        <button
+          onClick={() => workout.setIsMinimumSession(!workout.isMinimumSession)}
+          className={`h-7 w-14 border p-1 transition ${workout.isMinimumSession ? "border-blue-700 bg-blue-950" : "border-[#222] bg-black"}`}
+          aria-label="Toggle minimum session"
+        >
+          <span
+            className={`block h-4 w-4 bg-neutral-200 transition-transform ${workout.isMinimumSession ? "translate-x-7" : "translate-x-0"}`}
+          />
+        </button>
+      </div>
+
+      <div
+        className="mb-8 flex border-b border-edge bg-black scrollbar-none overflow-x-auto"
+        role="tablist"
+      >
         {workout.activeWorkoutList.map((exerciseId, index) => {
           const exercise = getExerciseById(exerciseId);
           const hasConflict = getExerciseConflict(exerciseId, injuries);
           const isActive = workout.selectedExIndex === index;
-          
+
           return (
             <button
               key={`${exerciseId}-${index}`}
@@ -80,18 +109,26 @@ export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) 
               role="tab"
               aria-selected={isActive}
               className={`min-w-[160px] shrink-0 px-6 py-5 text-left transition relative border-r border-edge ${
-                isActive ? 'bg-blue-950/20' : 'hover:bg-canvas'
+                isActive ? "bg-blue-950/20" : "hover:bg-canvas"
               }`}
             >
-              <span className={`block truncate font-mono text-xs font-bold uppercase tracking-tight ${
-                isActive ? 'text-blue-400' : 'text-neutral-400'
-              }`}>
+              <span
+                className={`block truncate font-mono text-xs font-bold uppercase tracking-tight ${
+                  isActive ? "text-blue-400" : "text-neutral-400"
+                }`}
+              >
                 {exercise?.name}
               </span>
-              <span className={`mt-1.5 block font-mono text-[10px] uppercase tracking-wider ${
-                hasConflict ? 'text-red-500 font-bold' : isActive ? 'text-blue-500/60' : 'text-neutral-500'
-              }`}>
-                {hasConflict ? 'Conflict' : exercise?.target}
+              <span
+                className={`mt-1.5 block font-mono text-[10px] uppercase tracking-wider ${
+                  hasConflict
+                    ? "text-red-500 font-bold"
+                    : isActive
+                      ? "text-blue-500/60"
+                      : "text-neutral-500"
+                }`}
+              >
+                {hasConflict ? "Conflict" : exercise?.target}
               </span>
               {isActive && (
                 <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-blue-500" />
@@ -105,11 +142,19 @@ export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) 
         <div className="mb-6 space-y-3 border border-red-900 bg-red-950/20 p-4">
           <div className="flex gap-3 text-red-300">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" />
-            <p className="font-mono text-xs leading-relaxed text-red-300">Injury conflict: {conflict.injury}. {conflict.tags.join(', ').replace(/g, ' ')}.</p>
+            <p className="font-mono text-xs leading-relaxed text-red-300">
+              Injury conflict: {conflict.injury}.{" "}
+              {conflict.tags.join(", ").replace(/_/g, " ")}.
+            </p>
           </div>
           {conflict.alternative && (
             <button
-              onClick={() => workout.substituteExercise(selectedExerciseId, conflict.alternative!)}
+              onClick={() =>
+                workout.substituteExercise(
+                  selectedExerciseId,
+                  conflict.alternative!,
+                )
+              }
               className="border border-red-900 bg-black px-4 py-3 font-mono text-xs font-bold uppercase text-red-300 transition hover:bg-red-950/30 active:bg-red-950/50"
             >
               Use {getExerciseById(conflict.alternative)?.name} instead
@@ -143,11 +188,17 @@ export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) 
       </div>
 
       <div className="mb-4 border-t border-edge pt-4">
-        <span className="mb-1 block font-mono text-[10px] uppercase tracking-widest text-neutral-500">Last time</span>
-        <p className="font-mono text-sm text-neutral-400">{selectedSet?.last ?? '—'}</p>
+        <span className="mb-1 block font-mono text-[10px] uppercase tracking-widest text-neutral-500">
+          Last time
+        </span>
+        <p className="font-mono text-sm text-neutral-400">
+          {selectedSet?.last ?? "—"}
+        </p>
       </div>
 
-      {selectedSet && <PlateVisualizer weight={selectedSet.weight} units={settings.units} />}
+      {selectedSet && (
+        <PlateVisualizer weight={selectedSet.weight} units={settings.units} />
+      )}
     </div>
   );
 }

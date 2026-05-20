@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 export function useRestTimer(defaultRest: number) {
   const [seconds, setSeconds] = useState(defaultRest);
@@ -30,7 +30,8 @@ export function useRestTimer(defaultRest: number) {
     running,
     visible,
     start,
-    add: (amount: number) => setSeconds((current) => Math.max(0, current + amount)),
+    add: (amount: number) =>
+      setSeconds((current) => Math.max(0, current + amount)),
     reset: () => {
       setSeconds(defaultRest);
       setRunning(false);

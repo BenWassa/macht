@@ -1,12 +1,12 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { ExerciseInjury } from '@/domain/types';
-import { INITIAL_INJURIES } from '@/data/mockData';
-import { todayIso } from '@/lib/format';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import type { ExerciseInjury } from "@/domain/types";
+import { INITIAL_INJURIES } from "@/data/mockData";
+import { todayIso } from "@/lib/format";
 
 interface InjuryState {
   injuries: ExerciseInjury[];
-  addInjury: (injury: Omit<ExerciseInjury, 'id' | 'dateAdded'>) => void;
+  addInjury: (injury: Omit<ExerciseInjury, "id" | "dateAdded">) => void;
   updateInjury: (id: string, patch: Partial<ExerciseInjury>) => void;
   removeInjury: (id: string) => void;
   clearInjury: (id: string) => ExerciseInjury | undefined;
@@ -26,19 +26,26 @@ export const useInjuryStore = create<InjuryState>()(
         })),
       updateInjury: (id, patch) =>
         set((state) => ({
-          injuries: state.injuries.map((injury) => (injury.id === id ? { ...injury, ...patch } : injury)),
+          injuries: state.injuries.map((injury) =>
+            injury.id === id ? { ...injury, ...patch } : injury,
+          ),
         })),
-      removeInjury: (id) => set((state) => ({ injuries: state.injuries.filter((injury) => injury.id !== id) })),
+      removeInjury: (id) =>
+        set((state) => ({
+          injuries: state.injuries.filter((injury) => injury.id !== id),
+        })),
       clearInjury: (id) => {
         const injury = get().injuries.find((item) => item.id === id);
         if (!injury) return undefined;
         set((state) => ({
-          injuries: state.injuries.map((item) => (item.id === id ? { ...item, clearedDate: todayIso() } : item)),
+          injuries: state.injuries.map((item) =>
+            item.id === id ? { ...item, clearedDate: todayIso() } : item,
+          ),
         }));
         return injury;
       },
       hydrateInjuries: (injuries) => set({ injuries }),
     }),
-    { name: 'macht_injuries' },
+    { name: "macht_injuries" },
   ),
 );

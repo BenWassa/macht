@@ -1,6 +1,6 @@
-export type Severity = 'avoid' | 'caution' | 'monitor';
-export type Units = 'lbs' | 'kgs';
-export type EffortMode = 'RPE' | 'RIR';
+export type Severity = "avoid" | "caution" | "monitor";
+export type Units = "lbs" | "kgs";
+export type EffortMode = "RPE" | "RIR";
 
 export interface Exercise {
   id: string;

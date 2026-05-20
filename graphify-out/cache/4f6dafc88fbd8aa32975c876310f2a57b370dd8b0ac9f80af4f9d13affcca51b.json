@@ -1,1 +1,38 @@
-{"nodes": [{"id": "src_screens_ProgressScreen_tsx", "label": "ProgressScreen", "file_type": "code", "source_file": "src/screens/ProgressScreen.tsx", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "src_screens_ProgressScreen_tsx", "target": "src_state_useHistoryStore_ts", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "src/screens/ProgressScreen.tsx", "source_location": null, "weight": 1.0}, {"source": "src_screens_ProgressScreen_tsx", "target": "concept_brzycki_formula", "relation": "cites", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "src/screens/ProgressScreen.tsx", "source_location": null, "weight": 1.0}], "hyperedges": []}
+{
+  "nodes": [
+    {
+      "id": "src_screens_ProgressScreen_tsx",
+      "label": "ProgressScreen",
+      "file_type": "code",
+      "source_file": "src/screens/ProgressScreen.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "src_screens_ProgressScreen_tsx",
+      "target": "src_state_useHistoryStore_ts",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/screens/ProgressScreen.tsx",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "src_screens_ProgressScreen_tsx",
+      "target": "concept_brzycki_formula",
+      "relation": "cites",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/screens/ProgressScreen.tsx",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": []
+}
