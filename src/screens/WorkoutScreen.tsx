@@ -67,20 +67,33 @@ export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) 
         </button>
       </div>
 
-      <div className="mb-6 flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+      <div className="mb-8 flex border-b border-[#1a1a1a] bg-black scrollbar-none overflow-x-auto">
         {workout.activeWorkoutList.map((exerciseId, index) => {
           const exercise = getExerciseById(exerciseId);
           const hasConflict = getExerciseConflict(exerciseId, injuries);
+          const isActive = workout.selectedExIndex === index;
+          
           return (
             <button
               key={`${exerciseId}-${index}`}
               onClick={() => workout.setSelectedExIndex(index)}
-              className={`min-w-32 shrink-0 border px-3 py-2 text-left transition ${
-                workout.selectedExIndex === index ? 'border-blue-800 bg-blue-950/20' : 'border-[#1a1a1a] bg-[#0c0c0c]'
+              className={`min-w-[140px] shrink-0 px-4 py-4 text-left transition relative border-r border-[#1a1a1a] ${
+                isActive ? 'bg-blue-950/20' : 'hover:bg-[#0c0c0c]'
               }`}
             >
-              <span className="block truncate font-mono text-[10px] font-bold uppercase text-neutral-300">{exercise?.name}</span>
-              <span className={`mt-1 block font-mono text-[8px] uppercase ${hasConflict ? 'text-red-400' : 'text-neutral-600'}`}>{hasConflict ? 'Conflict' : exercise?.target}</span>
+              <span className={`block truncate font-mono text-[10px] font-bold uppercase tracking-tight ${
+                isActive ? 'text-blue-400' : 'text-neutral-400'
+              }`}>
+                {exercise?.name}
+              </span>
+              <span className={`mt-1 block font-mono text-[8px] uppercase tracking-wider ${
+                hasConflict ? 'text-red-500 font-bold' : isActive ? 'text-blue-500/60' : 'text-neutral-600'
+              }`}>
+                {hasConflict ? 'Conflict' : exercise?.target}
+              </span>
+              {isActive && (
+                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-500" />
+              )}
             </button>
           );
         })}
