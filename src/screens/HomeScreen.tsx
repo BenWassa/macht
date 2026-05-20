@@ -40,13 +40,13 @@ export function HomeScreen({ setActiveTab }: HomeScreenProps) {
   };
 
   return (
-    <div className="space-y-8 animate-fadeIn">
-      <div>
+    <div className="animate-fadeIn">
+      <div className="mb-10">
         <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-neutral-500">Strength log</p>
         <h1 className="font-mono text-xl font-bold uppercase tracking-tight">Consistency</h1>
       </div>
 
-      <div className="border border-[#1a1a1a] bg-[#0c0c0c] p-4">
+      <div className="mb-6 border border-[#1a1a1a] bg-[#0c0c0c] p-4 pb-3">
         <div className="mb-6 flex items-center justify-between">
           <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-400">Six weeks</span>
           <div className="flex space-x-3 font-mono text-[9px]">
@@ -71,36 +71,38 @@ export function HomeScreen({ setActiveTab }: HomeScreenProps) {
         </div>
       </div>
 
-      <div className="flex flex-col items-start justify-between gap-4 border border-[#1a1a1a] bg-[#0c0c0c] p-4 sm:flex-row sm:items-center">
+      <div className="mb-12 flex flex-col items-start justify-between gap-5 border border-[#1a1a1a] bg-[#0c0c0c] p-5 sm:flex-row sm:items-center">
         <div>
-          <span className="mb-0.5 block font-mono text-[9px] uppercase tracking-widest text-blue-500">Next</span>
+          <span className="mb-1 block font-mono text-[9px] uppercase tracking-widest text-blue-500">Next</span>
           <h3 className="text-xs font-bold uppercase tracking-tight">{DEFAULT_TEMPLATE.name}</h3>
-          <p className="mt-0.5 text-[11px] text-neutral-500">{DEFAULT_TEMPLATE.notes}</p>
+          <p className="mt-1 text-[11px] text-neutral-500">{DEFAULT_TEMPLATE.notes}</p>
         </div>
-        <button onClick={start} className="flex w-full items-center justify-center gap-2 bg-blue-600 px-4 py-2.5 font-mono text-xs font-bold uppercase tracking-widest text-white transition hover:bg-blue-700 sm:w-auto">
-          <Play className="h-3.5 w-3.5" /> Start
+        <button onClick={start} className="flex w-full items-center justify-center gap-2 bg-blue-600 px-5 py-3 font-mono text-xs font-bold uppercase tracking-widest text-white transition hover:bg-blue-700 sm:w-auto">
+          <Play className="h-3.5 w-3.5" /> Start session
         </button>
       </div>
 
-      <div className="space-y-3">
-        <h2 className="border-b border-[#1a1a1a] pb-2 font-mono text-[10px] uppercase tracking-wider text-neutral-400">Recent sessions</h2>
-        {sessions.length === 0 && (
-          <button onClick={start} className="w-full border border-dashed border-[#1a1a1a] bg-black p-6 text-center font-mono text-xs uppercase tracking-widest text-neutral-500">
-            No sessions yet. Start your first session.
-          </button>
-        )}
-        {sessions.slice(0, 6).map((session) => (
-          <div key={session.id} className="flex items-center justify-between border border-[#1a1a1a] bg-[#0c0c0c] p-4">
-            <div>
-              <p className="font-mono text-xs font-bold uppercase text-neutral-200">{session.template}</p>
-              <p className="mt-1 font-mono text-[9px] uppercase tracking-wider text-neutral-500">{session.date} / {session.duration} / {session.sets} sets</p>
+      <div>
+        <h2 className="mb-3 font-mono text-[10px] uppercase tracking-wider text-neutral-400">Recent sessions</h2>
+        <div className="border-t border-[#1a1a1a]">
+          {sessions.length === 0 && (
+            <button onClick={start} className="w-full border border-dashed border-[#1a1a1a] bg-black p-6 text-center font-mono text-xs uppercase tracking-widest text-neutral-500">
+              No sessions yet. Start your first session.
+            </button>
+          )}
+          {sessions.slice(0, 6).map((session) => (
+            <div key={session.id} className="flex items-center justify-between border-b border-[#1a1a1a] py-3">
+              <div>
+                <p className="font-mono text-xs font-bold uppercase text-neutral-200">{session.template}</p>
+                <p className="mt-1 font-mono text-[9px] uppercase tracking-wider text-neutral-500">{session.date} · {session.duration} · {session.sets} sets</p>
+              </div>
+              <div className="text-right">
+                <p className="font-mono text-xs font-bold text-neutral-300">{session.volume.toLocaleString()} <span className="font-mono text-[9px] text-neutral-600">lbs</span></p>
+                {session.adapted && <span className="mt-0.5 block font-mono text-[8px] uppercase text-blue-400">Adapted</span>}
+              </div>
             </div>
-            <div className="text-right">
-              <p className="font-mono text-xs font-bold text-neutral-300">{session.volume.toLocaleString()}</p>
-              {session.adapted && <span className="font-mono text-[8px] uppercase text-blue-400">Adapted</span>}
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );

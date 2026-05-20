@@ -48,27 +48,27 @@ export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) 
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn">
-      <div className="flex items-start justify-between gap-4">
+    <div className="animate-fadeIn">
+      <div className="mb-8 flex items-start justify-between gap-4">
         <div>
           <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-neutral-500">Active workout</p>
           <h1 className="font-mono text-xl font-bold uppercase tracking-tight">{workout.workoutName}</h1>
         </div>
-        <button onClick={onFinish} className="bg-emerald-600 px-4 py-2.5 font-mono text-[10px] font-bold uppercase tracking-widest text-white hover:bg-emerald-700">Finish</button>
+        <button onClick={onFinish} className="shrink-0 bg-emerald-600 px-4 py-2.5 font-mono text-[10px] font-bold uppercase tracking-widest text-white hover:bg-emerald-700">Finish</button>
       </div>
 
-      <div className="flex items-center justify-between border border-[#1a1a1a] bg-[#0c0c0c] p-3">
-        <span className="font-mono text-[10px] uppercase tracking-widest text-neutral-500">Minimum session</span>
+      <div className="mb-6 flex items-center justify-between px-0.5">
+        <span className="font-mono text-[9px] uppercase tracking-widest text-neutral-600">Minimum session</span>
         <button
           onClick={() => workout.setIsMinimumSession(!workout.isMinimumSession)}
-          className={`h-6 w-11 border p-0.5 transition ${workout.isMinimumSession ? 'border-blue-700 bg-blue-950' : 'border-[#222] bg-black'}`}
+          className={`h-5 w-10 border p-0.5 transition ${workout.isMinimumSession ? 'border-blue-700 bg-blue-950' : 'border-[#222] bg-black'}`}
           aria-label="Toggle minimum session"
         >
-          <span className={`block h-4 w-4 bg-neutral-200 transition ${workout.isMinimumSession ? 'translate-x-5' : 'translate-x-0'}`} />
+          <span className={`block h-3 w-3 bg-neutral-200 transition-transform ${workout.isMinimumSession ? 'translate-x-5' : 'translate-x-0'}`} />
         </button>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto pb-1">
+      <div className="mb-6 flex gap-2 overflow-x-auto pb-1 scrollbar-none">
         {workout.activeWorkoutList.map((exerciseId, index) => {
           const exercise = getExerciseById(exerciseId);
           const hasConflict = getExerciseConflict(exerciseId, injuries);
@@ -76,7 +76,7 @@ export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) 
             <button
               key={`${exerciseId}-${index}`}
               onClick={() => workout.setSelectedExIndex(index)}
-              className={`min-w-32 border px-3 py-2 text-left ${
+              className={`min-w-32 shrink-0 border px-3 py-2 text-left transition ${
                 workout.selectedExIndex === index ? 'border-blue-800 bg-blue-950/20' : 'border-[#1a1a1a] bg-[#0c0c0c]'
               }`}
             >
@@ -88,7 +88,7 @@ export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) 
       </div>
 
       {conflict && (
-        <div className="space-y-3 border border-red-950 bg-red-950/20 p-3">
+        <div className="mb-6 space-y-3 border border-red-950 bg-red-950/20 p-3">
           <div className="flex gap-3 text-red-300">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
             <p className="text-[11px] leading-relaxed">Conflicts with {conflict.injury}: {conflict.tags.join(', ').replace(/_/g, ' ')}.</p>
@@ -101,27 +101,29 @@ export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) 
         </div>
       )}
 
-      <div className="space-y-2">
-        <div className="grid grid-cols-[34px_1fr_1fr_1fr_36px] gap-2 px-2 font-mono text-[8px] uppercase tracking-wider text-neutral-600">
+      <div className="mb-10">
+        <div className="mb-1 grid grid-cols-[34px_1fr_1fr_1fr_36px] gap-2 border-b border-[#1a1a1a] px-2 pb-2 font-mono text-[8px] uppercase tracking-wider text-neutral-600">
           <span>Set</span><span className="text-center">Weight</span><span className="text-center">Reps</span><span className="text-center">{settings.rpeMode}</span><span />
         </div>
-        {selectedSets.map((set, index) => (
-          <SetRow
-            key={set.id}
-            set={set}
-            index={index}
-            selected={workout.selectedSetIndex === index}
-            effortLabel={settings.rpeMode}
-            onSelect={() => workout.setSelectedSetIndex(index)}
-            onToggleComplete={() => toggleComplete(selectedExerciseId, index)}
-            onUpdate={(field, value) => updateSet(index, field, value)}
-          />
-        ))}
+        <div className="space-y-1.5 pt-1.5">
+          {selectedSets.map((set, index) => (
+            <SetRow
+              key={set.id}
+              set={set}
+              index={index}
+              selected={workout.selectedSetIndex === index}
+              effortLabel={settings.rpeMode}
+              onSelect={() => workout.setSelectedSetIndex(index)}
+              onToggleComplete={() => toggleComplete(selectedExerciseId, index)}
+              onUpdate={(field, value) => updateSet(index, field, value)}
+            />
+          ))}
+        </div>
       </div>
 
-      <div className="border border-[#1a1a1a] bg-[#0c0c0c] p-4">
-        <span className="mb-2 block font-mono text-[9px] uppercase tracking-widest text-neutral-500">Last time</span>
-        <p className="font-mono text-xs text-neutral-400">{selectedExercise?.name}: {selectedSet?.last ?? '-'}</p>
+      <div className="mb-4 border-t border-[#1a1a1a] pt-4">
+        <span className="mb-1 block font-mono text-[9px] uppercase tracking-widest text-neutral-600">Last time</span>
+        <p className="font-mono text-xs text-neutral-400">{selectedExercise?.name}: {selectedSet?.last ?? '—'}</p>
       </div>
 
       {selectedSet && <PlateVisualizer weight={selectedSet.weight} units={settings.units} />}
