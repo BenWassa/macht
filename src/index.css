@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@theme {
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-sans: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --animate-fadeIn: fadeIn 180ms ease-out;
+  @keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(4px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+}
+
+:root {
+  color-scheme: dark;
+  background: #060606;
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: #060606;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
