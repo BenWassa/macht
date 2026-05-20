@@ -41,49 +41,52 @@ export function HomeScreen({ setActiveTab }: HomeScreenProps) {
 
   return (
     <div className="animate-fadeIn">
-      <div className="mb-10">
+      <div className="mb-8">
         <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-neutral-500">Strength log</p>
-        <h1 className="font-mono text-xl font-bold uppercase tracking-tight">Consistency</h1>
+        <h1 className="font-mono text-xl font-bold uppercase tracking-tight text-white">Console</h1>
       </div>
 
-      <div className="mb-6 border border-[#1a1a1a] bg-[#0c0c0c] p-4 pb-3">
-        <div className="mb-6 flex items-center justify-between">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-400">Six weeks</span>
-          <div className="flex space-x-3 font-mono text-[9px]">
-            <span className="flex items-center space-x-1.5"><span className="inline-block h-1.5 w-1.5 bg-blue-500" /><span className="uppercase text-neutral-500">Logged</span></span>
-            <span className="flex items-center space-x-1.5"><span className="inline-block h-1.5 w-1.5 border-t border-red-500 bg-neutral-800" /><span className="uppercase text-neutral-500">Injury week</span></span>
-          </div>
-        </div>
-        <div className="relative grid h-24 grid-cols-6 items-end gap-2 border-b border-[#1a1a1a] pb-2">
-          <div className="absolute left-0 right-0 border-t border-dashed border-neutral-800" style={{ bottom: '33.3%' }}><span className="absolute -top-2 right-0 bg-[#0c0c0c] pl-1 font-mono text-[8px] text-neutral-500">Floor: 2</span></div>
-          <div className="absolute left-0 right-0 border-t border-[#1f1f1f]" style={{ bottom: '66.6%' }}><span className="absolute -top-2 right-0 bg-[#0c0c0c] pl-1 font-mono text-[8px] text-neutral-500">Stretch: 4</span></div>
-          {weeks.map((week) => (
-            <div key={week.week} className="group flex h-full flex-col items-center justify-end">
-              <span className="mb-1 font-mono text-[10px] text-neutral-400">{week.count}</span>
-              <div className={`relative w-full ${week.restricted ? 'border-t border-red-500 bg-neutral-800' : 'bg-blue-600'}`} style={{ height: `${Math.max((week.count / 6) * 100, 6)}%` }}>
-                {week.note && <div className="absolute bottom-full left-1/2 mb-1 -translate-x-1/2 whitespace-nowrap border border-red-900 bg-red-950 px-1 font-mono text-[8px] uppercase text-red-400">{week.note}</div>}
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="grid grid-cols-6 gap-2 pt-2 text-center">
-          {weeks.map((week) => <span key={week.week} className="font-mono text-[9px] uppercase text-neutral-500">{week.week}</span>)}
-        </div>
-      </div>
-
-      <div className="mb-12 flex flex-col items-start justify-between gap-5 border border-[#1a1a1a] bg-[#0c0c0c] p-5 sm:flex-row sm:items-center">
+      <div className="mb-10 flex flex-col items-start justify-between gap-5 border border-[#1a1a1a] bg-[#0c0c0c] p-6 sm:flex-row sm:items-center">
         <div>
-          <span className="mb-1 block font-mono text-[9px] uppercase tracking-widest text-blue-500">Next</span>
-          <h3 className="font-mono text-xs font-bold uppercase tracking-tight">{DEFAULT_TEMPLATE.name}</h3>
+          <span className="mb-1 block font-mono text-[9px] uppercase tracking-[0.2em] font-bold text-blue-500">Next session</span>
+          <h3 className="font-mono text-sm font-bold uppercase tracking-tight text-neutral-200">{DEFAULT_TEMPLATE.name}</h3>
           <p className="mt-1 font-mono text-[11px] text-neutral-500">{DEFAULT_TEMPLATE.notes}</p>
         </div>
-        <button onClick={start} className="flex w-full items-center justify-center gap-2 bg-blue-600 px-5 py-3 font-mono text-xs font-bold uppercase tracking-widest text-white transition hover:bg-blue-700 active:bg-blue-800 sm:w-auto">
-          <Play className="h-3.5 w-3.5" /> Start session
+        <button onClick={start} className="flex w-full items-center justify-center gap-2 bg-blue-600 px-6 py-4 font-mono text-xs font-bold uppercase tracking-widest text-white transition hover:bg-blue-700 active:bg-blue-800 sm:w-auto">
+          <Play className="h-4 w-4 fill-white" /> Start session
         </button>
       </div>
 
+      <div className="mb-10">
+        <h2 className="mb-3 font-mono text-[10px] uppercase tracking-wider text-neutral-400">Consistency</h2>
+        <div className="border border-[#1a1a1a] bg-[#0c0c0c] p-4 pb-3">
+          <div className="mb-6 flex items-center justify-between">
+            <span className="font-mono text-[9px] uppercase tracking-wider text-neutral-500">Trailing six weeks</span>
+            <div className="flex space-x-4 font-mono text-[9px]">
+              <span className="flex items-center space-x-1.5"><span className="inline-block h-1.5 w-1.5 bg-blue-600" /><span className="uppercase text-neutral-600">Logged</span></span>
+              <span className="flex items-center space-x-1.5"><span className="inline-block h-1.5 w-1.5 border-t border-red-500 bg-neutral-800" /><span className="uppercase text-neutral-600">Injury</span></span>
+            </div>
+          </div>
+          <div className="relative grid h-24 grid-cols-6 items-end gap-2 border-b border-[#1a1a1a] pb-2">
+            <div className="absolute left-0 right-0 border-t border-dashed border-neutral-800/50" style={{ bottom: '33.3%' }}><span className="absolute -top-2 right-0 bg-[#0c0c0c] pl-1 font-mono text-[8px] text-neutral-600">Floor: 2</span></div>
+            <div className="absolute left-0 right-0 border-t border-[#1f1f1f]" style={{ bottom: '66.6%' }}><span className="absolute -top-2 right-0 bg-[#0c0c0c] pl-1 font-mono text-[8px] text-neutral-600">Stretch: 4</span></div>
+            {weeks.map((week) => (
+              <div key={week.week} className="group flex h-full flex-col items-center justify-end">
+                <span className="mb-1 font-mono text-[10px] text-neutral-400">{week.count}</span>
+                <div className={`relative w-full transition-all duration-300 ${week.restricted ? 'border-t border-red-500 bg-neutral-800' : 'bg-blue-600'}`} style={{ height: `${Math.max((week.count / 6) * 100, 6)}%` }}>
+                  {week.note && <div className="absolute bottom-full left-1/2 mb-1 -translate-x-1/2 whitespace-nowrap border border-red-900 bg-red-950 px-1 font-mono text-[8px] uppercase text-red-400">{week.note}</div>}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-6 gap-2 pt-2 text-center">
+            {weeks.map((week) => <span key={week.week} className="font-mono text-[9px] uppercase text-neutral-500">{week.week}</span>)}
+          </div>
+        </div>
+      </div>
+
       <div>
-        <h2 className="mb-3 font-mono text-[10px] uppercase tracking-wider text-neutral-400">Recent sessions</h2>
+        <h2 className="mb-3 font-mono text-[10px] uppercase tracking-wider text-neutral-400">Activity history</h2>
         <div className="border-t border-[#1a1a1a]">
           {sessions.length === 0 && (
             <button
