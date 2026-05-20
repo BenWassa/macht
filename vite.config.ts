@@ -16,8 +16,8 @@ export default defineConfig({
         name: "MACHT - Minimum Viable Strength",
         short_name: "MACHT",
         description: "Minimalist powerlifting tracker for maximum results.",
-        theme_color: "#000000",
-        background_color: "#000000",
+        theme_color: "#0c0c0c",
+        background_color: "#0c0c0c",
         display: "standalone",
         orientation: "portrait",
         icons: [
@@ -32,10 +32,10 @@ export default defineConfig({
             type: "image/png",
           },
           {
-            src: "pwa-512x512.png",
+            src: "maskable-icon-512x512.png",
             sizes: "512x512",
             type: "image/png",
-            purpose: "any maskable",
+            purpose: "maskable",
           },
         ],
       },
