@@ -74,10 +74,10 @@ export function HomeScreen({ setActiveTab }: HomeScreenProps) {
       <div className="mb-12 flex flex-col items-start justify-between gap-5 border border-[#1a1a1a] bg-[#0c0c0c] p-5 sm:flex-row sm:items-center">
         <div>
           <span className="mb-1 block font-mono text-[9px] uppercase tracking-widest text-blue-500">Next</span>
-          <h3 className="text-xs font-bold uppercase tracking-tight">{DEFAULT_TEMPLATE.name}</h3>
-          <p className="mt-1 text-[11px] text-neutral-500">{DEFAULT_TEMPLATE.notes}</p>
+          <h3 className="font-mono text-xs font-bold uppercase tracking-tight">{DEFAULT_TEMPLATE.name}</h3>
+          <p className="mt-1 font-mono text-[11px] text-neutral-500">{DEFAULT_TEMPLATE.notes}</p>
         </div>
-        <button onClick={start} className="flex w-full items-center justify-center gap-2 bg-blue-600 px-5 py-3 font-mono text-xs font-bold uppercase tracking-widest text-white transition hover:bg-blue-700 sm:w-auto">
+        <button onClick={start} className="flex w-full items-center justify-center gap-2 bg-blue-600 px-5 py-3 font-mono text-xs font-bold uppercase tracking-widest text-white transition hover:bg-blue-700 active:bg-blue-800 sm:w-auto">
           <Play className="h-3.5 w-3.5" /> Start session
         </button>
       </div>
@@ -86,7 +86,10 @@ export function HomeScreen({ setActiveTab }: HomeScreenProps) {
         <h2 className="mb-3 font-mono text-[10px] uppercase tracking-wider text-neutral-400">Recent sessions</h2>
         <div className="border-t border-[#1a1a1a]">
           {sessions.length === 0 && (
-            <button onClick={start} className="w-full border border-dashed border-[#1a1a1a] bg-black p-6 text-center font-mono text-xs uppercase tracking-widest text-neutral-500">
+            <button
+              onClick={start}
+              className="mt-4 w-full border border-dashed border-[#1a1a1a] bg-[#080808] p-6 text-center font-mono text-[10px] uppercase tracking-widest text-neutral-500 transition hover:border-[#252525] hover:bg-[#0c0c0c] hover:text-neutral-400 active:bg-[#111]"
+            >
               No sessions yet. Start your first session.
             </button>
           )}
