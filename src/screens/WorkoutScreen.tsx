@@ -104,10 +104,14 @@ export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) 
       )}
 
       <div className="mb-10">
-        <div className="mb-1 grid grid-cols-[34px_1fr_1fr_1fr_36px] gap-2 border-b border-[#1a1a1a] px-2 pb-2 font-mono text-[8px] uppercase tracking-wider text-neutral-600">
-          <span>Set</span><span className="text-center">Weight</span><span className="text-center">Reps</span><span className="text-center">{settings.rpeMode}</span><span />
+        <div className="mb-1 grid grid-cols-[40px_1.4fr_1.2fr_1fr_52px] border-b border-[#1a1a1a] pb-2 font-mono text-[9px] font-bold uppercase tracking-widest text-neutral-600">
+          <span className="text-center">#</span>
+          <span className="text-center">Weight</span>
+          <span className="text-center">Reps</span>
+          <span className="text-center">{settings.rpeMode}</span>
+          <span />
         </div>
-        <div className="space-y-1.5 pt-1.5">
+        <div className="border-x border-t border-[#1a1a1a]">
           {selectedSets.map((set, index) => (
             <SetRow
               key={set.id}
