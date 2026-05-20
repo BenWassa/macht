@@ -98,6 +98,17 @@ Fixed — match international plate color conventions.
 | 25 | `#ca8a04` | `#000` |
 | 10 | `#16a34a` | `#fff` |
 | 5 | `#737373` | `#fff` |
+
+---
+
+## File Structure Conventions
+
+- **150 code-line limit** per file (enforced by ESLint `max-lines`); **120 lines** for state stores.
+- **Promote to a folder** when a file needs more than one private sub-component, or when a planned addition would breach the limit. Pattern: `screens/profile/index.tsx` + `screens/profile/SettingsPanel.tsx`.
+- **Folder naming**: lowercase concept noun (`profile/`, `workout/`). Sub-component files: PascalCase by responsibility (`InjuryManager`, not `ProfileInjuries`).
+- **Only `index.tsx` is importable from outside the folder.** Sub-components are private to the folder.
+- **No barrel files** in `src/state/`, `src/screens/`, `src/components/`. Direct imports only. A barrel in `src/domain/` is acceptable only when a single consumer needs 3+ domain type imports.
+
 | 2.5 | `#3a3a3a` | `#a3a3a3` |
 
 ---

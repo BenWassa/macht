@@ -5,7 +5,7 @@ import { useRestTimer } from '@/hooks/useRestTimer';
 import { useSessionClock } from '@/hooks/useSessionClock';
 import { FinishSessionModal } from '@/modals/FinishSessionModal';
 import { HomeScreen } from '@/screens/HomeScreen';
-import { ProfileScreen } from '@/screens/ProfileScreen';
+import { ProfileScreen } from '@/screens/profile';
 import { ProgressScreen } from '@/screens/ProgressScreen';
 import { TemplatesScreen } from '@/screens/TemplatesScreen';
 import { WorkoutScreen } from '@/screens/WorkoutScreen';

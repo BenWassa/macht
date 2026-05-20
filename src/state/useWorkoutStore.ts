@@ -2,6 +2,9 @@ import { create } from 'zustand';
 import { DEFAULT_TEMPLATE } from '@/domain/exercises';
 import type { SetEntry, TemplatePlan, WorkoutSets } from '@/domain/types';
 
+// SPLIT TRIGGER: if this file exceeds 160 lines, extract useWorkoutCursor.ts
+// containing: selectedExIndex, selectedSetIndex, setSelectedExIndex, setSelectedSetIndex.
+
 const makeDefaultSets = (last = '-'): SetEntry[] => [
   { id: 1, weight: 80, reps: 8, rpe: null, completed: false, last },
   { id: 2, weight: 80, reps: 8, rpe: null, completed: false, last },
