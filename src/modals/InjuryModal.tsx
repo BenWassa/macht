@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { X } from "lucide-react";
 import type { ExerciseInjury, Severity } from "@/domain/types";
+import { useModalA11y } from "@/hooks/useModalA11y";
 import { useInjuryStore } from "@/state/useInjuryStore";
 
 const TAGS = [
@@ -28,6 +29,7 @@ export function InjuryModal({ injury, onClose }: InjuryModalProps) {
   const [forbiddenTags, setForbiddenTags] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
   const editing = useMemo(() => Boolean(injury), [injury]);
+  const containerRef = useModalA11y<HTMLDivElement>(onClose);
 
   useEffect(() => {
     setName(injury?.name ?? "");
@@ -56,7 +58,10 @@ export function InjuryModal({ injury, onClose }: InjuryModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4">
-      <div className="w-full max-w-md space-y-4 border border-[#1a1a1a] bg-[#0c0c0c] p-6">
+      <div
+        ref={containerRef}
+        className="w-full max-w-md space-y-4 border border-[#1a1a1a] bg-[#0c0c0c] p-6"
+      >
         <div className="flex items-center justify-between border-b border-[#1a1a1a] pb-3">
           <h3 className="font-mono text-xs font-bold uppercase tracking-widest text-neutral-300">
             {editing ? "Edit injury" : "Log injury"}
@@ -76,7 +81,7 @@ export function InjuryModal({ injury, onClose }: InjuryModalProps) {
             </span>
             <input
               value={name}
-              onChange={(event) => setName(event.target.value)}
+              onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Left posterior shoulder labrum"
               className="w-full border border-[#1a1a1a] bg-black px-3 py-2 text-xs text-neutral-100 outline-none focus:border-blue-500"
             />
@@ -87,7 +92,7 @@ export function InjuryModal({ injury, onClose }: InjuryModalProps) {
             </span>
             <select
               value={severity}
-              onChange={(event) => setSeverity(event.target.value as Severity)}
+              onChange={(e) => setSeverity(e.target.value as Severity)}
               className="w-full border border-[#1a1a1a] bg-black px-3 py-2 text-xs text-neutral-100 outline-none focus:border-blue-500"
             >
               <option value="avoid">Avoid</option>
@@ -125,7 +130,7 @@ export function InjuryModal({ injury, onClose }: InjuryModalProps) {
             </span>
             <textarea
               value={notes}
-              onChange={(event) => setNotes(event.target.value)}
+              onChange={(e) => setNotes(e.target.value)}
               rows={2}
               placeholder="e.g. Avoid external rotation under load."
               className="w-full resize-none border border-[#1a1a1a] bg-black px-3 py-2 text-xs text-neutral-100 outline-none focus:border-blue-500"

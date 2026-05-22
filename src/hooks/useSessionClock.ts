@@ -7,7 +7,15 @@ export function useSessionClock(): void {
 
   useEffect(() => {
     if (!workoutActive) return undefined;
+    tick();
     const interval = window.setInterval(tick, 1000);
-    return () => window.clearInterval(interval);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") tick();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, [tick, workoutActive]);
 }

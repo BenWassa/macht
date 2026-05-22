@@ -20,6 +20,8 @@ export function BackupPanel() {
       units: settings.units,
       defaultRest: settings.defaultRest,
       rpeMode: settings.rpeMode,
+      haptics: settings.haptics,
+      audioCue: settings.audioCue,
     });
     const blob = new Blob([JSON.stringify(backup, null, 2)], {
       type: "application/json",

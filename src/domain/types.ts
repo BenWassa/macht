@@ -51,6 +51,8 @@ export interface Settings {
   units: Units;
   defaultRest: number;
   rpeMode: EffortMode;
+  haptics: boolean;
+  audioCue: boolean;
 }
 
 export interface TemplatePlan {

@@ -1,6 +1,7 @@
 import { brzyckiE1rm } from "@/domain/e1rm";
 import { getExerciseConflict } from "@/domain/injuries";
 import type { SessionLog } from "@/domain/types";
+import { useModalA11y } from "@/hooks/useModalA11y";
 import { formatTime, todayIso } from "@/lib/format";
 import { useHistoryStore } from "@/state/useHistoryStore";
 import { useInjuryStore } from "@/state/useInjuryStore";
@@ -11,13 +12,11 @@ interface FinishSessionModalProps {
   onSaved: () => void;
 }
 
-export function FinishSessionModal({
-  onClose,
-  onSaved,
-}: FinishSessionModalProps) {
+export function FinishSessionModal({ onClose, onSaved }: FinishSessionModalProps) {
   const addSession = useHistoryStore((state) => state.addSession);
   const injuries = useInjuryStore((state) => state.injuries);
   const workout = useWorkoutStore();
+  const containerRef = useModalA11y<HTMLDivElement>(onClose);
 
   const save = () => {
     const completedSets = workout.activeWorkoutList.flatMap((exerciseId) =>
@@ -36,10 +35,7 @@ export function FinishSessionModal({
       const sets = workout.workoutSets[exerciseId] ?? [];
       const topSet = sets
         .filter((set) => set.completed && set.reps <= 10)
-        .sort(
-          (a, b) =>
-            brzyckiE1rm(b.weight, b.reps) - brzyckiE1rm(a.weight, a.reps),
-        )[0];
+        .sort((a, b) => brzyckiE1rm(b.weight, b.reps) - brzyckiE1rm(a.weight, a.reps))[0];
       return {
         exerciseId,
         sets,
@@ -49,8 +45,7 @@ export function FinishSessionModal({
     const session: SessionLog = {
       id: crypto.randomUUID(),
       date: todayIso(),
-      template:
-        workout.workoutName + (workout.isMinimumSession ? " (min)" : ""),
+      template: workout.workoutName + (workout.isMinimumSession ? " (min)" : ""),
       duration: `${Math.floor(workout.workoutDuration / 60)}m`,
       volume,
       sets: completedSets.length,
@@ -65,7 +60,10 @@ export function FinishSessionModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4">
-      <div className="w-full max-w-sm space-y-4 border border-[#1a1a1a] bg-[#0c0c0c] p-6">
+      <div
+        ref={containerRef}
+        className="w-full max-w-sm space-y-4 border border-[#1a1a1a] bg-[#0c0c0c] p-6"
+      >
         <div className="space-y-2 text-center">
           <h3 className="font-mono text-sm font-bold uppercase tracking-tight text-neutral-200">
             Save this session?

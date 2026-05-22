@@ -1,6 +1,6 @@
-import { useState } from "react";
 import { BottomNav } from "@/components/BottomNav";
 import { RestTimerBanner } from "@/components/RestTimerBanner";
+import { Toast } from "@/components/Toast";
 import { useRestTimer } from "@/hooks/useRestTimer";
 import { useSessionClock } from "@/hooks/useSessionClock";
 import { FinishSessionModal } from "@/modals/FinishSessionModal";
@@ -10,13 +10,16 @@ import { ProgressScreen } from "@/screens/ProgressScreen";
 import { TemplatesScreen } from "@/screens/TemplatesScreen";
 import { WorkoutScreen } from "@/screens/WorkoutScreen";
 import { useSettingsStore } from "@/state/useSettingsStore";
+import { useUiStore } from "@/state/useUiStore";
 import { useWorkoutStore } from "@/state/useWorkoutStore";
 import { formatTime } from "@/lib/format";
+import { useState } from "react";
 
-export type TabId = "home" | "templates" | "workout" | "progress" | "profile";
+export type { TabId } from "@/state/useUiStore";
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<TabId>("workout");
+  const activeTab = useUiStore((state) => state.activeTab);
+  const setActiveTab = useUiStore((state) => state.setActiveTab);
   const [showFinishModal, setShowFinishModal] = useState(false);
   const defaultRest = useSettingsStore((state) => state.defaultRest);
   const workoutActive = useWorkoutStore((state) => state.workoutActive);
@@ -49,9 +52,7 @@ export default function App() {
 
       <main className="mx-auto w-full max-w-2xl flex-1 overflow-y-auto px-4 py-6 pb-36">
         {activeTab === "home" && <HomeScreen setActiveTab={setActiveTab} />}
-        {activeTab === "templates" && (
-          <TemplatesScreen setActiveTab={setActiveTab} />
-        )}
+        {activeTab === "templates" && <TemplatesScreen setActiveTab={setActiveTab} />}
         {activeTab === "workout" && (
           <WorkoutScreen
             onFinish={() => setShowFinishModal(true)}
@@ -72,6 +73,8 @@ export default function App() {
           onDismiss={restTimer.dismiss}
         />
       )}
+
+      <Toast />
 
       <BottomNav
         activeTab={activeTab}

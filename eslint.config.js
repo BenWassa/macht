@@ -4,6 +4,26 @@ import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 
+const BANNED_VOCAB = [
+  "telemetry",
+  "pathology",
+  "biomechanical",
+  "directive",
+  "reconstitution",
+].join("|");
+
+const bannedVocabRule = [
+  "warn",
+  {
+    selector: `JSXText[value=/${BANNED_VOCAB}/i]`,
+    message: "Banned vocabulary per DESIGN.md §Voice.",
+  },
+  {
+    selector: `Literal[value=/${BANNED_VOCAB}/i]`,
+    message: "Banned vocabulary per DESIGN.md §Voice.",
+  },
+];
+
 export default tseslint.config(
   { ignores: ["dist"] },
   {
@@ -27,6 +47,7 @@ export default tseslint.config(
         "warn",
         { max: 150, skipBlankLines: true, skipComments: true },
       ],
+      "no-restricted-syntax": bannedVocabRule,
     },
   },
   {

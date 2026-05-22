@@ -10,8 +10,17 @@ export function PlateVisualizer({ weight, units }: PlateVisualizerProps) {
   const plates = getPlates(weight, units);
   const plateData = getPlateData(units);
 
+  const ariaLabel =
+    plates.length === 0
+      ? `Bar only at ${weight} ${units}`
+      : `Loaded ${weight} ${units}. Plates per side: ${plates.join(", ")}.`;
+
   return (
-    <div className="border border-[#1a1a1a] bg-black p-4">
+    <div
+      role="img"
+      aria-label={ariaLabel}
+      className="border border-[#1a1a1a] bg-black p-4"
+    >
       <div className="mb-3 flex items-center justify-between">
         <span className="text-[9px] font-mono uppercase tracking-widest text-neutral-500">
           Bar load
@@ -35,12 +44,7 @@ export function PlateVisualizer({ weight, units }: PlateVisualizerProps) {
               <div
                 key={`${plate}-${index}`}
                 className="flex items-center justify-center border border-black text-[7px] font-bold"
-                style={{
-                  height: spec.h,
-                  width: spec.w,
-                  background: spec.bg,
-                  color: spec.color,
-                }}
+                style={{ height: spec.h, width: spec.w, background: spec.bg, color: spec.color }}
               >
                 {spec.label}
               </div>
