@@ -1,6 +1,6 @@
 import { Play } from "lucide-react";
-import { DEFAULT_TEMPLATE } from "@/domain/exercises";
 import { getRunnableTemplate } from "@/domain/injuries";
+import { getNextTrainingTemplate } from "@/domain/trainingPlan";
 import type { TabId } from "@/App";
 import { useHistoryStore } from "@/state/useHistoryStore";
 import { useInjuryStore } from "@/state/useInjuryStore";
@@ -38,9 +38,10 @@ export function HomeScreen({ setActiveTab }: HomeScreenProps) {
   const injuries = useInjuryStore((state) => state.injuries);
   const startTemplate = useWorkoutStore((state) => state.startTemplate);
   const weeks = rollingWeeks(sessions);
+  const nextTemplate = getNextTrainingTemplate(sessions);
 
   const start = () => {
-    startTemplate(getRunnableTemplate(DEFAULT_TEMPLATE, injuries));
+    startTemplate(getRunnableTemplate(nextTemplate, injuries));
     setActiveTab("workout");
   };
 
@@ -61,10 +62,10 @@ export function HomeScreen({ setActiveTab }: HomeScreenProps) {
             Next session
           </span>
           <h3 className="font-mono text-base font-bold uppercase tracking-tight text-neutral-200">
-            {DEFAULT_TEMPLATE.name}
+            {nextTemplate.name}
           </h3>
           <p className="mt-1 font-mono text-xs text-neutral-400">
-            {DEFAULT_TEMPLATE.notes}
+            {nextTemplate.notes}
           </p>
         </div>
         <button

@@ -1,17 +1,12 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { DEFAULT_TEMPLATE } from "@/domain/exercises";
+import { getDefaultSetsForExercise } from "@/domain/prescriptions";
 import type { SetEntry, TemplatePlan, WorkoutSets } from "@/domain/types";
-
-const makeDefaultSets = (last = "-"): SetEntry[] => [
-  { id: 1, weight: 80, reps: 8, rpe: null, completed: false, last },
-  { id: 2, weight: 80, reps: 8, rpe: null, completed: false, last },
-  { id: 3, weight: 75, reps: 10, rpe: null, completed: false, last },
-];
 
 const seedSets = (exercises: string[]): WorkoutSets =>
   exercises.reduce<WorkoutSets>((acc, id) => {
-    acc[id] = makeDefaultSets();
+    acc[id] = getDefaultSetsForExercise(id);
     return acc;
   }, {});
 
@@ -25,6 +20,7 @@ interface WorkoutState {
   selectedExIndex: number;
   selectedSetIndex: number;
   isMinimumSession: boolean;
+  adaptedDuringSession: boolean;
   deloadWeights: Record<string, number>;
   tick: () => void;
   startTemplate: (template?: TemplatePlan, deloadWeights?: Record<string, number>) => void;
@@ -51,6 +47,7 @@ export const useWorkoutStore = create<WorkoutState>()(
       selectedExIndex: 0,
       selectedSetIndex: 0,
       isMinimumSession: false,
+      adaptedDuringSession: false,
       deloadWeights: {},
       tick: () =>
         set((state) => {
@@ -65,17 +62,16 @@ export const useWorkoutStore = create<WorkoutState>()(
           startedAt: Date.now(),
           activeWorkoutList: template.exercises,
           workoutSets: template.exercises.reduce<WorkoutSets>((acc, exerciseId) => {
-            const weight = deloadWeights[exerciseId] ?? 80;
-            acc[exerciseId] = [
-              { id: 1, weight, reps: 8, rpe: null, completed: false, last: "-" },
-              { id: 2, weight, reps: 8, rpe: null, completed: false, last: "-" },
-              { id: 3, weight: Math.max(0, weight - 5), reps: 10, rpe: null, completed: false, last: "-" },
-            ];
+            acc[exerciseId] = getDefaultSetsForExercise(
+              exerciseId,
+              deloadWeights[exerciseId],
+            );
             return acc;
           }, {}),
           selectedExIndex: 0,
           selectedSetIndex: 0,
           isMinimumSession: Boolean(template.isMinimumSession),
+          adaptedDuringSession: false,
           deloadWeights,
         }),
       endSession: () =>
@@ -86,6 +82,7 @@ export const useWorkoutStore = create<WorkoutState>()(
           selectedExIndex: 0,
           selectedSetIndex: 0,
           isMinimumSession: false,
+          adaptedDuringSession: false,
         }),
       setSelectedExIndex: (selectedExIndex) => set({ selectedExIndex, selectedSetIndex: 0 }),
       setSelectedSetIndex: (selectedSetIndex) => set({ selectedSetIndex }),
@@ -125,9 +122,11 @@ export const useWorkoutStore = create<WorkoutState>()(
             activeWorkoutList: list,
             selectedExIndex: index,
             selectedSetIndex: 0,
+            adaptedDuringSession: true,
             workoutSets: {
               ...state.workoutSets,
-              [subId]: state.workoutSets[subId] ?? makeDefaultSets(),
+              [subId]:
+                state.workoutSets[subId] ?? getDefaultSetsForExercise(subId),
             },
           };
         }),
@@ -139,9 +138,10 @@ export const useWorkoutStore = create<WorkoutState>()(
         set((state) => {
           const sets = state.workoutSets[exerciseId] ?? [];
           const prev = sets[sets.length - 1];
+          const fallback = getDefaultSetsForExercise(exerciseId)[0];
           const next: SetEntry = prev
             ? { id: prev.id + 1, weight: prev.weight, reps: prev.reps, rpe: null, completed: false, last: "-" }
-            : { id: 1, weight: 80, reps: 8, rpe: null, completed: false, last: "-" };
+            : { ...fallback, id: 1, rpe: null, completed: false };
           return { workoutSets: { ...state.workoutSets, [exerciseId]: [...sets, next] } };
         }),
     }),

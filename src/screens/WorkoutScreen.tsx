@@ -3,6 +3,7 @@ import { PlateVisualizer } from "@/components/PlateVisualizer";
 import { SetRow } from "@/components/SetRow";
 import { getExerciseById } from "@/domain/exercises";
 import { getExerciseConflict } from "@/domain/injuries";
+import { getExercisePrescription } from "@/domain/prescriptions";
 import type { SetEntry } from "@/domain/types";
 import { useWakeLock } from "@/hooks/useWakeLock";
 import { vibrate } from "@/lib/haptics";
@@ -45,6 +46,7 @@ export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) 
   const selectedExerciseId = workout.activeWorkoutList[workout.selectedExIndex];
   const selectedSets = workout.workoutSets[selectedExerciseId] ?? [];
   const selectedSet = selectedSets[workout.selectedSetIndex] ?? selectedSets[0];
+  const selectedPrescription = getExercisePrescription(selectedExerciseId);
   const conflict = getExerciseConflict(selectedExerciseId, injuries);
 
   const toggleComplete = (exerciseId: string, setIndex: number) => {
@@ -169,10 +171,20 @@ export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) 
       )}
 
       <div className="mb-3">
+        <div className="mb-3 border border-[#1a1a1a] bg-black px-3 py-2">
+          <span className="font-mono text-[9px] uppercase tracking-widest text-neutral-500">
+            Plan
+          </span>
+          <p className="mt-1 font-mono text-xs font-bold uppercase tracking-tight text-neutral-300">
+            {selectedPrescription.planned}
+          </p>
+        </div>
         <div className="mb-2 grid grid-cols-[40px_1.4fr_1.2fr_1fr_64px] border-b border-edge pb-3 font-mono text-[11px] font-bold uppercase tracking-widest text-neutral-500">
           <span className="text-center">#</span>
-          <span className="text-center">Weight</span>
-          <span className="text-center">Reps</span>
+          <span className="text-center">
+            {selectedPrescription.loadMode === "external" ? "Load" : "Mode"}
+          </span>
+          <span className="text-center">{selectedPrescription.metricLabel}</span>
           <span className="text-center">{settings.rpeMode}</span>
           <span className="text-center">Done</span>
         </div>
@@ -185,6 +197,9 @@ export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) 
               selected={workout.selectedSetIndex === index}
               effortLabel={settings.rpeMode}
               units={settings.units}
+              loadMode={selectedPrescription.loadMode}
+              loadDisplay={selectedPrescription.loadDisplay}
+              metric={selectedPrescription.metric}
               onSelect={() => workout.setSelectedSetIndex(index)}
               onToggleComplete={() => toggleComplete(selectedExerciseId, index)}
               onUpdate={(field, value) => updateSet(index, field, value)}
@@ -208,7 +223,9 @@ export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) 
         </span>
       </div>
 
-      {selectedSet && (
+      {selectedSet &&
+        selectedPrescription.showPlateVisualizer &&
+        selectedSet.weight > 0 && (
         <PlateVisualizer weight={selectedSet.weight} units={settings.units} />
       )}
     </div>

@@ -1,5 +1,7 @@
 import { brzyckiE1rm } from "@/domain/e1rm";
+import { PROGRESS_LIFTS } from "@/domain/exercises";
 import { getExerciseConflict } from "@/domain/injuries";
+import { getExercisePrescription } from "@/domain/prescriptions";
 import type { SessionLog } from "@/domain/types";
 import { useModalA11y } from "@/hooks/useModalA11y";
 import { formatTime, todayIso } from "@/lib/format";
@@ -28,19 +30,27 @@ export function FinishSessionModal({ onClose, onSaved }: FinishSessionModalProps
       (sum, item) => sum + item.set.weight * item.set.reps,
       0,
     );
-    const adapted = workout.activeWorkoutList.some((exerciseId) =>
-      getExerciseConflict(exerciseId, injuries),
-    );
+    const adapted =
+      workout.adaptedDuringSession ||
+      workout.activeWorkoutList.some(
+        (exerciseId) =>
+          getExerciseConflict(exerciseId, injuries)?.level === "avoid",
+      );
     const exerciseSnapshots = workout.activeWorkoutList.map((exerciseId) => {
       const sets = workout.workoutSets[exerciseId] ?? [];
       const conflict = getExerciseConflict(exerciseId, injuries);
+      const prescription = getExercisePrescription(exerciseId);
+      const tracksE1rm =
+        PROGRESS_LIFTS.includes(exerciseId) &&
+        prescription.loadMode === "external" &&
+        !conflict;
       const topSet = sets
         .filter((set) => set.completed && set.reps <= 10)
         .sort((a, b) => brzyckiE1rm(b.weight, b.reps) - brzyckiE1rm(a.weight, a.reps))[0];
       return {
         exerciseId,
         sets,
-        e1rm: topSet && !conflict ? brzyckiE1rm(topSet.weight, topSet.reps) : undefined,
+        e1rm: topSet && tracksE1rm ? brzyckiE1rm(topSet.weight, topSet.reps) : undefined,
       };
     });
     const session: SessionLog = {

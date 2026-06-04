@@ -473,8 +473,6 @@ export const PROGRESS_LIFTS = [
   "leg_press",
   "hack_squat",
   "hip_thrust",
-  "romanian_deadlift",
-  "chest_supported_row",
   "bench_press",
 ];
 
