@@ -119,7 +119,7 @@ export function PlateVisualizer({ weight, units }: PlateVisualizerProps) {
               >
                 <span
                   aria-hidden
-                  className="h-2.5 w-2.5 border border-black"
+                  className="h-3 w-3 border border-white/15"
                   style={{ background: spec.bg }}
                 />
                 {count}
