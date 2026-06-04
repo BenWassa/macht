@@ -21,7 +21,6 @@ let counter = 0;
 
 export const useToastStore = create<ToastState>()((set) => ({
   toast: null,
-  show: (message, action) =>
-    set({ toast: { id: ++counter, message, action } }),
+  show: (message, action) => set({ toast: { id: ++counter, message, action } }),
   dismiss: () => set({ toast: null }),
 }));

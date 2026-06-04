@@ -81,10 +81,7 @@ export function SetRow({
               <Plus className="h-4 w-4" />
             </button>
             {delta > 0 && (
-              <span
-                aria-hidden
-                className="pointer-events-none absolute bottom-0.5 right-1 font-mono text-[8px] text-neutral-700"
-              >
+              <span className="pointer-events-none absolute bottom-0.5 right-1 font-mono text-[8px] text-neutral-700">
                 ·{delta}
               </span>
             )}
@@ -131,7 +128,9 @@ export function SetRow({
         >
           <option value="">{effortLabel}</option>
           {[6, 7, 7.5, 8, 8.5, 9, 9.5, 10].map((v) => (
-            <option key={v} value={v}>{v}</option>
+            <option key={v} value={v}>
+              {v}
+            </option>
           ))}
         </select>
       </div>
@@ -139,14 +138,19 @@ export function SetRow({
       <button
         aria-label="Toggle set complete"
         aria-pressed={set.completed}
-        onClick={(e) => { e.stopPropagation(); onToggleComplete(); }}
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleComplete();
+        }}
         className={`flex items-center justify-center transition ${
           set.completed
             ? "bg-emerald-600 text-white active:bg-emerald-700"
             : "bg-black text-neutral-600 hover:bg-neutral-950 active:bg-emerald-900/40 active:text-emerald-500"
         }`}
       >
-        <Check className={`h-6 w-6 ${set.completed ? "stroke-[3px]" : "stroke-[1.5px]"}`} />
+        <Check
+          className={`h-6 w-6 ${set.completed ? "stroke-[3px]" : "stroke-[1.5px]"}`}
+        />
       </button>
     </div>
   );

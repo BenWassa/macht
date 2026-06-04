@@ -32,7 +32,10 @@ export function SettingsPanel() {
             </button>
           ))}
         </SettingRow>
-        <SettingRow title="Effort scale" subtitle="How you log perceived effort">
+        <SettingRow
+          title="Effort scale"
+          subtitle="How you log perceived effort"
+        >
           {(["RPE", "RIR"] as const).map((mode) => (
             <button
               key={mode}
@@ -85,7 +88,9 @@ function SettingRow({
         <span className="block text-xs font-bold uppercase tracking-tight">
           {title}
         </span>
-        <span className="font-mono text-[10px] text-neutral-500">{subtitle}</span>
+        <span className="font-mono text-[10px] text-neutral-500">
+          {subtitle}
+        </span>
       </div>
       <div className="flex border border-[#1a1a1a] bg-black p-0.5 font-mono">
         {children}

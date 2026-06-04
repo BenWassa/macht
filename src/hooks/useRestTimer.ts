@@ -59,8 +59,7 @@ export function useRestTimer(defaultRest: number) {
         );
         return false;
       } else {
-        endsAtRef.current =
-          performance.now() + remainingRef.current * 1000;
+        endsAtRef.current = performance.now() + remainingRef.current * 1000;
         firedRef.current = false;
         return true;
       }

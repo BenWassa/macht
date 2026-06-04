@@ -9,9 +9,7 @@ function matchesTemplate(session: SessionLog, template: TemplatePlan): boolean {
   return session.template.startsWith(template.name);
 }
 
-export function getNextTrainingTemplate(
-  sessions: SessionLog[],
-): TemplatePlan {
+export function getNextTrainingTemplate(sessions: SessionLog[]): TemplatePlan {
   const lastRotationSession = [...sessions]
     .sort((a, b) => b.date.localeCompare(a.date))
     .find((session) =>
@@ -23,7 +21,8 @@ export function getNextTrainingTemplate(
   const currentIndex = ROTATION.findIndex((template) =>
     matchesTemplate(lastRotationSession, template),
   );
-  const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % ROTATION.length;
+  const nextIndex =
+    currentIndex === -1 ? 0 : (currentIndex + 1) % ROTATION.length;
 
   return ROTATION[nextIndex] ?? ROTATION[0] ?? TRAINING_TEMPLATES[0];
 }

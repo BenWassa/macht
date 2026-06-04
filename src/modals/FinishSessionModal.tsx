@@ -14,7 +14,10 @@ interface FinishSessionModalProps {
   onSaved: () => void;
 }
 
-export function FinishSessionModal({ onClose, onSaved }: FinishSessionModalProps) {
+export function FinishSessionModal({
+  onClose,
+  onSaved,
+}: FinishSessionModalProps) {
   const addSession = useHistoryStore((state) => state.addSession);
   const injuries = useInjuryStore((state) => state.injuries);
   const workout = useWorkoutStore();
@@ -46,17 +49,24 @@ export function FinishSessionModal({ onClose, onSaved }: FinishSessionModalProps
         !conflict;
       const topSet = sets
         .filter((set) => set.completed && set.reps <= 10)
-        .sort((a, b) => brzyckiE1rm(b.weight, b.reps) - brzyckiE1rm(a.weight, a.reps))[0];
+        .sort(
+          (a, b) =>
+            brzyckiE1rm(b.weight, b.reps) - brzyckiE1rm(a.weight, a.reps),
+        )[0];
       return {
         exerciseId,
         sets,
-        e1rm: topSet && tracksE1rm ? brzyckiE1rm(topSet.weight, topSet.reps) : undefined,
+        e1rm:
+          topSet && tracksE1rm
+            ? brzyckiE1rm(topSet.weight, topSet.reps)
+            : undefined,
       };
     });
     const session: SessionLog = {
       id: crypto.randomUUID(),
       date: todayIso(),
-      template: workout.workoutName + (workout.isMinimumSession ? " (min)" : ""),
+      template:
+        workout.workoutName + (workout.isMinimumSession ? " (min)" : ""),
       duration: `${Math.floor(workout.workoutDuration / 60)}m`,
       volume,
       sets: completedSets.length,

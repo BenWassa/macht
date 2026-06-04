@@ -76,7 +76,8 @@ export function getRunnableTemplate(
   return {
     ...template,
     exercises: template.exercises.filter(
-      (exerciseId) => getExerciseConflict(exerciseId, injuries)?.level !== "avoid",
+      (exerciseId) =>
+        getExerciseConflict(exerciseId, injuries)?.level !== "avoid",
     ),
   };
 }

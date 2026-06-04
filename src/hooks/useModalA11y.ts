@@ -9,9 +9,7 @@ const FOCUSABLE = [
   '[tabindex]:not([tabindex="-1"])',
 ].join(",");
 
-export function useModalA11y<T extends HTMLElement>(
-  onClose: () => void,
-) {
+export function useModalA11y<T extends HTMLElement>(onClose: () => void) {
   const ref = useRef<T | null>(null);
 
   useEffect(() => {
