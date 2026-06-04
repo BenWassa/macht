@@ -22,10 +22,11 @@ export const PRESCRIPTIONS: Record<string, ExercisePrescription> = {
   trap_bar_deadlift: external(
     "Caution: light only if no traction",
     sets(2, 80, 6, "Pain-free only"),
+    true,
   ),
   deadlift: external("Paused until cleared", sets(1, 80, 5, "Paused"), true),
   squat: external("Paused until cleared", sets(1, 80, 5, "Paused"), true),
-  front_squat: external("Paused until cleared", sets(1, 80, 5, "Paused")),
+  front_squat: external("Paused until cleared", sets(1, 80, 5, "Paused"), true),
   bench_press: external("Paused until cleared", sets(1, 80, 5, "Paused"), true),
   overhead_press: external(
     "Paused until cleared",
@@ -35,7 +36,6 @@ export const PRESCRIPTIONS: Record<string, ExercisePrescription> = {
   floor_press_neutral: external(
     "Re-entry only: 2-3 x 6-10",
     sets(2, 40, 8, "Re-entry only"),
-    true,
   ),
   landmine_press: external(
     "Re-entry only: 2-3 x 8-10",
