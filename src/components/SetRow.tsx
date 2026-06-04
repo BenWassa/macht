@@ -38,7 +38,7 @@ export function SetRow({
   return (
     <div
       onClick={onSelect}
-      className={`grid grid-cols-[40px_1.4fr_1.2fr_1fr_52px] items-stretch border-b border-[#1a1a1a] transition ${
+      className={`grid min-h-[56px] grid-cols-[40px_1.4fr_1.2fr_1fr_64px] items-stretch border-b border-[#1a1a1a] transition ${
         selected ? "border-blue-600 bg-blue-950/20" : "bg-black"
       }`}
     >
@@ -53,7 +53,7 @@ export function SetRow({
           onClick={(e) => e.stopPropagation()}
           className="flex flex-1 items-center justify-center text-neutral-500 transition hover:bg-neutral-900 active:bg-blue-900/40 active:text-blue-400"
         >
-          <Minus className="h-3.5 w-3.5" />
+          <Minus className="h-4 w-4" />
         </button>
         <input
           value={set.weight}
@@ -67,7 +67,7 @@ export function SetRow({
           onClick={(e) => e.stopPropagation()}
           className="flex flex-1 items-center justify-center text-neutral-500 transition hover:bg-neutral-900 active:bg-blue-900/40 active:text-blue-400"
         >
-          <Plus className="h-3.5 w-3.5" />
+          <Plus className="h-4 w-4" />
         </button>
         {delta > 0 && (
           <span
@@ -86,7 +86,7 @@ export function SetRow({
           onClick={(e) => e.stopPropagation()}
           className="flex flex-1 items-center justify-center text-neutral-500 transition hover:bg-neutral-900 active:bg-blue-900/40 active:text-blue-400"
         >
-          <Minus className="h-3.5 w-3.5" />
+          <Minus className="h-4 w-4" />
         </button>
         <input
           value={set.reps}
@@ -100,7 +100,7 @@ export function SetRow({
           onClick={(e) => e.stopPropagation()}
           className="flex flex-1 items-center justify-center text-neutral-500 transition hover:bg-neutral-900 active:bg-blue-900/40 active:text-blue-400"
         >
-          <Plus className="h-3.5 w-3.5" />
+          <Plus className="h-4 w-4" />
         </button>
       </div>
 
@@ -121,14 +121,15 @@ export function SetRow({
 
       <button
         aria-label="Toggle set complete"
+        aria-pressed={set.completed}
         onClick={(e) => { e.stopPropagation(); onToggleComplete(); }}
         className={`flex items-center justify-center transition ${
           set.completed
-            ? "bg-emerald-600 text-white"
-            : "bg-black text-neutral-700 hover:bg-neutral-950 active:bg-emerald-900/40 active:text-emerald-500"
+            ? "bg-emerald-600 text-white active:bg-emerald-700"
+            : "bg-black text-neutral-600 hover:bg-neutral-950 active:bg-emerald-900/40 active:text-emerald-500"
         }`}
       >
-        <Check className={`h-5 w-5 ${set.completed ? "stroke-[3px]" : "stroke-[1px]"}`} />
+        <Check className={`h-6 w-6 ${set.completed ? "stroke-[3px]" : "stroke-[1.5px]"}`} />
       </button>
     </div>
   );

@@ -146,12 +146,12 @@ export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) 
       )}
 
       <div className="mb-4">
-        <div className="mb-2 grid grid-cols-[48px_1.4fr_1.2fr_1fr_60px] border-b border-edge pb-3 font-mono text-[11px] font-bold uppercase tracking-widest text-neutral-500">
+        <div className="mb-2 grid grid-cols-[40px_1.4fr_1.2fr_1fr_64px] border-b border-edge pb-3 font-mono text-[11px] font-bold uppercase tracking-widest text-neutral-500">
           <span className="text-center">#</span>
           <span className="text-center">Weight</span>
           <span className="text-center">Reps</span>
           <span className="text-center">{settings.rpeMode}</span>
-          <span />
+          <span className="text-center">Done</span>
         </div>
         <div className="border-x border-t border-edge">
           {selectedSets.map((set, index) => (
