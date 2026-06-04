@@ -65,40 +65,33 @@ export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) 
 
   return (
     <div className="animate-fadeIn">
-      <div className="mb-8 flex items-start justify-between gap-4">
-        <div>
-          <p className="mb-1 font-mono text-[11px] uppercase tracking-widest text-neutral-400">
-            Active workout
-          </p>
-          <h1 className="font-mono text-2xl font-bold uppercase tracking-tight">
-            {workout.workoutName}
-          </h1>
+      <div className="mb-5 flex items-center justify-between gap-4">
+        <h1 className="truncate font-mono text-xl font-bold uppercase tracking-tight">
+          {workout.workoutName}
+        </h1>
+        <div className="flex shrink-0 items-center gap-3">
+          <button
+            onClick={() => workout.setIsMinimumSession(!workout.isMinimumSession)}
+            aria-pressed={workout.isMinimumSession}
+            className={`border px-3 py-2 font-mono text-[9px] font-bold uppercase tracking-widest transition ${
+              workout.isMinimumSession
+                ? "border-blue-700 bg-blue-950 text-blue-300"
+                : "border-[#222] bg-black text-neutral-500 hover:text-neutral-300"
+            }`}
+          >
+            Min
+          </button>
+          <button
+            onClick={onFinish}
+            className="bg-emerald-600 px-5 py-2.5 font-mono text-xs font-bold uppercase tracking-widest text-white transition hover:bg-emerald-700 active:bg-emerald-800"
+          >
+            Finish
+          </button>
         </div>
-        <button
-          onClick={onFinish}
-          className="shrink-0 bg-emerald-600 px-6 py-3 font-mono text-xs font-bold uppercase tracking-widest text-white transition hover:bg-emerald-700 active:bg-emerald-800"
-        >
-          Finish
-        </button>
-      </div>
-
-      <div className="mb-6 flex items-center justify-between px-0.5">
-        <span className="font-mono text-[11px] uppercase tracking-widest text-neutral-500">
-          Minimum session
-        </span>
-        <button
-          onClick={() => workout.setIsMinimumSession(!workout.isMinimumSession)}
-          className={`h-7 w-14 border p-1 transition ${workout.isMinimumSession ? "border-blue-700 bg-blue-950" : "border-[#222] bg-black"}`}
-          aria-label="Toggle minimum session"
-        >
-          <span
-            className={`block h-4 w-4 bg-neutral-200 transition-transform ${workout.isMinimumSession ? "translate-x-7" : "translate-x-0"}`}
-          />
-        </button>
       </div>
 
       <div
-        className="mb-8 flex overflow-x-auto border-b border-edge bg-black scrollbar-none"
+        className="mb-5 flex overflow-x-auto border-b border-edge bg-black scrollbar-none"
         role="tablist"
       >
         {workout.activeWorkoutList.map((exerciseId, index) => {
@@ -111,12 +104,12 @@ export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) 
               onClick={() => workout.setSelectedExIndex(index)}
               role="tab"
               aria-selected={isActive}
-              className={`relative min-w-[160px] shrink-0 border-r border-edge px-6 py-5 text-left transition ${isActive ? "bg-blue-950/20" : "hover:bg-canvas"}`}
+              className={`relative min-w-[150px] shrink-0 border-r border-edge px-5 py-3.5 text-left transition ${isActive ? "bg-blue-950/20" : "hover:bg-canvas"}`}
             >
               <span className={`block truncate font-mono text-xs font-bold uppercase tracking-tight ${isActive ? "text-blue-400" : "text-neutral-400"}`}>
                 {exercise?.name}
               </span>
-              <span className={`mt-1.5 block font-mono text-[10px] uppercase tracking-wider ${hasConflict ? "font-bold text-red-500" : isActive ? "text-blue-500/60" : "text-neutral-500"}`}>
+              <span className={`mt-1 block font-mono text-[10px] uppercase tracking-wider ${hasConflict ? "font-bold text-red-500" : isActive ? "text-blue-500/60" : "text-neutral-500"}`}>
                 {hasConflict ? "Conflict" : exercise?.target}
               </span>
               {isActive && <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-blue-500" />}
@@ -145,7 +138,7 @@ export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) 
         </div>
       )}
 
-      <div className="mb-4">
+      <div className="mb-3">
         <div className="mb-2 grid grid-cols-[40px_1.4fr_1.2fr_1fr_64px] border-b border-edge pb-3 font-mono text-[11px] font-bold uppercase tracking-widest text-neutral-500">
           <span className="text-center">#</span>
           <span className="text-center">Weight</span>
@@ -176,11 +169,13 @@ export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) 
         </button>
       </div>
 
-      <div className="mb-4 border-t border-edge pt-4">
-        <span className="mb-1 block font-mono text-[10px] uppercase tracking-widest text-neutral-500">
+      <div className="mb-3 flex items-baseline justify-between gap-3 border-t border-edge pt-2.5">
+        <span className="font-mono text-[10px] uppercase tracking-widest text-neutral-500">
           Last time
         </span>
-        <p className="font-mono text-sm text-neutral-400">{selectedSet?.last ?? "—"}</p>
+        <span className="truncate font-mono text-xs text-neutral-400">
+          {selectedSet?.last ?? "—"}
+        </span>
       </div>
 
       {selectedSet && (
