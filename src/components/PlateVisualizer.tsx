@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { getPlateData, getPlates } from "@/domain/plates";
 import type { Units } from "@/domain/types";
 import { useElementWidth } from "@/hooks/useElementWidth";
@@ -21,24 +21,47 @@ export function PlateVisualizer({ weight, units }: PlateVisualizerProps) {
     return acc;
   }, {});
 
-  // Auto-fit: measure the plate strip's natural width vs the space available
-  // between the bar collars and shrink uniformly so heavy loads never clip.
-  // scrollWidth ignores the applied transform, so there is no remeasure loop.
+  // Auto-fit: compute the bar assembly's natural width arithmetically and
+  // shrink the whole thing to fit the card so heavy loads never overflow.
+  // (flex-1 shafts make scrollWidth unreliable, so we sum widths directly.)
   const trackRef = useRef<HTMLDivElement>(null);
-  const stripRef = useRef<HTMLDivElement>(null);
   const trackW = useElementWidth(trackRef);
-  const [naturalW, setNaturalW] = useState(0);
 
-  useLayoutEffect(() => {
-    if (stripRef.current) setNaturalW(stripRef.current.scrollWidth);
-  }, [plates.length, units, trackW]);
+  // Fixed bar furniture widths (px): two w-8 ends, two w-2.5 collars, one w-6
+  // center shaft, two flex-1 shafts at their 16px minimum, plus side padding.
+  const BAR_FURNITURE = 32 * 2 + 10 * 2 + 24 + 16 * 2 + 8;
+  const platesNaturalW = plates.reduce(
+    (sum, p) => sum + plateData[p].w * PLATE_SCALE + 3,
+    0,
+  );
+  // ×2 because the same plates load both sleeves.
+  const naturalW = platesNaturalW * 2 + BAR_FURNITURE;
 
-  const fit = naturalW > 0 && trackW > 0 ? Math.min(1, trackW / naturalW) : 1;
+  const fit = trackW > 0 ? Math.min(1, trackW / naturalW) : 1;
 
   const ariaLabel =
     plates.length === 0
       ? `Bar only at ${weight} ${units}`
       : `Loaded ${weight} ${units}. Plates per side: ${plates.join(", ")}.`;
+
+  // A loaded bar is symmetric: the same plates on both sleeves, heaviest
+  // innermost (against the collar). `plates` is largest-first, which is the
+  // inner-to-outer order for the right sleeve; the left sleeve is its mirror.
+  const renderPlate = (plate: number, key: string) => {
+    const spec = plateData[plate];
+    return (
+      <div
+        key={key}
+        className="shrink-0 border border-black"
+        style={{
+          height: spec.h * PLATE_SCALE,
+          width: spec.w * PLATE_SCALE,
+          background: spec.bg,
+        }}
+        title={`${spec.label} ${units}`}
+      />
+    );
+  };
 
   return (
     <div
@@ -58,49 +81,46 @@ export function PlateVisualizer({ weight, units }: PlateVisualizerProps) {
         </span>
       </div>
 
-      <div className="border border-[#141414] bg-well px-2 py-5">
-        <div className="relative mx-auto flex h-28 w-full items-center justify-center">
-          {/* shaft + inner collar (flat, brutalist) */}
-          <div className="h-2.5 min-w-0 flex-1 bg-neutral-700" />
+      {/* trackRef measures the available width; the bar assembly inside is
+          scaled down as a unit by `fit` so heavy loads never overflow. */}
+      <div
+        ref={trackRef}
+        className="overflow-hidden border border-[#141414] bg-well px-2 py-5"
+      >
+        <div
+          className="relative mx-auto flex h-28 w-full items-center justify-center"
+          style={{ transform: `scale(${fit})`, transformOrigin: "center" }}
+        >
+          {/* left bar end + shaft (flexes) + collar */}
+          <div className="h-2.5 w-8 shrink-0 bg-neutral-700" />
+          <div className="h-2.5 min-w-[16px] flex-1 bg-neutral-700" />
           <div className="h-12 w-2.5 shrink-0 bg-neutral-500" />
 
-          {/* Track: the space the plate strip may occupy. Measured so the strip
-              scales down to fit instead of clipping on heavy loads. */}
-          <div
-            ref={trackRef}
-            className="flex h-28 min-w-0 shrink items-center justify-center overflow-hidden px-1"
-          >
-            <div
-              ref={stripRef}
-              className="flex h-28 shrink-0 items-center justify-center gap-[3px]"
-              style={{ transform: `scale(${fit})`, transformOrigin: "center" }}
-            >
-              {plates.length === 0 && (
-                <span className="border border-[#222] px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-neutral-500">
-                  Bar only
-                </span>
-              )}
-              {plates.map((plate, index) => {
-                const spec = plateData[plate];
-                return (
-                  <div
-                    key={`${plate}-${index}`}
-                    className="shrink-0 border border-black"
-                    style={{
-                      height: spec.h * PLATE_SCALE,
-                      width: spec.w * PLATE_SCALE,
-                      background: spec.bg,
-                    }}
-                    title={`${spec.label} ${units}`}
-                  />
-                );
-              })}
-            </div>
-          </div>
+          {plates.length === 0 ? (
+            <span className="mx-1 shrink-0 border border-[#222] px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-neutral-500">
+              Bar only
+            </span>
+          ) : (
+            <>
+              {/* left sleeve: outermost (smallest) first → heaviest nearest center */}
+              <div className="flex h-28 shrink-0 items-center gap-[3px] pl-1">
+                {[...plates]
+                  .reverse()
+                  .map((plate, i) => renderPlate(plate, `l-${plate}-${i}`))}
+              </div>
+              {/* center shaft between the two plate stacks */}
+              <div className="h-2.5 w-6 shrink-0 bg-neutral-600" />
+              {/* right sleeve: heaviest nearest center → outermost (smallest) */}
+              <div className="flex h-28 shrink-0 items-center gap-[3px] pr-1">
+                {plates.map((plate, i) => renderPlate(plate, `r-${plate}-${i}`))}
+              </div>
+            </>
+          )}
 
-          {/* outer collar + bar end (flat, brutalist) */}
+          {/* right collar + shaft (flexes) + bar end */}
           <div className="h-12 w-2.5 shrink-0 bg-neutral-500" />
-          <div className="h-2.5 w-10 shrink-0 bg-neutral-700" />
+          <div className="h-2.5 min-w-[16px] flex-1 bg-neutral-700" />
+          <div className="h-2.5 w-8 shrink-0 bg-neutral-700" />
         </div>
       </div>
 
