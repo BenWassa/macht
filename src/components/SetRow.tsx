@@ -6,9 +6,7 @@ import { loadabilityDelta } from "@/lib/loadability";
 
 interface SetRowProps {
   set: SetEntry;
-  index: number;
   selected: boolean;
-  effortLabel: string;
   units: Units;
   loadMode: ExerciseLoadMode;
   loadDisplay: string;
@@ -20,9 +18,7 @@ interface SetRowProps {
 
 export function SetRow({
   set,
-  index,
   selected,
-  effortLabel,
   units,
   loadMode,
   loadDisplay,
@@ -47,14 +43,10 @@ export function SetRow({
   return (
     <div
       onClick={onSelect}
-      className={`grid min-h-[56px] grid-cols-[40px_1.4fr_1.2fr_1fr_64px] items-stretch border-b border-[#1a1a1a] transition ${
+      className={`grid min-h-[64px] grid-cols-[1.45fr_1.2fr_64px] items-stretch border-b border-[#1a1a1a] transition ${
         selected ? "border-blue-600 bg-blue-950/20" : "bg-black"
       }`}
     >
-      <div className="flex items-center justify-center border-r border-[#1a1a1a] font-mono text-[11px] font-bold text-neutral-600">
-        {index + 1}
-      </div>
-
       <div className="relative flex items-stretch border-r border-[#1a1a1a]">
         {showLoadControls ? (
           <>
@@ -116,23 +108,6 @@ export function SetRow({
         >
           <Plus className="h-4 w-4" />
         </button>
-      </div>
-
-      <div className="flex items-center justify-center border-r border-[#1a1a1a]">
-        <select
-          value={set.rpe ?? ""}
-          onChange={(e) =>
-            onUpdate("rpe", e.target.value ? Number(e.target.value) : null)
-          }
-          className="h-full w-full appearance-none bg-black text-center font-mono text-[10px] uppercase text-neutral-400 outline-none transition hover:bg-neutral-900"
-        >
-          <option value="">{effortLabel}</option>
-          {[6, 7, 7.5, 8, 8.5, 9, 9.5, 10].map((v) => (
-            <option key={v} value={v}>
-              {v}
-            </option>
-          ))}
-        </select>
       </div>
 
       <button

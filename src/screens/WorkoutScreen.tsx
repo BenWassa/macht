@@ -14,7 +14,7 @@ import { useWorkoutStore } from "@/state/useWorkoutStore";
 
 interface WorkoutScreenProps {
   onFinish: () => void;
-  onSetCompleted: () => void;
+  onSetCompleted: (options: { advanceAfterRest: boolean }) => void;
 }
 
 export function WorkoutScreen({
@@ -53,17 +53,23 @@ export function WorkoutScreen({
   const selectedSet = selectedSets[workout.selectedSetIndex] ?? selectedSets[0];
   const selectedPrescription = getExercisePrescription(selectedExerciseId);
   const conflict = getExerciseConflict(selectedExerciseId, injuries);
+  const lastSetText = selectedSet?.last;
+  const showLastSet =
+    lastSetText && lastSetText !== "-" && /[×x@]/.test(lastSetText);
 
   const toggleComplete = (exerciseId: string, setIndex: number) => {
     const completedNow = workout.toggleComplete(exerciseId, setIndex);
     if (completedNow) {
       vibrate(15);
-      onSetCompleted();
+      onSetCompleted({
+        advanceAfterRest: setIndex === selectedSets.length - 1,
+      });
       showToast(`Set ${setIndex + 1} logged`, {
         label: "Undo",
         onAction: () => workout.toggleComplete(exerciseId, setIndex),
       });
     }
+    return completedNow;
   };
 
   const updateSet = <K extends keyof SetEntry>(
@@ -129,14 +135,16 @@ export function WorkoutScreen({
         onAppendSet={() => workout.appendSet(selectedExerciseId)}
       />
 
-      <div className="mb-3 flex items-baseline justify-between gap-3 border-t border-edge pt-2.5">
-        <span className="font-mono text-[10px] uppercase tracking-widest text-neutral-500">
-          Last time
-        </span>
-        <span className="truncate font-mono text-xs text-neutral-400">
-          {selectedSet?.last ?? "—"}
-        </span>
-      </div>
+      {showLastSet && (
+        <div className="mb-3 flex items-baseline justify-between gap-3 border-t border-edge pt-2.5">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-neutral-500">
+            Last time
+          </span>
+          <span className="truncate font-mono text-xs text-neutral-400">
+            {lastSetText}
+          </span>
+        </div>
+      )}
 
       {selectedSet &&
         selectedPrescription.showPlateVisualizer &&

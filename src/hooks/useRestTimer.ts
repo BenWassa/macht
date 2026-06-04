@@ -74,6 +74,11 @@ export function useRestTimer(defaultRest: number) {
     setRunning(false);
   };
 
+  const dismiss = () => {
+    setRunning(false);
+    setVisible(false);
+  };
+
   return {
     seconds,
     running,
@@ -82,6 +87,6 @@ export function useRestTimer(defaultRest: number) {
     add,
     toggle,
     reset,
-    dismiss: () => setVisible(false),
+    dismiss,
   };
 }

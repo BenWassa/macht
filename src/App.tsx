@@ -13,9 +13,14 @@ import { useSettingsStore } from "@/state/useSettingsStore";
 import { useUiStore } from "@/state/useUiStore";
 import { useWorkoutStore } from "@/state/useWorkoutStore";
 import { formatTime } from "@/lib/format";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export type { TabId } from "@/state/useUiStore";
+
+type PendingAdvance = {
+  exerciseId: string;
+  nextIndex: number;
+};
 
 export default function App() {
   const activeTab = useUiStore((state) => state.activeTab);
@@ -24,9 +29,50 @@ export default function App() {
   const defaultRest = useSettingsStore((state) => state.defaultRest);
   const workoutActive = useWorkoutStore((state) => state.workoutActive);
   const workoutDuration = useWorkoutStore((state) => state.workoutDuration);
+  const selectedExIndex = useWorkoutStore((state) => state.selectedExIndex);
+  const activeWorkoutList = useWorkoutStore((state) => state.activeWorkoutList);
+  const setSelectedExIndex = useWorkoutStore(
+    (state) => state.setSelectedExIndex,
+  );
   const restTimer = useRestTimer(defaultRest);
+  const pendingAdvance = useRef<PendingAdvance | null>(null);
 
   useSessionClock();
+
+  const advanceAfterRest = useCallback(() => {
+    const pending = pendingAdvance.current;
+    pendingAdvance.current = null;
+    if (!pending || pending.nextIndex >= activeWorkoutList.length) return;
+    const sets = useWorkoutStore.getState().workoutSets[pending.exerciseId];
+    const sourceComplete = sets?.length && sets.every((set) => set.completed);
+    if (!sourceComplete) return;
+    setSelectedExIndex(pending.nextIndex);
+  }, [activeWorkoutList.length, setSelectedExIndex]);
+
+  useEffect(() => {
+    if (!restTimer.visible || restTimer.running || restTimer.seconds !== 0) {
+      return;
+    }
+    if (pendingAdvance.current === null) return;
+    advanceAfterRest();
+    restTimer.dismiss();
+  }, [restTimer, advanceAfterRest]);
+
+  const startRestTimer = (options: { advanceAfterRest: boolean }) => {
+    const exerciseId = activeWorkoutList[selectedExIndex];
+    pendingAdvance.current =
+      options.advanceAfterRest &&
+      exerciseId &&
+      selectedExIndex < activeWorkoutList.length - 1
+        ? { exerciseId, nextIndex: selectedExIndex + 1 }
+        : null;
+    restTimer.start();
+  };
+
+  const dismissRestTimer = () => {
+    advanceAfterRest();
+    restTimer.dismiss();
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-[#060606] text-[#f0f0f0] selection:bg-blue-600 selection:text-white">
@@ -58,7 +104,7 @@ export default function App() {
         {activeTab === "workout" && (
           <WorkoutScreen
             onFinish={() => setShowFinishModal(true)}
-            onSetCompleted={restTimer.start}
+            onSetCompleted={startRestTimer}
           />
         )}
         {activeTab === "progress" && <ProgressScreen />}
@@ -72,7 +118,7 @@ export default function App() {
           onAdd={restTimer.add}
           onToggle={restTimer.toggle}
           onReset={restTimer.reset}
-          onDismiss={restTimer.dismiss}
+          onDismiss={dismissRestTimer}
         />
       )}
 
