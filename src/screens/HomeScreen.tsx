@@ -1,7 +1,9 @@
 import { Play } from "lucide-react";
 import { DEFAULT_TEMPLATE } from "@/domain/exercises";
+import { getRunnableTemplate } from "@/domain/injuries";
 import type { TabId } from "@/App";
 import { useHistoryStore } from "@/state/useHistoryStore";
+import { useInjuryStore } from "@/state/useInjuryStore";
 import { useWorkoutStore } from "@/state/useWorkoutStore";
 
 interface HomeScreenProps {
@@ -33,11 +35,12 @@ function rollingWeeks(
 
 export function HomeScreen({ setActiveTab }: HomeScreenProps) {
   const sessions = useHistoryStore((state) => state.sessions);
+  const injuries = useInjuryStore((state) => state.injuries);
   const startTemplate = useWorkoutStore((state) => state.startTemplate);
   const weeks = rollingWeeks(sessions);
 
   const start = () => {
-    startTemplate(DEFAULT_TEMPLATE);
+    startTemplate(getRunnableTemplate(DEFAULT_TEMPLATE, injuries));
     setActiveTab("workout");
   };
 

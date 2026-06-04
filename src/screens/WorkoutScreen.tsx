@@ -96,7 +96,7 @@ export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) 
       >
         {workout.activeWorkoutList.map((exerciseId, index) => {
           const exercise = getExerciseById(exerciseId);
-          const hasConflict = getExerciseConflict(exerciseId, injuries);
+          const exerciseConflict = getExerciseConflict(exerciseId, injuries);
           const isActive = workout.selectedExIndex === index;
           return (
             <button
@@ -109,8 +109,20 @@ export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) 
               <span className={`block truncate font-mono text-xs font-bold uppercase tracking-tight ${isActive ? "text-blue-400" : "text-neutral-400"}`}>
                 {exercise?.name}
               </span>
-              <span className={`mt-1 block font-mono text-[10px] uppercase tracking-wider ${hasConflict ? "font-bold text-red-500" : isActive ? "text-blue-500/60" : "text-neutral-500"}`}>
-                {hasConflict ? "Conflict" : exercise?.target}
+              <span className={`mt-1 block font-mono text-[10px] uppercase tracking-wider ${
+                exerciseConflict?.level === "avoid"
+                  ? "font-bold text-red-500"
+                  : exerciseConflict?.level === "caution"
+                    ? "font-bold text-yellow-500"
+                    : isActive
+                      ? "text-blue-500/60"
+                      : "text-neutral-500"
+              }`}>
+                {exerciseConflict?.level === "avoid"
+                  ? "Avoid"
+                  : exerciseConflict?.level === "caution"
+                    ? "Caution"
+                    : exercise?.target}
               </span>
               {isActive && <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-blue-500" />}
             </button>
@@ -119,15 +131,33 @@ export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) 
       </div>
 
       {conflict && (
-        <div className="mb-6 space-y-3 border border-red-900 bg-red-950/20 p-4">
-          <div className="flex gap-3 text-red-300">
-            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" />
-            <p className="font-mono text-xs leading-relaxed text-red-300">
-              Injury conflict: {conflict.injury}.{" "}
+        <div
+          className={`mb-6 space-y-3 border p-4 ${
+            conflict.level === "avoid"
+              ? "border-red-900 bg-red-950/20"
+              : "border-yellow-900 bg-yellow-950/20"
+          }`}
+        >
+          <div
+            className={`flex gap-3 ${
+              conflict.level === "avoid" ? "text-red-300" : "text-yellow-300"
+            }`}
+          >
+            <AlertTriangle
+              className={`mt-0.5 h-4 w-4 shrink-0 ${
+                conflict.level === "avoid" ? "text-red-400" : "text-yellow-400"
+              }`}
+            />
+            <p
+              className={`font-mono text-xs leading-relaxed ${
+                conflict.level === "avoid" ? "text-red-300" : "text-yellow-300"
+              }`}
+            >
+              Injury {conflict.level}: {conflict.injury}.{" "}
               {conflict.tags.join(", ").replace(/_/g, " ")}.
             </p>
           </div>
-          {conflict.alternative && (
+          {conflict.level === "avoid" && conflict.alternative && (
             <button
               onClick={() => workout.substituteExercise(selectedExerciseId, conflict.alternative!)}
               className="border border-red-900 bg-black px-4 py-3 font-mono text-xs font-bold uppercase text-red-300 transition hover:bg-red-950/30 active:bg-red-950/50"

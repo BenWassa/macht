@@ -62,6 +62,14 @@ export function InjuryManager({ onEdit, onAdd }: InjuryManagerProps) {
                     {tag.replace(/_/g, " ")}
                   </span>
                 ))}
+                {(injury.cautionTags ?? []).map((tag) => (
+                  <span
+                    key={tag}
+                    className="border border-yellow-950 bg-yellow-950/20 px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-wider text-yellow-500"
+                  >
+                    {tag.replace(/_/g, " ")}
+                  </span>
+                ))}
               </div>
             </button>
             <div className="flex gap-2">

@@ -14,6 +14,7 @@ export interface ExerciseInjury {
   name: string;
   severity: Severity;
   forbiddenTags: string[];
+  cautionTags?: string[];
   notes: string;
   dateAdded: string;
   targetReturn?: string;
@@ -60,6 +61,7 @@ export interface TemplatePlan {
   name: string;
   notes: string;
   exercises: string[];
+  isMinimumSession?: boolean;
 }
 
 export type WorkoutSets = Record<string, SetEntry[]>;
@@ -67,6 +69,7 @@ export type WorkoutSets = Record<string, SetEntry[]>;
 export interface ExerciseConflict {
   injuryId: string;
   injury: string;
+  level: "avoid" | "caution";
   tags: string[];
   severity: Severity;
   alternative: string | null;

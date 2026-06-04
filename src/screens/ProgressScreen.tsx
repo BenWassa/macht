@@ -1,23 +1,19 @@
 import { SparklineChart } from "@/components/SparklineChart";
 import { deriveE1rmHistory } from "@/domain/e1rm";
-import { getExerciseById } from "@/domain/exercises";
+import { PROGRESS_LIFTS, getExerciseById } from "@/domain/exercises";
 import { getExerciseConflict } from "@/domain/injuries";
 import { useHistoryStore } from "@/state/useHistoryStore";
 import { useInjuryStore } from "@/state/useInjuryStore";
 import { useSettingsStore } from "@/state/useSettingsStore";
-
-const LIFTS = ["squat", "deadlift", "bench_press", "romanian_deadlift"];
 
 export function ProgressScreen() {
   const sessions = useHistoryStore((state) => state.sessions);
   const injuries = useInjuryStore((state) => state.injuries);
   const units = useSettingsStore((state) => state.units);
 
-  const liftData = LIFTS.map((exerciseId) => {
+  const liftData = PROGRESS_LIFTS.map((exerciseId) => {
     const history = deriveE1rmHistory(sessions, exerciseId);
-    const fallback =
-      exerciseId === "bench_press" ? [255, 258, 260, 262, 265, 265] : [];
-    const values = history.length ? history : fallback;
+    const values = history;
     return {
       exerciseId,
       exercise: getExerciseById(exerciseId),

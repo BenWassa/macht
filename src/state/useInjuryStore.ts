@@ -46,6 +46,24 @@ export const useInjuryStore = create<InjuryState>()(
       },
       hydrateInjuries: (injuries) => set({ injuries }),
     }),
-    { name: "macht_injuries" },
+    {
+      name: "macht_injuries",
+      version: 2,
+      migrate: (persisted) => {
+        const state = persisted as Partial<InjuryState>;
+        const injuries = state.injuries ?? INITIAL_INJURIES;
+        const hasCurrent = injuries.some(
+          (injury) => injury.id === "labrum_left_anteroinferior",
+        );
+        if (hasCurrent) return state;
+        return {
+          ...state,
+          injuries: [
+            ...injuries.filter((injury) => injury.id !== "labrum_left"),
+            ...INITIAL_INJURIES,
+          ],
+        };
+      },
+    },
   ),
 );

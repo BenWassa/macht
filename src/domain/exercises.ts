@@ -1,129 +1,403 @@
+/* eslint-disable max-lines */
 import type { Exercise, TemplatePlan } from "./types";
 
-/*
- * Injury tag taxonomy:
- * shoulder: general shoulder sensitivity under loaded press/pull positions.
- * posterior_labrum: externally rotated or behind-neck positions that stress the posterior labrum.
- * anterior_labrum: deep shoulder extension and anterior capsule stress.
- * deep_rom: end-range positions that can be limited during flare-ups.
- * cervical_spine: overhead/behind-neck work with neck positioning demands.
- * knee: loaded knee flexion or direct quad isolation stress.
- * lower_back: hip hinge or axial loading that asks for spinal tolerance.
- * grip: heavy grip demand.
- * elbow: supinated or high-tension elbow flexion demand.
- */
+export const FRAMEWORK_TAGS = [
+  "shoulder_abduction",
+  "shoulder_external_rotation",
+  "abduction_external_rotation",
+  "shoulder_extension",
+  "overhead_load",
+  "hanging_traction",
+  "anterior_shoulder_load",
+  "heavy_anterior_shoulder_load",
+  "contact_posting",
+  "sudden_traction",
+  "wide_pressing",
+  "dip_pattern",
+  "scapular_control",
+  "rotator_cuff_control",
+  "lower_body_primary",
+  "conditioning_safe",
+  "core_safe",
+  "return_to_pressing",
+  "return_to_pulling",
+  "wrestling_relevance",
+  "heavy_rowing",
+  "push_up_position",
+  "loaded_carry",
+  "barbell_rack_position",
+] as const;
+
 export const EXERCISE_LIBRARY: Exercise[] = [
   {
-    id: "squat",
-    name: "Barbell Back Squat",
-    target: "Quads / Glutes",
-    tags: ["knee", "lower_back"],
+    id: "leg_press",
+    name: "Leg Press",
+    target: "Quads",
+    tags: ["lower_body_primary"],
   },
   {
-    id: "deadlift",
-    name: "Conventional Deadlift",
-    target: "Posterior chain",
-    tags: ["lower_back", "grip"],
+    id: "belt_squat",
+    name: "Belt Squat",
+    target: "Quads / Glutes",
+    tags: ["lower_body_primary"],
+  },
+  {
+    id: "hack_squat",
+    name: "Hack Squat",
+    target: "Quads / Glutes",
+    tags: ["lower_body_primary"],
+  },
+  {
+    id: "split_squat",
+    name: "Split Squat",
+    target: "Quads / Glutes",
+    tags: ["lower_body_primary"],
+  },
+  {
+    id: "step_up",
+    name: "Step-Up",
+    target: "Quads / Glutes",
+    tags: ["lower_body_primary"],
+  },
+  {
+    id: "leg_extension",
+    name: "Leg Extension",
+    target: "Quads",
+    tags: ["lower_body_primary"],
+  },
+  {
+    id: "hamstring_curl",
+    name: "Hamstring Curl",
+    target: "Hamstrings",
+    tags: ["lower_body_primary"],
+  },
+  {
+    id: "leg_curl",
+    name: "Lying Leg Curl",
+    target: "Hamstrings",
+    tags: ["lower_body_primary"],
+  },
+  {
+    id: "hip_thrust",
+    name: "Hip Thrust",
+    target: "Glutes",
+    tags: ["lower_body_primary"],
+  },
+  {
+    id: "glute_bridge",
+    name: "Glute Bridge",
+    target: "Glutes",
+    tags: ["lower_body_primary"],
+  },
+  {
+    id: "calf_raise",
+    name: "Calf Raise",
+    target: "Calves",
+    tags: ["lower_body_primary"],
+  },
+  {
+    id: "walking_lunge",
+    name: "Walking Lunge",
+    target: "Quads / Glutes",
+    tags: ["lower_body_primary"],
   },
   {
     id: "romanian_deadlift",
     name: "Romanian Deadlift",
     target: "Hamstrings / Glutes",
-    tags: ["lower_back"],
+    tags: ["shoulder_extension"],
   },
   {
-    id: "bench_press",
-    name: "Flat Barbell Bench Press",
-    target: "Chest / Triceps",
-    tags: ["shoulder", "deep_rom", "posterior_labrum", "anterior_labrum"],
+    id: "trap_bar_deadlift",
+    name: "Trap Bar Deadlift",
+    target: "Posterior chain",
+    tags: ["shoulder_extension", "loaded_carry"],
   },
   {
-    id: "overhead_press",
-    name: "Overhead Barbell Press",
-    target: "Shoulders / Triceps",
-    tags: ["shoulder", "posterior_labrum", "cervical_spine"],
+    id: "sled_push",
+    name: "Sled Push",
+    target: "Conditioning / Legs",
+    tags: ["wrestling_relevance", "push_up_position"],
   },
   {
-    id: "landmine_press",
-    name: "Half-Kneeling Landmine Press",
-    target: "Shoulders / Triceps",
-    tags: [],
+    id: "squat",
+    name: "Barbell Back Squat",
+    target: "Quads / Glutes",
+    tags: ["barbell_rack_position"],
   },
   {
-    id: "neutral_db_press",
-    name: "Neutral Grip DB Press",
-    target: "Chest / Triceps",
-    tags: [],
+    id: "front_squat",
+    name: "Front Squat",
+    target: "Quads / Core",
+    tags: ["barbell_rack_position", "shoulder_external_rotation"],
   },
   {
-    id: "incline_db_press",
-    name: "Incline Dumbbell Press",
-    target: "Upper chest",
-    tags: ["shoulder", "deep_rom"],
+    id: "deadlift",
+    name: "Conventional Deadlift",
+    target: "Posterior chain",
+    tags: ["shoulder_extension", "loaded_carry"],
   },
   {
-    id: "lat_pulldown_front",
-    name: "Front Lat Pulldown",
-    target: "Lats / Upper back",
-    tags: [],
+    id: "stationary_bike",
+    name: "Stationary Bike",
+    target: "Aerobic base",
+    tags: ["conditioning_safe"],
   },
   {
-    id: "lat_pulldown_behind",
-    name: "Behind Neck Lat Pulldown",
-    target: "Lats",
-    tags: ["shoulder", "posterior_labrum", "deep_rom"],
+    id: "incline_walk",
+    name: "Incline Treadmill Walk",
+    target: "Aerobic base",
+    tags: ["conditioning_safe"],
+  },
+  {
+    id: "easy_jog",
+    name: "Easy Jog",
+    target: "Aerobic base",
+    tags: ["conditioning_safe"],
+  },
+  {
+    id: "stair_climber",
+    name: "Stair Climber",
+    target: "Aerobic base",
+    tags: ["conditioning_safe"],
+  },
+  {
+    id: "hands_free_elliptical",
+    name: "Hands-Free Elliptical",
+    target: "Aerobic base",
+    tags: ["conditioning_safe"],
+  },
+  {
+    id: "rowing_machine",
+    name: "Rowing Machine",
+    target: "Conditioning",
+    tags: ["heavy_rowing", "sudden_traction"],
+  },
+  {
+    id: "assault_bike_arms",
+    name: "Assault Bike Arms",
+    target: "Conditioning",
+    tags: ["sudden_traction", "shoulder_extension"],
+  },
+  {
+    id: "battle_ropes",
+    name: "Battle Ropes",
+    target: "Conditioning",
+    tags: ["sudden_traction", "shoulder_abduction"],
+  },
+  {
+    id: "dead_bug",
+    name: "Dead Bug",
+    target: "Core",
+    tags: ["core_safe"],
+  },
+  {
+    id: "reverse_crunch",
+    name: "Reverse Crunch",
+    target: "Core",
+    tags: ["core_safe"],
+  },
+  {
+    id: "hollow_hold",
+    name: "Hollow Hold Variation",
+    target: "Core",
+    tags: ["core_safe"],
+  },
+  {
+    id: "pallof_press",
+    name: "Pallof Press",
+    target: "Core / Anti-rotation",
+    tags: ["core_safe"],
+  },
+  {
+    id: "front_plank",
+    name: "Front Plank",
+    target: "Core",
+    tags: ["push_up_position"],
+  },
+  {
+    id: "side_plank",
+    name: "Side Plank",
+    target: "Core",
+    tags: ["push_up_position"],
+  },
+  {
+    id: "hanging_leg_raise",
+    name: "Hanging Leg Raise",
+    target: "Core",
+    tags: ["hanging_traction"],
+  },
+  {
+    id: "ab_wheel",
+    name: "Ab Wheel",
+    target: "Core",
+    tags: ["push_up_position", "overhead_load"],
+  },
+  {
+    id: "scapular_setting",
+    name: "Scapular Setting",
+    target: "Scapula",
+    tags: ["scapular_control"],
+  },
+  {
+    id: "band_row_elbows_close",
+    name: "Band Row, Elbows Close",
+    target: "Scapula / Upper back",
+    tags: ["scapular_control", "return_to_pulling"],
+  },
+  {
+    id: "external_rotation_isometric",
+    name: "External Rotation Isometric",
+    target: "Rotator cuff",
+    tags: ["rotator_cuff_control", "shoulder_external_rotation"],
+  },
+  {
+    id: "internal_rotation_isometric",
+    name: "Internal Rotation Isometric",
+    target: "Rotator cuff",
+    tags: ["rotator_cuff_control"],
+  },
+  {
+    id: "serratus_wall_press",
+    name: "Serratus Wall Press",
+    target: "Serratus / Scapula",
+    tags: ["scapular_control"],
+  },
+  {
+    id: "wall_slide",
+    name: "Wall Slide",
+    target: "Scapula / Shoulder",
+    tags: ["scapular_control", "shoulder_abduction"],
+  },
+  {
+    id: "side_lying_external_rotation",
+    name: "Side-Lying External Rotation",
+    target: "Rotator cuff",
+    tags: ["rotator_cuff_control", "shoulder_external_rotation"],
   },
   {
     id: "chest_supported_row",
     name: "Chest-Supported Row",
     target: "Upper back",
-    tags: [],
+    tags: ["return_to_pulling"],
   },
   {
-    id: "barbell_row",
-    name: "Barbell Bent-Over Row",
-    target: "Back / Grip",
-    tags: ["lower_back"],
+    id: "neutral_cable_row",
+    name: "Neutral-Grip Cable Row",
+    target: "Upper back",
+    tags: ["return_to_pulling"],
   },
   {
-    id: "dumbbell_row",
-    name: "One-Arm Dumbbell Row",
-    target: "Lats / Back",
-    tags: [],
-  },
-  {
-    id: "cable_lateral_raise",
-    name: "Cable Lateral Raise",
-    target: "Lateral delts",
-    tags: [],
+    id: "lat_pulldown_front",
+    name: "Light Front Lat Pulldown",
+    target: "Lats / Upper back",
+    tags: ["return_to_pulling"],
   },
   {
     id: "face_pull",
     name: "Cable Face Pull",
     target: "Rear delts / Rotator",
-    tags: [],
+    tags: ["return_to_pulling", "shoulder_external_rotation"],
   },
-  { id: "chin_up", name: "Chin-Up", target: "Lats / Biceps", tags: ["elbow"] },
+  {
+    id: "barbell_row",
+    name: "Barbell Bent-Over Row",
+    target: "Back / Grip",
+    tags: ["heavy_rowing"],
+  },
+  {
+    id: "dumbbell_row",
+    name: "One-Arm Dumbbell Row",
+    target: "Lats / Back",
+    tags: ["heavy_rowing"],
+  },
+  {
+    id: "wall_push_up",
+    name: "Wall Push-Up",
+    target: "Chest / Control",
+    tags: ["return_to_pressing", "push_up_position"],
+  },
+  {
+    id: "incline_push_up",
+    name: "Incline Push-Up",
+    target: "Chest / Control",
+    tags: ["return_to_pressing", "push_up_position"],
+  },
+  {
+    id: "floor_press_neutral",
+    name: "Neutral-Grip Floor Press",
+    target: "Chest / Triceps",
+    tags: ["return_to_pressing", "anterior_shoulder_load"],
+  },
+  {
+    id: "landmine_press",
+    name: "Half-Kneeling Landmine Press",
+    target: "Shoulders / Triceps",
+    tags: ["return_to_pressing", "shoulder_abduction"],
+  },
+  {
+    id: "push_up",
+    name: "Push-Up",
+    target: "Chest / Triceps",
+    tags: ["return_to_pressing", "push_up_position"],
+  },
+  {
+    id: "neutral_db_press",
+    name: "Neutral Grip DB Press",
+    target: "Chest / Triceps",
+    tags: ["return_to_pressing", "anterior_shoulder_load"],
+  },
+  {
+    id: "bench_press",
+    name: "Flat Barbell Bench Press",
+    target: "Chest / Triceps",
+    tags: [
+      "abduction_external_rotation",
+      "wide_pressing",
+      "shoulder_extension",
+      "heavy_anterior_shoulder_load",
+    ],
+  },
+  {
+    id: "incline_db_press",
+    name: "Incline Dumbbell Press",
+    target: "Upper chest",
+    tags: [
+      "shoulder_abduction",
+      "shoulder_extension",
+      "heavy_anterior_shoulder_load",
+    ],
+  },
+  {
+    id: "overhead_press",
+    name: "Overhead Barbell Press",
+    target: "Shoulders / Triceps",
+    tags: ["overhead_load", "shoulder_abduction", "shoulder_external_rotation"],
+  },
+  {
+    id: "lat_pulldown_behind",
+    name: "Behind Neck Lat Pulldown",
+    target: "Lats",
+    tags: ["abduction_external_rotation", "overhead_load"],
+  },
   {
     id: "pull_up",
     name: "Pull-Up",
     target: "Lats / Back",
-    tags: ["shoulder", "posterior_labrum"],
+    tags: ["hanging_traction", "shoulder_external_rotation"],
+  },
+  {
+    id: "chin_up",
+    name: "Chin-Up",
+    target: "Lats / Biceps",
+    tags: ["hanging_traction"],
   },
   {
     id: "dip",
     name: "Chest Dip",
     target: "Chest / Triceps",
-    tags: ["shoulder", "anterior_labrum", "deep_rom"],
+    tags: ["dip_pattern", "shoulder_extension", "heavy_anterior_shoulder_load"],
   },
-  { id: "leg_press", name: "Leg Press", target: "Quads", tags: ["knee"] },
-  {
-    id: "leg_extension",
-    name: "Leg Extension",
-    target: "Quads",
-    tags: ["knee"],
-  },
-  { id: "leg_curl", name: "Lying Leg Curl", target: "Hamstrings", tags: [] },
   {
     id: "tricep_pushdown",
     name: "Tricep Pushdown",
@@ -132,18 +406,77 @@ export const EXERCISE_LIBRARY: Exercise[] = [
   },
 ];
 
-export const DEFAULT_TEMPLATE: TemplatePlan = {
-  id: "ppl-push-adapted",
-  name: "PPL - Push (adapted)",
-  notes:
-    "Bench press and overhead press substituted. Movement patterns adjusted to protect left posterior shoulder.",
-  exercises: [
-    "neutral_db_press",
-    "incline_db_press",
-    "cable_lateral_raise",
-    "tricep_pushdown",
-  ],
-};
+export const TRAINING_TEMPLATES: TemplatePlan[] = [
+  {
+    id: "session-a-lower-strength-shoulder-control",
+    name: "Session A - Lower Strength + Shoulder Control",
+    notes:
+      "Primary return-to-capability session: lower-body loading, trunk control, and shoulder isometrics.",
+    exercises: [
+      "leg_press",
+      "hamstring_curl",
+      "split_squat",
+      "calf_raise",
+      "dead_bug",
+      "band_row_elbows_close",
+      "external_rotation_isometric",
+      "internal_rotation_isometric",
+    ],
+  },
+  {
+    id: "session-b-conditioning-core",
+    name: "Session B - Conditioning + Core",
+    notes:
+      "Aerobic base with core and low-risk scapular control. Use as the weekly floor when recovery is limited.",
+    exercises: [
+      "stationary_bike",
+      "incline_walk",
+      "reverse_crunch",
+      "pallof_press",
+      "serratus_wall_press",
+      "scapular_setting",
+    ],
+  },
+  {
+    id: "session-c-lower-hypertrophy-stability",
+    name: "Session C - Lower Hypertrophy + Stability",
+    notes:
+      "Second lower-body anchor with supported pulling and rotator cuff control if pain-free.",
+    exercises: [
+      "hack_squat",
+      "hip_thrust",
+      "step_up",
+      "leg_extension",
+      "hamstring_curl",
+      "band_row_elbows_close",
+      "side_lying_external_rotation",
+    ],
+  },
+  {
+    id: "session-d-easy-base",
+    name: "Session D - Easy Base",
+    notes:
+      "Optional minimum session: easy conditioning plus mobility and shoulder isometrics.",
+    exercises: [
+      "stationary_bike",
+      "wall_slide",
+      "external_rotation_isometric",
+      "internal_rotation_isometric",
+    ],
+    isMinimumSession: true,
+  },
+];
+
+export const DEFAULT_TEMPLATE = TRAINING_TEMPLATES[0];
+
+export const PROGRESS_LIFTS = [
+  "leg_press",
+  "hack_squat",
+  "hip_thrust",
+  "romanian_deadlift",
+  "chest_supported_row",
+  "bench_press",
+];
 
 export const getExerciseById = (exerciseId: string): Exercise | undefined =>
   EXERCISE_LIBRARY.find((exercise) => exercise.id === exerciseId);

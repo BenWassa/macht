@@ -1,20 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { X } from "lucide-react";
+import { FRAMEWORK_TAGS } from "@/domain/exercises";
 import type { ExerciseInjury, Severity } from "@/domain/types";
 import { useModalA11y } from "@/hooks/useModalA11y";
 import { useInjuryStore } from "@/state/useInjuryStore";
-
-const TAGS = [
-  "shoulder",
-  "posterior_labrum",
-  "anterior_labrum",
-  "deep_rom",
-  "cervical_spine",
-  "knee",
-  "lower_back",
-  "grip",
-  "elbow",
-];
 
 interface InjuryModalProps {
   injury?: ExerciseInjury | null;
@@ -105,7 +94,7 @@ export function InjuryModal({ injury, onClose }: InjuryModalProps) {
               Affected movements
             </span>
             <div className="grid grid-cols-2 gap-1 border border-[#1a1a1a] bg-black p-2">
-              {TAGS.map((tag) => {
+              {FRAMEWORK_TAGS.map((tag) => {
                 const active = forbiddenTags.includes(tag);
                 return (
                   <button

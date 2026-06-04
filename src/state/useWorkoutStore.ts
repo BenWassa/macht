@@ -75,7 +75,7 @@ export const useWorkoutStore = create<WorkoutState>()(
           }, {}),
           selectedExIndex: 0,
           selectedSetIndex: 0,
-          isMinimumSession: false,
+          isMinimumSession: Boolean(template.isMinimumSession),
           deloadWeights,
         }),
       endSession: () =>

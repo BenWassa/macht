@@ -33,13 +33,14 @@ export function FinishSessionModal({ onClose, onSaved }: FinishSessionModalProps
     );
     const exerciseSnapshots = workout.activeWorkoutList.map((exerciseId) => {
       const sets = workout.workoutSets[exerciseId] ?? [];
+      const conflict = getExerciseConflict(exerciseId, injuries);
       const topSet = sets
         .filter((set) => set.completed && set.reps <= 10)
         .sort((a, b) => brzyckiE1rm(b.weight, b.reps) - brzyckiE1rm(a.weight, a.reps))[0];
       return {
         exerciseId,
         sets,
-        e1rm: topSet ? brzyckiE1rm(topSet.weight, topSet.reps) : undefined,
+        e1rm: topSet && !conflict ? brzyckiE1rm(topSet.weight, topSet.reps) : undefined,
       };
     });
     const session: SessionLog = {
