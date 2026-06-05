@@ -71,6 +71,27 @@ export function substituteWorkoutExercise(
   };
 }
 
+export function addWorkoutExercise(
+  state: WorkoutState,
+  exerciseId: string,
+): Partial<WorkoutState> {
+  const existing = state.activeWorkoutList.indexOf(exerciseId);
+  if (existing !== -1) {
+    return { selectedExIndex: existing, selectedSetIndex: 0 };
+  }
+  const list = [...state.activeWorkoutList, exerciseId];
+  return {
+    activeWorkoutList: list,
+    selectedExIndex: list.length - 1,
+    selectedSetIndex: 0,
+    workoutSets: {
+      ...state.workoutSets,
+      [exerciseId]:
+        state.workoutSets[exerciseId] ?? getDefaultSetsForExercise(exerciseId),
+    },
+  };
+}
+
 export function appendWorkoutSet(
   state: WorkoutState,
   exerciseId: string,

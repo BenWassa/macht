@@ -1,4 +1,4 @@
-import { Play } from "lucide-react";
+import { Play, Wand2 } from "lucide-react";
 import { getRunnableTemplate } from "@/domain/injuries";
 import { getNextTrainingTemplate } from "@/domain/trainingPlan";
 import { ActivityHistory } from "@/screens/home/ActivityHistory";
@@ -46,12 +46,20 @@ export function HomeScreen({ setActiveTab }: HomeScreenProps) {
             {nextTemplate.notes}
           </p>
         </div>
-        <button
-          onClick={start}
-          className="flex w-full items-center justify-center gap-2 bg-blue-600 px-6 py-4 font-mono text-sm font-bold uppercase tracking-widest text-white transition hover:bg-blue-700 active:bg-blue-800 sm:w-auto"
-        >
-          <Play className="h-4 w-4 fill-white" /> Start session
-        </button>
+        <div className="flex w-full flex-col gap-2 sm:w-auto">
+          <button
+            onClick={start}
+            className="flex w-full items-center justify-center gap-2 bg-blue-600 px-6 py-4 font-mono text-sm font-bold uppercase tracking-widest text-white transition hover:bg-blue-700 active:bg-blue-800 sm:w-auto"
+          >
+            <Play className="h-4 w-4 fill-white" /> Start session
+          </button>
+          <button
+            onClick={() => setActiveTab("freeplay")}
+            className="flex w-full items-center justify-center gap-2 border border-edge bg-black px-6 py-3 font-mono text-[11px] font-bold uppercase tracking-widest text-neutral-300 transition hover:border-neutral-700 hover:text-white sm:w-auto"
+          >
+            <Wand2 className="h-3.5 w-3.5" /> Build your own
+          </button>
+        </div>
       </div>
 
       <ConsistencyChart sessions={sessions} />

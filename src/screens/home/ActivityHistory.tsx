@@ -78,7 +78,10 @@ export function ActivityHistory({ sessions, onStart }: ActivityHistoryProps) {
                 {/* Swipable Card Body */}
                 <motion.div
                   drag="x"
-                  dragConstraints={{ left: isConfirming ? -160 : -100, right: 0 }}
+                  dragConstraints={{
+                    left: isConfirming ? -160 : -100,
+                    right: 0,
+                  }}
                   dragElastic={0.05}
                   animate={{ x: isConfirming ? -160 : 0 }}
                   onDragEnd={(_, info) => {

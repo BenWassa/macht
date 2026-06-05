@@ -29,6 +29,7 @@ export interface WorkoutState {
     value: SetEntry[K],
   ) => void;
   substituteExercise: (targetId: string, subId: string) => void;
+  addExercise: (exerciseId: string) => void;
   applyDeloadWeight: (exerciseId: string, weight: number) => void;
   appendSet: (exerciseId: string) => void;
 }

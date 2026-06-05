@@ -1,7 +1,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export type TabId = "home" | "templates" | "workout" | "progress" | "profile";
+export type TabId =
+  | "home"
+  | "templates"
+  | "workout"
+  | "progress"
+  | "profile"
+  | "freeplay";
 
 interface UiState {
   activeTab: TabId;

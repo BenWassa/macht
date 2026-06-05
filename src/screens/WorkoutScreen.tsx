@@ -1,5 +1,8 @@
+import { Plus } from "lucide-react";
+import { useState } from "react";
 import { PlateVisualizer } from "@/components/PlateVisualizer";
 import { getExerciseConflict } from "@/domain/injuries";
+import { AddExerciseModal } from "@/modals/AddExerciseModal";
 import { getExercisePrescription } from "@/domain/prescriptions";
 import type { SetEntry } from "@/domain/types";
 import { useWakeLock } from "@/hooks/useWakeLock";
@@ -25,6 +28,7 @@ export function WorkoutScreen({
   const injuries = useInjuryStore((state) => state.injuries);
   const workout = useWorkoutStore();
   const showToast = useToastStore((state) => state.show);
+  const [showAddExercise, setShowAddExercise] = useState(false);
 
   useWakeLock(workout.workoutActive);
 
@@ -61,9 +65,8 @@ export function WorkoutScreen({
     const completedNow = workout.toggleComplete(exerciseId, setIndex);
     if (completedNow) {
       vibrate(15);
-      onSetCompleted({
-        advanceAfterRest: setIndex === selectedSets.length - 1,
-      });
+      const advanceAfterRest = setIndex === selectedSets.length - 1;
+      onSetCompleted({ advanceAfterRest });
       showToast(`Set ${setIndex + 1} logged`, {
         label: "Undo",
         onAction: () => workout.toggleComplete(exerciseId, setIndex),
@@ -76,13 +79,17 @@ export function WorkoutScreen({
     setIndex: number,
     field: K,
     value: SetEntry[K],
-  ) => {
-    workout.updateSetField(selectedExerciseId, setIndex, field, value);
-  };
+  ) => workout.updateSetField(selectedExerciseId, setIndex, field, value);
 
   return (
     <div className="animate-fadeIn">
-      <div className="mb-5 flex justify-end">
+      <div className="mb-5 flex items-center justify-between">
+        <button
+          onClick={() => setShowAddExercise(true)}
+          className="flex items-center gap-1.5 border border-[#222] bg-black px-3 py-2 font-mono text-[9px] font-bold uppercase tracking-widest text-neutral-400 transition hover:text-neutral-200"
+        >
+          <Plus className="h-3.5 w-3.5" /> Add
+        </button>
         <div className="flex items-center gap-3">
           <button
             onClick={() =>
@@ -148,6 +155,10 @@ export function WorkoutScreen({
         selectedSet.weight > 0 && (
           <PlateVisualizer weight={selectedSet.weight} units={settings.units} />
         )}
+
+      {showAddExercise && (
+        <AddExerciseModal onClose={() => setShowAddExercise(false)} />
+      )}
     </div>
   );
 }

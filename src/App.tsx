@@ -4,6 +4,7 @@ import { Toast } from "@/components/Toast";
 import { useRestTimer } from "@/hooks/useRestTimer";
 import { useSessionClock } from "@/hooks/useSessionClock";
 import { FinishSessionModal } from "@/modals/FinishSessionModal";
+import { FreePlayScreen } from "@/screens/FreePlayScreen";
 import { HomeScreen } from "@/screens/HomeScreen";
 import { ProfileScreen } from "@/screens/profile";
 import { ProgressScreen } from "@/screens/ProgressScreen";
@@ -17,10 +18,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 export type { TabId } from "@/state/useUiStore";
 
-type PendingAdvance = {
-  exerciseId: string;
-  nextIndex: number;
-};
+type PendingAdvance = { exerciseId: string; nextIndex: number };
 
 export default function App() {
   const activeTab = useUiStore((state) => state.activeTab);
@@ -116,6 +114,9 @@ export default function App() {
 
       <main className="mx-auto w-full max-w-2xl flex-1 overflow-y-auto px-4 py-6 pb-36">
         {activeTab === "home" && <HomeScreen setActiveTab={setActiveTab} />}
+        {activeTab === "freeplay" && (
+          <FreePlayScreen setActiveTab={setActiveTab} />
+        )}
         {activeTab === "templates" && (
           <TemplatesScreen setActiveTab={setActiveTab} />
         )}

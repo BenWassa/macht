@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { DEFAULT_TEMPLATE } from "@/domain/exercises";
 import {
+  addWorkoutExercise,
   appendWorkoutSet,
   buildWorkoutSets,
   substituteWorkoutExercise,
@@ -74,6 +75,8 @@ export const useWorkoutStore = create<WorkoutState>()(
         ),
       substituteExercise: (targetId, subId) =>
         set((state) => substituteWorkoutExercise(state, targetId, subId)),
+      addExercise: (exerciseId) =>
+        set((state) => addWorkoutExercise(state, exerciseId)),
       applyDeloadWeight: (exerciseId, weight) =>
         set((state) => ({
           deloadWeights: { ...state.deloadWeights, [exerciseId]: weight },
