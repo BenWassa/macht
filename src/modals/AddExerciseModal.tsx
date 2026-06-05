@@ -1,7 +1,9 @@
 import { X } from "lucide-react";
 import { useMemo } from "react";
 import { useModalA11y } from "@/hooks/useModalA11y";
+import type { CreateExerciseResult } from "@/screens/freeplay/CreateExercisePrompt";
 import { ExercisePicker } from "@/screens/freeplay/ExercisePicker";
+import { useCustomExerciseStore } from "@/state/useCustomExerciseStore";
 import { useInjuryStore } from "@/state/useInjuryStore";
 import { useWorkoutStore } from "@/state/useWorkoutStore";
 
@@ -13,6 +15,9 @@ const EMPTY = new Set<string>();
 
 export function AddExerciseModal({ onClose }: AddExerciseModalProps) {
   const injuries = useInjuryStore((state) => state.injuries);
+  const addCustomExercise = useCustomExerciseStore(
+    (state) => state.addExercise,
+  );
   const activeWorkoutList = useWorkoutStore((state) => state.activeWorkoutList);
   const addExercise = useWorkoutStore((state) => state.addExercise);
   const containerRef = useModalA11y<HTMLDivElement>(onClose);
@@ -21,6 +26,16 @@ export function AddExerciseModal({ onClose }: AddExerciseModalProps) {
     () => new Set(activeWorkoutList),
     [activeWorkoutList],
   );
+
+  const createExercise = (
+    name: string,
+    target: string,
+  ): CreateExerciseResult => {
+    const result = addCustomExercise({ name, target });
+    if (!result.ok) return result;
+    addExercise(result.exercise.id);
+    return { ok: true };
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4">
@@ -45,6 +60,8 @@ export function AddExerciseModal({ onClose }: AddExerciseModalProps) {
             onToggle={addExercise}
             injuries={injuries}
             disabledIds={disabledIds}
+            allowCreate
+            onCreateExercise={createExercise}
           />
         </div>
         <div className="border-t border-[#1a1a1a] p-4">

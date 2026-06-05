@@ -1,8 +1,9 @@
 import { ArrowLeft, Play, X } from "lucide-react";
 import { useMemo, useState } from "react";
-import { getExerciseById } from "@/domain/exercises";
+import { getExerciseById } from "@/domain/exerciseLibrary";
 import type { TabId } from "@/App";
 import { ExercisePicker } from "@/screens/freeplay/ExercisePicker";
+import { useCustomExerciseStore } from "@/state/useCustomExerciseStore";
 import { useInjuryStore } from "@/state/useInjuryStore";
 import { useWorkoutStore } from "@/state/useWorkoutStore";
 
@@ -12,6 +13,7 @@ interface FreePlayScreenProps {
 
 export function FreePlayScreen({ setActiveTab }: FreePlayScreenProps) {
   const injuries = useInjuryStore((state) => state.injuries);
+  const customExercises = useCustomExerciseStore((state) => state.exercises);
   const startTemplate = useWorkoutStore((state) => state.startTemplate);
   const [selected, setSelected] = useState<string[]>([]);
 
@@ -63,7 +65,7 @@ export function FreePlayScreen({ setActiveTab }: FreePlayScreenProps) {
           {selected.length > 0 ? (
             <div className="mb-3 flex flex-wrap gap-2">
               {selected.map((id) => {
-                const exercise = getExerciseById(id);
+                const exercise = getExerciseById(id, customExercises);
                 return (
                   <button
                     key={id}

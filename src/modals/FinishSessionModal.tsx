@@ -11,7 +11,7 @@ import { useWorkoutStore } from "@/state/useWorkoutStore";
 
 interface FinishSessionModalProps {
   onClose: () => void;
-  onSaved: () => void;
+  onSaved: (summary: { duration: string; sets: number; volume: number }) => void;
 }
 
 export function FinishSessionModal({
@@ -76,7 +76,11 @@ export function FinishSessionModal({
     };
     addSession(session);
     workout.endSession();
-    onSaved();
+    onSaved({
+      duration: session.duration,
+      sets: session.sets,
+      volume: session.volume,
+    });
   };
 
   return (

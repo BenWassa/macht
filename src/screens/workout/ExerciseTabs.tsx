@@ -1,6 +1,7 @@
-import { getExerciseById } from "@/domain/exercises";
+import { getExerciseById } from "@/domain/exerciseLibrary";
 import { getExerciseConflict } from "@/domain/injuries";
 import type { ExerciseInjury } from "@/domain/types";
+import { useCustomExerciseStore } from "@/state/useCustomExerciseStore";
 
 interface ExerciseTabsProps {
   exercises: string[];
@@ -15,6 +16,7 @@ export function ExerciseTabs({
   injuries,
   onSelect,
 }: ExerciseTabsProps) {
+  const customExercises = useCustomExerciseStore((state) => state.exercises);
   const total = exercises.length;
   const current = total > 0 ? selectedIndex + 1 : 0;
 
@@ -33,7 +35,7 @@ export function ExerciseTabs({
         role="tablist"
       >
         {exercises.map((exerciseId, index) => {
-          const exercise = getExerciseById(exerciseId);
+          const exercise = getExerciseById(exerciseId, customExercises);
           const conflict = getExerciseConflict(exerciseId, injuries);
           const isActive = selectedIndex === index;
           const status =

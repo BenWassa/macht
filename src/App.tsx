@@ -11,6 +11,7 @@ import { ProgressScreen } from "@/screens/ProgressScreen";
 import { TemplatesScreen } from "@/screens/TemplatesScreen";
 import { WorkoutScreen } from "@/screens/WorkoutScreen";
 import { useSettingsStore } from "@/state/useSettingsStore";
+import { useToastStore } from "@/state/useToastStore";
 import { useUiStore } from "@/state/useUiStore";
 import { useWorkoutStore } from "@/state/useWorkoutStore";
 import { formatTime, formatWorkoutName } from "@/lib/format";
@@ -25,14 +26,13 @@ export default function App() {
   const setActiveTab = useUiStore((state) => state.setActiveTab);
   const [showFinishModal, setShowFinishModal] = useState(false);
   const defaultRest = useSettingsStore((state) => state.defaultRest);
+  const showToast = useToastStore((state) => state.show);
   const workoutActive = useWorkoutStore((state) => state.workoutActive);
   const workoutName = useWorkoutStore((state) => state.workoutName);
   const workoutDuration = useWorkoutStore((state) => state.workoutDuration);
   const selectedExIndex = useWorkoutStore((state) => state.selectedExIndex);
   const activeWorkoutList = useWorkoutStore((state) => state.activeWorkoutList);
-  const setSelectedExIndex = useWorkoutStore(
-    (state) => state.setSelectedExIndex,
-  );
+  const setSelectedExIndex = useWorkoutStore((state) => state.setSelectedExIndex);
   const restTimer = useRestTimer(defaultRest);
   const pendingAdvance = useRef<PendingAdvance | null>(null);
   const isWorkoutScreen = activeTab === "workout" && workoutActive;
@@ -114,17 +114,10 @@ export default function App() {
 
       <main className="mx-auto w-full max-w-2xl flex-1 overflow-y-auto px-4 py-6 pb-36">
         {activeTab === "home" && <HomeScreen setActiveTab={setActiveTab} />}
-        {activeTab === "freeplay" && (
-          <FreePlayScreen setActiveTab={setActiveTab} />
-        )}
-        {activeTab === "templates" && (
-          <TemplatesScreen setActiveTab={setActiveTab} />
-        )}
+        {activeTab === "freeplay" && <FreePlayScreen setActiveTab={setActiveTab} />}
+        {activeTab === "templates" && <TemplatesScreen setActiveTab={setActiveTab} />}
         {activeTab === "workout" && (
-          <WorkoutScreen
-            onFinish={() => setShowFinishModal(true)}
-            onSetCompleted={startRestTimer}
-          />
+          <WorkoutScreen onFinish={() => setShowFinishModal(true)} onSetCompleted={startRestTimer} />
         )}
         {activeTab === "progress" && <ProgressScreen />}
         {activeTab === "profile" && <ProfileScreen />}
@@ -152,8 +145,13 @@ export default function App() {
       {showFinishModal && (
         <FinishSessionModal
           onClose={() => setShowFinishModal(false)}
-          onSaved={() => {
+          onSaved={(summary) => {
             setShowFinishModal(false);
+            pendingAdvance.current = null;
+            restTimer.dismiss();
+            showToast(
+              `Session saved · ${summary.duration} · ${summary.sets} sets · ${summary.volume.toLocaleString()} lbs`,
+            );
             setActiveTab("home");
           }}
         />

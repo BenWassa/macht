@@ -1,6 +1,12 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { ExerciseInjury, SessionLog, Settings } from "@/domain/types";
+import type {
+  CustomExercise,
+  ExerciseInjury,
+  SessionLog,
+  Settings,
+  UpgradeItem,
+} from "@/domain/types";
 import { MOCK_HISTORY } from "@/data/mockData";
 import { todayIso } from "@/lib/format";
 
@@ -10,6 +16,8 @@ export interface MachtBackup {
   history: SessionLog[];
   injuries: ExerciseInjury[];
   settings: Settings;
+  customExercises?: CustomExercise[];
+  upgrades?: UpgradeItem[];
 }
 
 interface HistoryState {
@@ -19,7 +27,12 @@ interface HistoryState {
   deleteSession: (id: string) => void;
   clearSessions: () => void;
   hydrateHistory: (sessions: SessionLog[]) => void;
-  createBackup: (injuries: ExerciseInjury[], settings: Settings) => MachtBackup;
+  createBackup: (
+    injuries: ExerciseInjury[],
+    settings: Settings,
+    customExercises?: CustomExercise[],
+    upgrades?: UpgradeItem[],
+  ) => MachtBackup;
 }
 
 export const useHistoryStore = create<HistoryState>()(
@@ -38,12 +51,14 @@ export const useHistoryStore = create<HistoryState>()(
         })),
       clearSessions: () => set({ sessions: [] }),
       hydrateHistory: (sessions) => set({ sessions }),
-      createBackup: (injuries, settings) => ({
+      createBackup: (injuries, settings, customExercises = [], upgrades = []) => ({
         version: 1,
         exportedAt: todayIso(),
         history: get().sessions,
         injuries,
         settings,
+        customExercises,
+        upgrades,
       }),
     }),
     {

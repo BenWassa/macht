@@ -9,6 +9,18 @@ export interface Exercise {
   tags: string[];
 }
 
+export interface CustomExercise extends Exercise {
+  loadMode: "external";
+  createdAt: string;
+}
+
+export interface UpgradeItem {
+  id: string;
+  text: string;
+  completed: boolean;
+  createdAt: string;
+}
+
 export interface ExerciseInjury {
   id: string;
   name: string;

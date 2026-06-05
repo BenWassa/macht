@@ -73,7 +73,9 @@ export function getExerciseCategory(exercise: Exercise): SectionKey {
  * Group the full library by section, excluding the Big Five (those live only in
  * the pinned row).
  */
-export function groupLibraryBySection(): Record<SectionKey, Exercise[]> {
+export function groupLibraryBySection(
+  exercises: Exercise[] = EXERCISE_LIBRARY,
+): Record<SectionKey, Exercise[]> {
   const groups: Record<SectionKey, Exercise[]> = {
     lower: [],
     upper: [],
@@ -82,7 +84,7 @@ export function groupLibraryBySection(): Record<SectionKey, Exercise[]> {
     shoulder_care: [],
   };
 
-  for (const exercise of EXERCISE_LIBRARY) {
+  for (const exercise of exercises) {
     if (BIG_FIVE.includes(exercise.id)) continue;
     groups[getExerciseCategory(exercise)].push(exercise);
   }

@@ -404,6 +404,12 @@ export const EXERCISE_LIBRARY: Exercise[] = [
     target: "Triceps",
     tags: [],
   },
+  {
+    id: "dumbbell_biceps_curl",
+    name: "Dumbbell Biceps Curl",
+    target: "Biceps",
+    tags: [],
+  },
 ];
 
 export const TRAINING_TEMPLATES: TemplatePlan[] = [
