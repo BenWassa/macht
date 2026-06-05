@@ -10,6 +10,7 @@ interface InjuryState {
   updateInjury: (id: string, patch: Partial<ExerciseInjury>) => void;
   removeInjury: (id: string) => void;
   clearInjury: (id: string) => ExerciseInjury | undefined;
+  clearAllInjuries: () => void;
   hydrateInjuries: (injuries: ExerciseInjury[]) => void;
 }
 
@@ -44,6 +45,7 @@ export const useInjuryStore = create<InjuryState>()(
         }));
         return injury;
       },
+      clearAllInjuries: () => set({ injuries: [] }),
       hydrateInjuries: (injuries) => set({ injuries }),
     }),
     {

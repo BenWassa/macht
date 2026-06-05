@@ -4,6 +4,7 @@ import type { ExerciseInjury } from "@/domain/types";
 import { InjuryManager } from "./InjuryManager";
 import { SettingsPanel } from "./SettingsPanel";
 import { BackupPanel } from "./BackupPanel";
+import { DangerZone } from "./DangerZone";
 
 export function ProfileScreen() {
   const [editing, setEditing] = useState<ExerciseInjury | null>(null);
@@ -35,6 +36,8 @@ export function ProfileScreen() {
         <SettingsPanel />
         <BackupPanel />
       </div>
+
+      <DangerZone />
 
       {showModal && (
         <InjuryModal injury={editing} onClose={() => setShowModal(false)} />

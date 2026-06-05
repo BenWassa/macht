@@ -17,6 +17,7 @@ interface HistoryState {
   snapshots: MachtBackup[];
   addSession: (session: SessionLog) => void;
   deleteSession: (id: string) => void;
+  clearSessions: () => void;
   hydrateHistory: (sessions: SessionLog[]) => void;
   createBackup: (injuries: ExerciseInjury[], settings: Settings) => MachtBackup;
 }
@@ -35,6 +36,7 @@ export const useHistoryStore = create<HistoryState>()(
         set((state) => ({
           sessions: state.sessions.filter((s) => s.id !== id),
         })),
+      clearSessions: () => set({ sessions: [] }),
       hydrateHistory: (sessions) => set({ sessions }),
       createBackup: (injuries, settings) => ({
         version: 1,
