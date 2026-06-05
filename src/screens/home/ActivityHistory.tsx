@@ -2,6 +2,7 @@ import { Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useHistoryStore } from "@/state/useHistoryStore";
 import type { SessionLog } from "@/domain/types";
+import { formatWorkoutName } from "@/lib/format";
 
 interface ActivityHistoryProps {
   sessions: SessionLog[];
@@ -53,7 +54,7 @@ export function ActivityHistory({ sessions, onStart }: ActivityHistoryProps) {
               >
                 <div>
                   <p className="font-mono text-sm font-bold uppercase text-neutral-200">
-                    {session.template}
+                    {formatWorkoutName(session.template)}
                   </p>
                   <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-neutral-400">
                     {session.date} · {session.duration} · {session.sets} sets

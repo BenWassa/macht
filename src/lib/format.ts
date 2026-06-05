@@ -4,6 +4,10 @@ export function formatTime(totalSec: number): string {
   return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 }
 
+export function formatWorkoutName(name: string): string {
+  return name.replace(/^Session\s+[A-Z]\s*[-–—]\s*/i, "");
+}
+
 export function formatDate(iso: string): string {
   const date = new Date(`${iso}T00:00:00`);
   return new Intl.DateTimeFormat("en", {

@@ -3,6 +3,7 @@ import { TRAINING_TEMPLATES, getExerciseById } from "@/domain/exercises";
 import { getExerciseConflict, getRunnableTemplate } from "@/domain/injuries";
 import type { TabId } from "@/App";
 import type { ExerciseConflict, TemplatePlan } from "@/domain/types";
+import { formatWorkoutName } from "@/lib/format";
 import { useInjuryStore } from "@/state/useInjuryStore";
 import { useWorkoutStore } from "@/state/useWorkoutStore";
 
@@ -52,7 +53,7 @@ export function TemplatesScreen({ setActiveTab }: TemplatesScreenProps) {
               <div className="flex items-start justify-between gap-4 border-b border-[#1a1a1a] pb-4">
                 <div>
                   <h2 className="font-mono text-sm font-bold uppercase tracking-tight text-neutral-200">
-                    {template.name}
+                    {formatWorkoutName(template.name)}
                   </h2>
                   <p className="mt-1 max-w-xl text-xs leading-relaxed text-neutral-500">
                     {template.notes}

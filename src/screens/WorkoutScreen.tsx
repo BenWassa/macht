@@ -82,11 +82,8 @@ export function WorkoutScreen({
 
   return (
     <div className="animate-fadeIn">
-      <div className="mb-5 flex items-center justify-between gap-4">
-        <h1 className="truncate font-mono text-xl font-bold uppercase tracking-tight">
-          {workout.workoutName}
-        </h1>
-        <div className="flex shrink-0 items-center gap-3">
+      <div className="mb-5 flex justify-end">
+        <div className="flex items-center gap-3">
           <button
             onClick={() =>
               workout.setIsMinimumSession(!workout.isMinimumSession)
