@@ -9,7 +9,10 @@ import {
   toggleSetCompletion,
   updateWorkoutSet,
 } from "@/state/workoutMutations";
+import { useCustomExerciseStore } from "@/state/useCustomExerciseStore";
 import type { WorkoutState } from "@/state/workoutTypes";
+
+const customExercises = () => useCustomExerciseStore.getState().exercises;
 
 export const useWorkoutStore = create<WorkoutState>()(
   persist(
@@ -39,7 +42,11 @@ export const useWorkoutStore = create<WorkoutState>()(
           workoutDuration: 0,
           startedAt: Date.now(),
           activeWorkoutList: template.exercises,
-          workoutSets: buildWorkoutSets(template.exercises, deloadWeights),
+          workoutSets: buildWorkoutSets(
+            template.exercises,
+            deloadWeights,
+            customExercises(),
+          ),
           selectedExIndex: 0,
           selectedSetIndex: 0,
           isMinimumSession: Boolean(template.isMinimumSession),
@@ -74,15 +81,17 @@ export const useWorkoutStore = create<WorkoutState>()(
           updateWorkoutSet(state, exerciseId, setIndex, field, value),
         ),
       substituteExercise: (targetId, subId) =>
-        set((state) => substituteWorkoutExercise(state, targetId, subId)),
+        set((state) =>
+          substituteWorkoutExercise(state, targetId, subId, customExercises()),
+        ),
       addExercise: (exerciseId) =>
-        set((state) => addWorkoutExercise(state, exerciseId)),
+        set((state) => addWorkoutExercise(state, exerciseId, customExercises())),
       applyDeloadWeight: (exerciseId, weight) =>
         set((state) => ({
           deloadWeights: { ...state.deloadWeights, [exerciseId]: weight },
         })),
       appendSet: (exerciseId) =>
-        set((state) => appendWorkoutSet(state, exerciseId)),
+        set((state) => appendWorkoutSet(state, exerciseId, customExercises())),
     }),
     { name: "macht_workout" },
   ),

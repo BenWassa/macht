@@ -11,6 +11,8 @@ export interface Exercise {
 
 export interface CustomExercise extends Exercise {
   loadMode: "external";
+  defaultWeight: number;
+  defaultReps: number;
   createdAt: string;
 }
 

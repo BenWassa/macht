@@ -1,7 +1,8 @@
-import { ArrowLeft, Play, X } from "lucide-react";
+import { ArrowLeft, Play, Plus, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { getExerciseById } from "@/domain/exerciseLibrary";
 import type { TabId } from "@/App";
+import { CustomExerciseForm } from "@/screens/freeplay/CustomExerciseForm";
 import { ExercisePicker } from "@/screens/freeplay/ExercisePicker";
 import { useCustomExerciseStore } from "@/state/useCustomExerciseStore";
 import { useInjuryStore } from "@/state/useInjuryStore";
@@ -14,8 +15,17 @@ interface FreePlayScreenProps {
 export function FreePlayScreen({ setActiveTab }: FreePlayScreenProps) {
   const injuries = useInjuryStore((state) => state.injuries);
   const customExercises = useCustomExerciseStore((state) => state.exercises);
+  const addCustomExercise = useCustomExerciseStore(
+    (state) => state.addExercise,
+  );
   const startTemplate = useWorkoutStore((state) => state.startTemplate);
   const [selected, setSelected] = useState<string[]>([]);
+  const [showCreate, setShowCreate] = useState(false);
+  const [customName, setCustomName] = useState("");
+  const [customTarget, setCustomTarget] = useState("");
+  const [customWeight, setCustomWeight] = useState(20);
+  const [customReps, setCustomReps] = useState(8);
+  const [createError, setCreateError] = useState<string | null>(null);
 
   const selectedSet = useMemo(() => new Set(selected), [selected]);
 
@@ -23,6 +33,26 @@ export function FreePlayScreen({ setActiveTab }: FreePlayScreenProps) {
     setSelected((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
     );
+
+  const createExercise = () => {
+    const result = addCustomExercise({
+      name: customName,
+      target: customTarget,
+      defaultWeight: customWeight,
+      defaultReps: customReps,
+    });
+    if (!result.ok) {
+      setCreateError(result.error);
+      return;
+    }
+    setSelected((prev) => [...prev, result.exercise.id]);
+    setCreateError(null);
+    setCustomName("");
+    setCustomTarget("");
+    setCustomWeight(20);
+    setCustomReps(8);
+    setShowCreate(false);
+  };
 
   const start = () => {
     if (selected.length === 0) return;
@@ -46,13 +76,39 @@ export function FreePlayScreen({ setActiveTab }: FreePlayScreenProps) {
             Build session
           </h1>
         </div>
-        <button
-          onClick={() => setActiveTab("home")}
-          className="flex items-center gap-1.5 border border-edge bg-black px-3 py-2 font-mono text-[9px] font-bold uppercase tracking-widest text-neutral-400 transition hover:text-neutral-200"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" /> Cancel
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowCreate((value) => !value)}
+            aria-expanded={showCreate}
+            className="flex items-center gap-1.5 border border-edge bg-black px-3 py-2 font-mono text-[9px] font-bold uppercase tracking-widest text-neutral-400 transition hover:text-neutral-200"
+          >
+            <Plus className="h-3.5 w-3.5" /> New
+          </button>
+          <button
+            onClick={() => setActiveTab("home")}
+            className="flex items-center gap-1.5 border border-edge bg-black px-3 py-2 font-mono text-[9px] font-bold uppercase tracking-widest text-neutral-400 transition hover:text-neutral-200"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" /> Cancel
+          </button>
+        </div>
       </div>
+
+      {showCreate && (
+        <CustomExerciseForm
+          name={customName}
+          target={customTarget}
+          defaultWeight={customWeight}
+          defaultReps={customReps}
+          error={createError}
+          onNameChange={setCustomName}
+          onTargetChange={setCustomTarget}
+          onDefaultWeightChange={setCustomWeight}
+          onDefaultRepsChange={setCustomReps}
+          onCreate={createExercise}
+          onClose={() => setShowCreate(false)}
+        />
+      )}
 
       <ExercisePicker
         selectedIds={selectedSet}

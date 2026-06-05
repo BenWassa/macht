@@ -1,12 +1,14 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { EXERCISE_LIBRARY } from "@/domain/exercises";
-import { normalizeExerciseName } from "@/domain/exerciseLibrary";
+import { findSimilarExerciseName } from "@/domain/exerciseLibrary";
 import type { CustomExercise } from "@/domain/types";
 
 interface CreateExerciseInput {
   name: string;
   target: string;
+  defaultWeight?: number;
+  defaultReps?: number;
 }
 
 type CreateExerciseResult =
@@ -30,22 +32,21 @@ export const useCustomExerciseStore = create<CustomExerciseState>()(
   persist(
     (set, get) => ({
       exercises: [],
-      addExercise: ({ name, target }) => {
+      addExercise: ({ name, target, defaultWeight, defaultReps }) => {
         const cleanName = name.trim().replace(/\s+/g, " ");
         const cleanTarget = target.trim().replace(/\s+/g, " ");
+        const cleanWeight = Math.max(0, Math.round(defaultWeight ?? 20));
+        const cleanReps = Math.max(1, Math.round(defaultReps || 8));
         if (!cleanName || !cleanTarget) {
           return { ok: false, error: "Name and target required" };
         }
 
-        const normalized = normalizeExerciseName(cleanName);
-        const duplicateStatic = EXERCISE_LIBRARY.some(
-          (exercise) => normalizeExerciseName(exercise.name) === normalized,
-        );
-        const duplicateCustom = get().exercises.some(
-          (exercise) => normalizeExerciseName(exercise.name) === normalized,
-        );
-        if (duplicateStatic || duplicateCustom) {
-          return { ok: false, error: "Exercise already exists" };
+        const similarName = findSimilarExerciseName(cleanName, [
+          ...EXERCISE_LIBRARY,
+          ...get().exercises,
+        ]);
+        if (similarName) {
+          return { ok: false, error: `Similar to ${similarName}` };
         }
 
         const exercise: CustomExercise = {
@@ -54,6 +55,8 @@ export const useCustomExerciseStore = create<CustomExerciseState>()(
           target: cleanTarget,
           tags: [],
           loadMode: "external",
+          defaultWeight: cleanWeight,
+          defaultReps: cleanReps,
           createdAt: new Date().toISOString(),
         };
         set((state) => ({ exercises: [...state.exercises, exercise] }));

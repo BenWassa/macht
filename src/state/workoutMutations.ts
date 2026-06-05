@@ -1,15 +1,17 @@
 import { getDefaultSetsForExercise } from "@/domain/prescriptions";
-import type { SetEntry, WorkoutSets } from "@/domain/types";
+import type { CustomExercise, SetEntry, WorkoutSets } from "@/domain/types";
 import type { WorkoutState } from "@/state/workoutTypes";
 
 export const buildWorkoutSets = (
   exercises: string[],
   deloadWeights: Record<string, number> = {},
+  customExercises: CustomExercise[] = [],
 ): WorkoutSets =>
   exercises.reduce<WorkoutSets>((acc, exerciseId) => {
     acc[exerciseId] = getDefaultSetsForExercise(
       exerciseId,
       deloadWeights[exerciseId],
+      customExercises,
     );
     return acc;
   }, {});
@@ -54,6 +56,7 @@ export function substituteWorkoutExercise(
   state: WorkoutState,
   targetId: string,
   subId: string,
+  customExercises: CustomExercise[] = [],
 ): Partial<WorkoutState> {
   const index = state.activeWorkoutList.indexOf(targetId);
   if (index === -1) return state;
@@ -66,7 +69,9 @@ export function substituteWorkoutExercise(
     adaptedDuringSession: true,
     workoutSets: {
       ...state.workoutSets,
-      [subId]: state.workoutSets[subId] ?? getDefaultSetsForExercise(subId),
+      [subId]:
+        state.workoutSets[subId] ??
+        getDefaultSetsForExercise(subId, undefined, customExercises),
     },
   };
 }
@@ -74,6 +79,7 @@ export function substituteWorkoutExercise(
 export function addWorkoutExercise(
   state: WorkoutState,
   exerciseId: string,
+  customExercises: CustomExercise[] = [],
 ): Partial<WorkoutState> {
   const existing = state.activeWorkoutList.indexOf(exerciseId);
   if (existing !== -1) {
@@ -87,7 +93,8 @@ export function addWorkoutExercise(
     workoutSets: {
       ...state.workoutSets,
       [exerciseId]:
-        state.workoutSets[exerciseId] ?? getDefaultSetsForExercise(exerciseId),
+        state.workoutSets[exerciseId] ??
+        getDefaultSetsForExercise(exerciseId, undefined, customExercises),
     },
   };
 }
@@ -95,10 +102,11 @@ export function addWorkoutExercise(
 export function appendWorkoutSet(
   state: WorkoutState,
   exerciseId: string,
+  customExercises: CustomExercise[] = [],
 ): Pick<WorkoutState, "workoutSets"> {
   const sets = state.workoutSets[exerciseId] ?? [];
   const prev = sets[sets.length - 1];
-  const fallback = getDefaultSetsForExercise(exerciseId)[0];
+  const fallback = getDefaultSetsForExercise(exerciseId, undefined, customExercises)[0];
   const next: SetEntry = prev
     ? {
         id: prev.id + 1,

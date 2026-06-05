@@ -10,6 +10,7 @@ import { vibrate } from "@/lib/haptics";
 import { ExerciseTabs } from "@/screens/workout/ExerciseTabs";
 import { InjuryConflictBanner } from "@/screens/workout/InjuryConflictBanner";
 import { WorkoutSetTable } from "@/screens/workout/WorkoutSetTable";
+import { useCustomExerciseStore } from "@/state/useCustomExerciseStore";
 import { useInjuryStore } from "@/state/useInjuryStore";
 import { useSettingsStore } from "@/state/useSettingsStore";
 import { useToastStore } from "@/state/useToastStore";
@@ -20,11 +21,9 @@ interface WorkoutScreenProps {
   onSetCompleted: (options: { advanceAfterRest: boolean }) => void;
 }
 
-export function WorkoutScreen({
-  onFinish,
-  onSetCompleted,
-}: WorkoutScreenProps) {
+export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) {
   const settings = useSettingsStore();
+  const customExercises = useCustomExerciseStore((state) => state.exercises);
   const injuries = useInjuryStore((state) => state.injuries);
   const workout = useWorkoutStore();
   const showToast = useToastStore((state) => state.show);
@@ -55,7 +54,7 @@ export function WorkoutScreen({
   const selectedExerciseId = workout.activeWorkoutList[workout.selectedExIndex];
   const selectedSets = workout.workoutSets[selectedExerciseId] ?? [];
   const selectedSet = selectedSets[workout.selectedSetIndex] ?? selectedSets[0];
-  const selectedPrescription = getExercisePrescription(selectedExerciseId);
+  const selectedPrescription = getExercisePrescription(selectedExerciseId, customExercises);
   const conflict = getExerciseConflict(selectedExerciseId, injuries);
   const lastSetText = selectedSet?.last;
   const showLastSet =
