@@ -476,10 +476,11 @@ export const TRAINING_TEMPLATES: TemplatePlan[] = [
 export const DEFAULT_TEMPLATE = TRAINING_TEMPLATES[0];
 
 export const PROGRESS_LIFTS = [
-  "leg_press",
-  "hack_squat",
-  "hip_thrust",
+  "squat",
   "bench_press",
+  "deadlift",
+  "overhead_press",
+  "barbell_row",
 ];
 
 export const getExerciseById = (exerciseId: string): Exercise | undefined =>
