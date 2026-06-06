@@ -1,9 +1,10 @@
 import { Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useHistoryStore } from "@/state/useHistoryStore";
 import type { SessionLog } from "@/domain/types";
 import { formatWorkoutName } from "@/lib/format";
+import { WorkoutSummaryModal } from "@/modals/WorkoutSummaryModal";
 
 interface ActivityHistoryProps {
   sessions: SessionLog[];
@@ -13,6 +14,10 @@ interface ActivityHistoryProps {
 export function ActivityHistory({ sessions, onStart }: ActivityHistoryProps) {
   const deleteSession = useHistoryStore((state) => state.deleteSession);
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const dragOccurred = useRef(false);
+
+  const openSession = sessions.find((session) => session.id === openId) ?? null;
 
   function handleSwipe(id: string) {
     setPendingDelete(id);
@@ -84,14 +89,32 @@ export function ActivityHistory({ sessions, onStart }: ActivityHistoryProps) {
                   }}
                   dragElastic={0.05}
                   animate={{ x: isConfirming ? -160 : 0 }}
+                  onDragStart={() => {
+                    dragOccurred.current = true;
+                  }}
                   onDragEnd={(_, info) => {
                     if (info.offset.x < -80) {
                       handleSwipe(session.id);
                     } else if (isConfirming && info.offset.x > 40) {
                       handleCancel();
                     }
+                    window.setTimeout(() => {
+                      dragOccurred.current = false;
+                    }, 0);
                   }}
-                  className="relative flex items-center justify-between bg-[#060606] py-3 cursor-grab active:cursor-grabbing"
+                  onClick={() => {
+                    if (dragOccurred.current || isConfirming) return;
+                    setOpenId(session.id);
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      setOpenId(session.id);
+                    }
+                  }}
+                  className="relative flex items-center justify-between bg-[#060606] py-3 cursor-pointer"
                 >
                   <div>
                     <p className="font-mono text-sm font-bold uppercase text-neutral-200">
@@ -120,6 +143,12 @@ export function ActivityHistory({ sessions, onStart }: ActivityHistoryProps) {
           })}
         </AnimatePresence>
       </div>
+      {openSession && (
+        <WorkoutSummaryModal
+          session={openSession}
+          onClose={() => setOpenId(null)}
+        />
+      )}
     </div>
   );
 }

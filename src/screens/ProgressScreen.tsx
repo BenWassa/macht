@@ -60,7 +60,7 @@ export function ProgressScreen() {
             values.length > 1
               ? current - values[Math.max(0, values.length - 6)]
               : 0;
-          const paused = Boolean(conflict);
+          const paused = conflict?.level === "avoid";
           return (
             <div
               key={exerciseId}
