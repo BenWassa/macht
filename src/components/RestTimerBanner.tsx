@@ -4,15 +4,27 @@ import { formatTime } from "@/lib/format";
 interface RestTimerBannerProps {
   seconds: number;
   running: boolean;
+  label?: string;
+  doneText?: string;
+  increments?: readonly [number, number];
   onAdd: (amount: number) => void;
   onToggle: () => void;
   onReset: () => void;
   onDismiss: () => void;
 }
 
+const incrementLabel = (amount: number): string => {
+  const sign = amount > 0 ? "+" : "-";
+  const abs = Math.abs(amount);
+  return abs % 60 === 0 ? `${sign}${abs / 60}m` : `${sign}${abs}s`;
+};
+
 export function RestTimerBanner({
   seconds,
   running,
+  label = "Rest",
+  doneText = "Done - load next set",
+  increments = [30, -10],
   onAdd,
   onToggle,
   onReset,
@@ -26,28 +38,25 @@ export function RestTimerBanner({
         />
         <div>
           <span className="block text-[8px] font-mono uppercase leading-none tracking-wider text-neutral-500">
-            Rest
+            {label}
           </span>
           <span
             className={`text-xs font-mono font-bold leading-none ${seconds === 0 ? "animate-pulse text-emerald-400" : "text-neutral-200"}`}
           >
-            {seconds === 0 ? "Done - load next set" : formatTime(seconds)}
+            {seconds === 0 ? doneText : formatTime(seconds)}
           </span>
         </div>
       </div>
       <div className="flex items-center space-x-1 font-mono">
-        <button
-          onClick={() => onAdd(30)}
-          className="border border-[#222] bg-[#121212] px-2 py-1 text-[9px] text-neutral-300 hover:bg-[#1a1a1a]"
-        >
-          +30s
-        </button>
-        <button
-          onClick={() => onAdd(-10)}
-          className="border border-[#222] bg-[#121212] px-2 py-1 text-[9px] text-neutral-300 hover:bg-[#1a1a1a]"
-        >
-          -10s
-        </button>
+        {increments.map((amount) => (
+          <button
+            key={amount}
+            onClick={() => onAdd(amount)}
+            className="border border-[#222] bg-[#121212] px-2 py-1 text-[9px] text-neutral-300 hover:bg-[#1a1a1a]"
+          >
+            {incrementLabel(amount)}
+          </button>
+        ))}
         <button
           onClick={onToggle}
           className="border border-[#222] bg-[#121212] px-2.5 py-1 text-[9px] text-neutral-300 hover:bg-[#1a1a1a]"
@@ -56,14 +65,14 @@ export function RestTimerBanner({
         </button>
         <button
           onClick={onReset}
-          aria-label="Reset rest timer"
+          aria-label={`Reset ${label.toLowerCase()} timer`}
           className="border border-[#222] bg-[#121212] p-1 text-[9px] text-neutral-300 hover:bg-[#1a1a1a]"
         >
           <RotateCcw className="h-3 w-3" />
         </button>
         <button
           onClick={onDismiss}
-          aria-label="Dismiss rest timer"
+          aria-label={`Dismiss ${label.toLowerCase()} timer`}
           className="pl-2 text-neutral-500 hover:text-neutral-100"
         >
           <X className="h-4 w-4" />
