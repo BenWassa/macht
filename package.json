@@ -8,9 +8,11 @@
     "dev": "vite",
     "dev:demo": "vite --mode demo",
     "build": "tsc -b && vite build",
+    "build:demo": "tsc -b && vite build --mode demo",
     "lint": "eslint .",
     "format": "prettier --write \"src/**/*.{ts,tsx}\" \"*.{js,ts,json}\"",
     "preview": "vite preview",
+    "preview:demo": "vite preview",
     "test": "vitest run",
     "size": "node scripts/check-bundle-size.js"
   },

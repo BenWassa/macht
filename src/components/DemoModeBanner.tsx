@@ -1,20 +1,11 @@
 import { RotateCcw } from "lucide-react";
-import { IS_DEMO_MODE } from "@/lib/demoMode";
-
-const DEMO_KEYS = [
-  "macht_history_demo",
-  "macht_injuries_demo",
-  "macht_settings_demo",
-  "macht_custom_exercises_demo",
-  "macht_ui_demo",
-  "macht_workout_demo",
-];
+import { DEMO_STORAGE_KEYS, IS_DEMO_MODE } from "@/lib/demoMode";
 
 export function DemoModeBanner() {
   if (!IS_DEMO_MODE) return null;
 
   const resetDemo = () => {
-    DEMO_KEYS.forEach((key) => localStorage.removeItem(key));
+    DEMO_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
     window.location.reload();
   };
 
