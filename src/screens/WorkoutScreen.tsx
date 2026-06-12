@@ -63,13 +63,25 @@ export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) 
   const toggleComplete = (exerciseId: string, setIndex: number) => {
     const completedNow = workout.toggleComplete(exerciseId, setIndex);
     if (completedNow) {
-      vibrate(15);
-      const advanceAfterRest = setIndex === selectedSets.length - 1;
-      onSetCompleted({ advanceAfterRest });
-      showToast(`Set ${setIndex + 1} logged`, {
-        label: "Undo",
-        onAction: () => workout.toggleComplete(exerciseId, setIndex),
-      });
+      const { workoutSets, activeWorkoutList } = useWorkoutStore.getState();
+      const allSetsComplete = activeWorkoutList.every((id) =>
+        (workoutSets[id] ?? []).every((set) => set.completed),
+      );
+      if (allSetsComplete) {
+        vibrate([20, 60, 20]);
+        showToast("All sets complete · Session done", {
+          label: "Finish",
+          onAction: onFinish,
+        });
+      } else {
+        vibrate(15);
+        const advanceAfterRest = setIndex === selectedSets.length - 1;
+        onSetCompleted({ advanceAfterRest });
+        showToast(`Set ${setIndex + 1} logged`, {
+          label: "Undo",
+          onAction: () => workout.toggleComplete(exerciseId, setIndex),
+        });
+      }
     }
     return completedNow;
   };

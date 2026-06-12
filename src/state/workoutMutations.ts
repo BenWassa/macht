@@ -42,12 +42,24 @@ export function updateWorkoutSet<K extends keyof SetEntry>(
   value: SetEntry[K],
 ): Pick<WorkoutState, "workoutSets"> {
   const sets = state.workoutSets[exerciseId] ?? [];
+  const previousWeight = sets[setIndex]?.weight;
   return {
     workoutSets: {
       ...state.workoutSets,
-      [exerciseId]: sets.map((entry, index) =>
-        index === setIndex ? { ...entry, [field]: value } : entry,
-      ),
+      [exerciseId]: sets.map((entry, index) => {
+        if (index === setIndex) return { ...entry, [field]: value };
+        // Straight sets: later uncompleted sets still at the old weight
+        // follow a weight edit; individually adjusted sets are left alone.
+        if (
+          field === "weight" &&
+          index > setIndex &&
+          !entry.completed &&
+          entry.weight === previousWeight
+        ) {
+          return { ...entry, weight: value as SetEntry["weight"] };
+        }
+        return entry;
+      }),
     },
   };
 }
