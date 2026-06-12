@@ -59,4 +59,10 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    files: ["src/**/*.test.ts"],
+    rules: {
+      "max-lines": "off",
+    },
+  },
 );

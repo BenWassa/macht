@@ -1,8 +1,6 @@
 import { Plus } from "lucide-react";
 
-export type CreateExerciseResult =
-  | { ok: true }
-  | { ok: false; error: string };
+export type CreateExerciseResult = { ok: true } | { ok: false; error: string };
 
 interface CreateExercisePromptProps {
   name: string;

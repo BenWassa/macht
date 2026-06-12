@@ -59,7 +59,10 @@ export function WorkoutScreen({
   const selectedExerciseId = workout.activeWorkoutList[workout.selectedExIndex];
   const selectedSets = workout.workoutSets[selectedExerciseId] ?? [];
   const selectedSet = selectedSets[workout.selectedSetIndex] ?? selectedSets[0];
-  const selectedPrescription = getExercisePrescription(selectedExerciseId, customExercises);
+  const selectedPrescription = getExercisePrescription(
+    selectedExerciseId,
+    customExercises,
+  );
   const conflict = getExerciseConflict(selectedExerciseId, injuries);
   const lastSetText = selectedSet?.last;
   const showLastSet =
@@ -129,6 +132,7 @@ export function WorkoutScreen({
         selectedSetIndex={workout.selectedSetIndex}
         prescription={selectedPrescription}
         settings={settings}
+        suggestion={workout.loadSuggestions?.[selectedExerciseId]}
         onSelectSet={workout.setSelectedSetIndex}
         onToggleComplete={(index) => toggleComplete(selectedExerciseId, index)}
         onUpdateSet={updateSet}

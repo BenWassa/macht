@@ -74,10 +74,7 @@ export const PRESCRIPTIONS: Record<string, ExercisePrescription> = {
     "Caution: controlled only",
     sets(2, 20, 10, "Caution"),
   ),
-  dumbbell_biceps_curl: external(
-    "2-3 x 10-15",
-    sets(3, 20, 12, "10-15 reps"),
-  ),
+  dumbbell_biceps_curl: external("2-3 x 10-15", sets(3, 20, 12, "10-15 reps")),
   tricep_pushdown: external("2-3 x 10-15", sets(2, 30, 12, "10-15 reps")),
   split_squat: noLoad("3 x 8-10 each side", sets(3, 0, 8, "Each side")),
   step_up: noLoad("3 x 8-10 each side", sets(3, 0, 8, "Each side")),
