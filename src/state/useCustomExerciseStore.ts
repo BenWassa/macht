@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import { EXERCISE_LIBRARY } from "@/domain/exercises";
 import { findSimilarExerciseName } from "@/domain/exerciseLibrary";
 import type { CustomExercise } from "@/domain/types";
+import { demoStorageKey } from "@/lib/demoMode";
 
 interface CreateExerciseInput {
   name: string;
@@ -64,6 +65,6 @@ export const useCustomExerciseStore = create<CustomExerciseState>()(
       },
       hydrateExercises: (exercises) => set({ exercises }),
     }),
-    { name: "macht_custom_exercises" },
+    { name: demoStorageKey("macht_custom_exercises") },
   ),
 );

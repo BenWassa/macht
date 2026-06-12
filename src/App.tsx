@@ -1,4 +1,5 @@
 import { BottomNav } from "@/components/BottomNav";
+import { DemoModeBanner } from "@/components/DemoModeBanner";
 import { RestTimerBanner } from "@/components/RestTimerBanner";
 import { Toast } from "@/components/Toast";
 import { useSessionClock } from "@/hooks/useSessionClock";
@@ -69,6 +70,7 @@ export default function App() {
           </button>
         )}
       </header>
+      <DemoModeBanner />
 
       <main className="mx-auto w-full max-w-2xl flex-1 overflow-y-auto px-4 py-6 pb-36">
         {activeTab === "home" && <HomeScreen setActiveTab={setActiveTab} />}

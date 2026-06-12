@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { DEFAULT_TEMPLATE } from "@/domain/exercises";
 import { buildWorkoutSets } from "@/domain/workoutPrefill";
+import { demoStorageKey } from "@/lib/demoMode";
 import {
   addWorkoutExercise,
   appendWorkoutSet,
@@ -114,6 +115,6 @@ export const useWorkoutStore = create<WorkoutState>()(
       appendSet: (exerciseId) =>
         set((state) => appendWorkoutSet(state, exerciseId, customExercises())),
     }),
-    { name: "macht_workout" },
+    { name: demoStorageKey("macht_workout") },
   ),
 );

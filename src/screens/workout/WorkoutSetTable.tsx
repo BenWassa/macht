@@ -38,12 +38,6 @@ export function WorkoutSetTable({
   const canGoNext = activeIndex < sets.length - 1;
 
   const firstOpenIndex = sets.findIndex((set) => !set.completed);
-  const firstOpen = firstOpenIndex === -1 ? undefined : sets[firstOpenIndex];
-  const suggestionApplied =
-    suggestion &&
-    firstOpen &&
-    firstOpen.weight === suggestion.weight &&
-    (suggestion.basis !== "add-rep" || firstOpen.reps === suggestion.repTarget);
 
   const revertSuggestion = () => {
     if (!suggestion || firstOpenIndex === -1) return;
@@ -88,7 +82,7 @@ export function WorkoutSetTable({
         onSelect={onSelectSet}
         onAppendSet={handleAppendSet}
       />
-      {suggestionApplied && (
+      {suggestion && (
         <SuggestionMarker
           suggestion={suggestion}
           units={settings.units}

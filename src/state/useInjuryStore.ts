@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import type { ExerciseInjury } from "@/domain/types";
 import { INITIAL_INJURIES } from "@/data/mockData";
 import { todayIso } from "@/lib/format";
+import { demoStorageKey } from "@/lib/demoMode";
 
 interface InjuryState {
   injuries: ExerciseInjury[];
@@ -49,7 +50,7 @@ export const useInjuryStore = create<InjuryState>()(
       hydrateInjuries: (injuries) => set({ injuries }),
     }),
     {
-      name: "macht_injuries",
+      name: demoStorageKey("macht_injuries"),
       version: 2,
       migrate: (persisted) => {
         const state = persisted as Partial<InjuryState>;

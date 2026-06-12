@@ -16,13 +16,6 @@ export interface CustomExercise extends Exercise {
   createdAt: string;
 }
 
-export interface UpgradeItem {
-  id: string;
-  text: string;
-  completed: boolean;
-  createdAt: string;
-}
-
 export interface ExerciseInjury {
   id: string;
   name: string;

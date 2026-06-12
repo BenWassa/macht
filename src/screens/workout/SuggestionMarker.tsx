@@ -9,11 +9,11 @@ interface SuggestionMarkerProps {
 }
 
 const DETAILS: Record<LoadSuggestion["basis"], string> = {
-  progress: "Suggested step up",
-  "add-rep": "Same load, one more rep",
-  deload: "Two tough sessions — ease off",
-  rust: "A while since last time — ease back in",
-  repeat: "",
+  progress: "Step up",
+  "add-rep": "Add one rep",
+  deload: "Ease off",
+  rust: "Ease back in",
+  repeat: "Repeat load",
 };
 
 export function SuggestionMarker({
@@ -24,17 +24,19 @@ export function SuggestionMarker({
   const hintSeen = useUiStore((state) => state.progressionHintSeen);
   const dismissHint = useUiStore((state) => state.dismissProgressionHint);
 
-  const { basis, deltaFromLast, lastWeight, lastReps } = suggestion;
-  if (basis === "repeat") return null;
+  const { basis, deltaFromLast, lastWeight, lastReps, lastSummary } =
+    suggestion;
   const up = basis === "progress" || basis === "add-rep";
   const label =
     basis === "progress"
       ? `▲ +${deltaFromLast} ${units}`
       : basis === "add-rep"
         ? "▲ +1 rep"
+        : basis === "repeat" || deltaFromLast === 0
+          ? "Hold"
         : deltaFromLast < 0
           ? `▼ ${deltaFromLast} ${units}`
-          : "▼ hold";
+          : "Hold";
   const revertLabel =
     basis === "add-rep"
       ? `Keep ${lastReps} reps`
@@ -42,34 +44,51 @@ export function SuggestionMarker({
   const canRevert = deltaFromLast !== 0 || basis === "add-rep";
 
   return (
-    <div className="mb-2 space-y-2">
-      <div className="flex items-center justify-between gap-3 border border-edge bg-well px-3 py-2">
-        <div className="flex min-w-0 items-baseline gap-2">
-          <span
-            className={`shrink-0 font-mono text-[11px] font-bold ${
-              up ? "text-emerald-400" : "text-neutral-400"
-            }`}
-          >
-            {label}
-          </span>
-          <span className="truncate font-mono text-[9px] uppercase tracking-widest text-neutral-500">
+    <div className="mb-3 space-y-2">
+      <div className="border border-blue-900/50 bg-blue-950/15 p-3">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <span className="block font-mono text-[9px] font-bold uppercase tracking-widest text-blue-400">
+              Suggested load
+            </span>
+            <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+              <span className="font-mono text-2xl font-black tracking-tight text-neutral-100">
+                {suggestion.weight}
+              </span>
+              <span className="font-mono text-[10px] font-bold uppercase text-neutral-500">
+                {units} x {suggestion.repTarget}
+              </span>
+              <span
+                className={`font-mono text-[10px] font-bold ${
+                  up ? "text-emerald-400" : "text-neutral-400"
+                }`}
+              >
+                {label}
+              </span>
+            </div>
+          </div>
+          <span className="shrink-0 border border-blue-900/60 bg-black px-2 py-1 font-mono text-[8px] font-bold uppercase tracking-widest text-blue-300">
             {DETAILS[basis]}
           </span>
         </div>
-        {canRevert && (
-          <button
-            onClick={onRevert}
-            className="shrink-0 border border-edge bg-black px-2 py-1 font-mono text-[9px] font-bold uppercase tracking-wider text-neutral-400 transition hover:border-neutral-700 hover:text-white"
-          >
-            {revertLabel}
-          </button>
-        )}
+        <div className="mt-3 flex items-center justify-between gap-3 border-t border-blue-900/30 pt-2">
+          <span className="min-w-0 truncate font-mono text-[10px] text-neutral-500">
+            Last top set: {lastSummary}
+          </span>
+          {canRevert && (
+            <button
+              onClick={onRevert}
+              className="shrink-0 border border-edge bg-black px-2 py-1 font-mono text-[9px] font-bold uppercase tracking-wider text-neutral-400 transition hover:border-neutral-700 hover:text-white"
+            >
+              {revertLabel}
+            </button>
+          )}
+        </div>
       </div>
       {!hintSeen && (
         <div className="flex items-start justify-between gap-3 border border-blue-900/60 bg-blue-950/20 px-3 py-2">
           <p className="text-[11px] leading-relaxed text-blue-200/80">
-            Suggested loads are a guide, not gospel — go heavier if you feel
-            strong, lighter if you feel beat up.
+            Guide only. Log the set you can actually lift today.
           </p>
           <button
             onClick={dismissHint}

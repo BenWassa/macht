@@ -5,7 +5,6 @@ import { InjuryManager } from "./InjuryManager";
 import { SettingsPanel } from "./SettingsPanel";
 import { BackupPanel } from "./BackupPanel";
 import { DangerZone } from "./DangerZone";
-import { UpgradeNotesPanel } from "./UpgradeNotesPanel";
 
 export function ProfileScreen() {
   const [editing, setEditing] = useState<ExerciseInjury | null>(null);
@@ -32,8 +31,6 @@ export function ProfileScreen() {
           setShowModal(true);
         }}
       />
-
-      <UpgradeNotesPanel />
 
       <div className="space-y-0">
         <SettingsPanel />

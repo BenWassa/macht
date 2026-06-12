@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { demoStorageKey } from "@/lib/demoMode";
 
 export type TabId =
   | "home"
@@ -24,6 +25,6 @@ export const useUiStore = create<UiState>()(
       setActiveTab: (activeTab) => set({ activeTab }),
       dismissProgressionHint: () => set({ progressionHintSeen: true }),
     }),
-    { name: "macht_ui" },
+    { name: demoStorageKey("macht_ui") },
   ),
 );

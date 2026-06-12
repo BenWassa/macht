@@ -3,21 +3,18 @@ import { useHistoryStore, type MachtBackup } from "@/state/useHistoryStore";
 import { useCustomExerciseStore } from "@/state/useCustomExerciseStore";
 import { useInjuryStore } from "@/state/useInjuryStore";
 import { useSettingsStore } from "@/state/useSettingsStore";
-import { useUpgradeStore } from "@/state/useUpgradeStore";
-import type { CustomExercise, Settings, UpgradeItem } from "@/domain/types";
+import type { CustomExercise, Settings } from "@/domain/types";
 
 export function BackupPanel() {
   const settings = useSettingsStore();
   const injuries = useInjuryStore((state) => state.injuries);
   const customExercises = useCustomExerciseStore((state) => state.exercises);
-  const upgrades = useUpgradeStore((state) => state.items);
   const hydrateCustomExercises = useCustomExerciseStore(
     (state) => state.hydrateExercises,
   );
   const hydrateInjuries = useInjuryStore((state) => state.hydrateInjuries);
   const hydrateSettings = useSettingsStore((state) => state.hydrateSettings);
   const hydrateHistory = useHistoryStore((state) => state.hydrateHistory);
-  const hydrateUpgrades = useUpgradeStore((state) => state.hydrateItems);
   const createBackup = useHistoryStore((state) => state.createBackup);
 
   const [error, setError] = useState("");
@@ -34,7 +31,6 @@ export function BackupPanel() {
         audioCue: settings.audioCue,
       },
       customExercises,
-      upgrades,
     );
     const blob = new Blob([JSON.stringify(backup, null, 2)], {
       type: "application/json",
@@ -67,7 +63,6 @@ export function BackupPanel() {
       hydrateCustomExercises(
         (parsed.customExercises ?? []) as CustomExercise[],
       );
-      hydrateUpgrades((parsed.upgrades ?? []) as UpgradeItem[]);
     } catch {
       setError("Invalid backup file.");
     }

@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { EffortMode, Settings, Units } from "@/domain/types";
+import { demoStorageKey } from "@/lib/demoMode";
 
 interface SettingsState extends Settings {
   setUnits: (units: Units) => void;
@@ -33,6 +34,6 @@ export const useSettingsStore = create<SettingsState>()(
           audioCue: settings.audioCue ?? state.audioCue,
         })),
     }),
-    { name: "macht_settings" },
+    { name: demoStorageKey("macht_settings") },
   ),
 );

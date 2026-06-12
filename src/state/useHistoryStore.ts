@@ -5,10 +5,11 @@ import type {
   ExerciseInjury,
   SessionLog,
   Settings,
-  UpgradeItem,
 } from "@/domain/types";
 import { MOCK_HISTORY } from "@/data/mockData";
+import { DEMO_HISTORY } from "@/data/demoData";
 import { todayIso } from "@/lib/format";
+import { IS_DEMO_MODE, demoStorageKey } from "@/lib/demoMode";
 
 export interface MachtBackup {
   version: 1;
@@ -17,7 +18,6 @@ export interface MachtBackup {
   injuries: ExerciseInjury[];
   settings: Settings;
   customExercises?: CustomExercise[];
-  upgrades?: UpgradeItem[];
 }
 
 interface HistoryState {
@@ -32,14 +32,13 @@ interface HistoryState {
     injuries: ExerciseInjury[],
     settings: Settings,
     customExercises?: CustomExercise[],
-    upgrades?: UpgradeItem[],
   ) => MachtBackup;
 }
 
 export const useHistoryStore = create<HistoryState>()(
   persist(
     (set, get) => ({
-      sessions: MOCK_HISTORY,
+      sessions: IS_DEMO_MODE ? DEMO_HISTORY : MOCK_HISTORY,
       snapshots: [],
       addSession: (session) =>
         set((state) => ({
@@ -58,23 +57,17 @@ export const useHistoryStore = create<HistoryState>()(
         })),
       clearSessions: () => set({ sessions: [] }),
       hydrateHistory: (sessions) => set({ sessions }),
-      createBackup: (
-        injuries,
-        settings,
-        customExercises = [],
-        upgrades = [],
-      ) => ({
+      createBackup: (injuries, settings, customExercises = []) => ({
         version: 1,
         exportedAt: todayIso(),
         history: get().sessions,
         injuries,
         settings,
         customExercises,
-        upgrades,
       }),
     }),
     {
-      name: "macht_history",
+      name: demoStorageKey("macht_history"),
       partialize: (state) => ({
         sessions: state.sessions,
         snapshots: state.snapshots,
