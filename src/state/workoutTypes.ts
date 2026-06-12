@@ -1,3 +1,4 @@
+import type { LoadSuggestion } from "@/domain/progression";
 import type { SetEntry, TemplatePlan, WorkoutSets } from "@/domain/types";
 
 export interface WorkoutState {
@@ -12,6 +13,7 @@ export interface WorkoutState {
   isMinimumSession: boolean;
   adaptedDuringSession: boolean;
   deloadWeights: Record<string, number>;
+  loadSuggestions: Record<string, LoadSuggestion>;
   tick: () => void;
   startTemplate: (
     template?: TemplatePlan,

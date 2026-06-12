@@ -1,8 +1,8 @@
 import { BottomNav } from "@/components/BottomNav";
 import { RestTimerBanner } from "@/components/RestTimerBanner";
 import { Toast } from "@/components/Toast";
-import { useRestTimer } from "@/hooks/useRestTimer";
 import { useSessionClock } from "@/hooks/useSessionClock";
+import { useSessionTimers } from "@/hooks/useSessionTimers";
 import { FinishSessionModal } from "@/modals/FinishSessionModal";
 import { FreePlayScreen } from "@/screens/FreePlayScreen";
 import { HomeScreen } from "@/screens/HomeScreen";
@@ -10,69 +10,27 @@ import { ProfileScreen } from "@/screens/profile";
 import { ProgressScreen } from "@/screens/ProgressScreen";
 import { TemplatesScreen } from "@/screens/TemplatesScreen";
 import { WorkoutScreen } from "@/screens/WorkoutScreen";
-import { useSettingsStore } from "@/state/useSettingsStore";
 import { useToastStore } from "@/state/useToastStore";
 import { useUiStore } from "@/state/useUiStore";
 import { useWorkoutStore } from "@/state/useWorkoutStore";
 import { formatTime, formatWorkoutName } from "@/lib/format";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 export type { TabId } from "@/state/useUiStore";
-
-type PendingAdvance = { exerciseId: string; nextIndex: number };
 
 export default function App() {
   const activeTab = useUiStore((state) => state.activeTab);
   const setActiveTab = useUiStore((state) => state.setActiveTab);
   const [showFinishModal, setShowFinishModal] = useState(false);
-  const defaultRest = useSettingsStore((state) => state.defaultRest);
   const showToast = useToastStore((state) => state.show);
   const workoutActive = useWorkoutStore((state) => state.workoutActive);
   const workoutName = useWorkoutStore((state) => state.workoutName);
   const workoutDuration = useWorkoutStore((state) => state.workoutDuration);
-  const selectedExIndex = useWorkoutStore((state) => state.selectedExIndex);
-  const activeWorkoutList = useWorkoutStore((state) => state.activeWorkoutList);
-  const setSelectedExIndex = useWorkoutStore((state) => state.setSelectedExIndex);
-  const restTimer = useRestTimer(defaultRest);
-  const pendingAdvance = useRef<PendingAdvance | null>(null);
+  const { restTimer, warmupTimer, startRest, startWarmup, dismissRest, clear } =
+    useSessionTimers();
   const isWorkoutScreen = activeTab === "workout" && workoutActive;
 
   useSessionClock();
-
-  const advanceAfterRest = useCallback(() => {
-    const pending = pendingAdvance.current;
-    pendingAdvance.current = null;
-    if (!pending || pending.nextIndex >= activeWorkoutList.length) return;
-    const sets = useWorkoutStore.getState().workoutSets[pending.exerciseId];
-    const sourceComplete = sets?.length && sets.every((set) => set.completed);
-    if (!sourceComplete) return;
-    setSelectedExIndex(pending.nextIndex);
-  }, [activeWorkoutList.length, setSelectedExIndex]);
-
-  useEffect(() => {
-    if (!restTimer.visible || restTimer.running || restTimer.seconds !== 0) {
-      return;
-    }
-    if (pendingAdvance.current === null) return;
-    advanceAfterRest();
-    restTimer.dismiss();
-  }, [restTimer, advanceAfterRest]);
-
-  const startRestTimer = (options: { advanceAfterRest: boolean }) => {
-    const exerciseId = activeWorkoutList[selectedExIndex];
-    pendingAdvance.current =
-      options.advanceAfterRest &&
-      exerciseId &&
-      selectedExIndex < activeWorkoutList.length - 1
-        ? { exerciseId, nextIndex: selectedExIndex + 1 }
-        : null;
-    restTimer.start();
-  };
-
-  const dismissRestTimer = () => {
-    advanceAfterRest();
-    restTimer.dismiss();
-  };
 
   return (
     <div className="flex min-h-screen flex-col bg-[#060606] text-[#f0f0f0] selection:bg-blue-600 selection:text-white">
@@ -114,10 +72,18 @@ export default function App() {
 
       <main className="mx-auto w-full max-w-2xl flex-1 overflow-y-auto px-4 py-6 pb-36">
         {activeTab === "home" && <HomeScreen setActiveTab={setActiveTab} />}
-        {activeTab === "freeplay" && <FreePlayScreen setActiveTab={setActiveTab} />}
-        {activeTab === "templates" && <TemplatesScreen setActiveTab={setActiveTab} />}
+        {activeTab === "freeplay" && (
+          <FreePlayScreen setActiveTab={setActiveTab} />
+        )}
+        {activeTab === "templates" && (
+          <TemplatesScreen setActiveTab={setActiveTab} />
+        )}
         {activeTab === "workout" && (
-          <WorkoutScreen onFinish={() => setShowFinishModal(true)} onSetCompleted={startRestTimer} />
+          <WorkoutScreen
+            onFinish={() => setShowFinishModal(true)}
+            onSetCompleted={startRest}
+            onStartWarmup={startWarmup}
+          />
         )}
         {activeTab === "progress" && <ProgressScreen />}
         {activeTab === "profile" && <ProfileScreen />}
@@ -130,7 +96,21 @@ export default function App() {
           onAdd={restTimer.add}
           onToggle={restTimer.toggle}
           onReset={restTimer.reset}
-          onDismiss={dismissRestTimer}
+          onDismiss={dismissRest}
+        />
+      )}
+
+      {warmupTimer.visible && !restTimer.visible && (
+        <RestTimerBanner
+          label="Warm-up"
+          doneText="Done - start lifting"
+          increments={[60, -60]}
+          seconds={warmupTimer.seconds}
+          running={warmupTimer.running}
+          onAdd={warmupTimer.add}
+          onToggle={warmupTimer.toggle}
+          onReset={warmupTimer.reset}
+          onDismiss={warmupTimer.dismiss}
         />
       )}
 
@@ -147,8 +127,7 @@ export default function App() {
           onClose={() => setShowFinishModal(false)}
           onSaved={(summary) => {
             setShowFinishModal(false);
-            pendingAdvance.current = null;
-            restTimer.dismiss();
+            clear();
             showToast(
               `Session saved · ${summary.duration} · ${summary.sets} sets · ${summary.volume.toLocaleString()} lbs`,
             );

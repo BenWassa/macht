@@ -1,14 +1,17 @@
 import { SetRow } from "@/components/SetRow";
 import type { ExercisePrescription } from "@/domain/prescriptions";
+import type { LoadSuggestion } from "@/domain/progression";
 import type { SetEntry, Settings } from "@/domain/types";
 import { EffortSlider } from "@/screens/workout/EffortSlider";
 import { SetNavigator } from "@/screens/workout/SetNavigator";
+import { SuggestionMarker } from "@/screens/workout/SuggestionMarker";
 
 interface WorkoutSetTableProps {
   sets: SetEntry[];
   selectedSetIndex: number;
   prescription: ExercisePrescription;
   settings: Settings;
+  suggestion?: LoadSuggestion;
   onSelectSet: (index: number) => void;
   onToggleComplete: (setIndex: number) => boolean;
   onUpdateSet: <K extends keyof SetEntry>(
@@ -24,6 +27,7 @@ export function WorkoutSetTable({
   selectedSetIndex,
   prescription,
   settings,
+  suggestion,
   onSelectSet,
   onToggleComplete,
   onUpdateSet,
@@ -32,6 +36,26 @@ export function WorkoutSetTable({
   const activeIndex = sets[selectedSetIndex] ? selectedSetIndex : 0;
   const selectedSet = sets[activeIndex];
   const canGoNext = activeIndex < sets.length - 1;
+
+  const firstOpenIndex = sets.findIndex((set) => !set.completed);
+  const firstOpen = firstOpenIndex === -1 ? undefined : sets[firstOpenIndex];
+  const suggestionApplied =
+    suggestion &&
+    firstOpen &&
+    firstOpen.weight === suggestion.weight &&
+    (suggestion.basis !== "add-rep" || firstOpen.reps === suggestion.repTarget);
+
+  const revertSuggestion = () => {
+    if (!suggestion || firstOpenIndex === -1) return;
+    if (suggestion.basis === "add-rep") {
+      sets.forEach((set, index) => {
+        if (!set.completed) onUpdateSet(index, "reps", suggestion.lastReps);
+      });
+      return;
+    }
+    // Cascade in updateWorkoutSet carries this to later untouched sets.
+    onUpdateSet(firstOpenIndex, "weight", suggestion.lastWeight);
+  };
 
   const handleToggleComplete = () => {
     const completedNow = onToggleComplete(activeIndex);
@@ -64,6 +88,13 @@ export function WorkoutSetTable({
         onSelect={onSelectSet}
         onAppendSet={handleAppendSet}
       />
+      {suggestionApplied && (
+        <SuggestionMarker
+          suggestion={suggestion}
+          units={settings.units}
+          onRevert={revertSuggestion}
+        />
+      )}
       <div className="grid grid-cols-[1.45fr_1.2fr_64px] border-b border-edge pb-3 font-mono text-[11px] font-bold uppercase tracking-widest text-neutral-500">
         <span className="text-center">
           {prescription.loadMode === "external" ? "Load" : "Mode"}

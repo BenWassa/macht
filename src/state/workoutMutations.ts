@@ -2,19 +2,10 @@ import { getDefaultSetsForExercise } from "@/domain/prescriptions";
 import type { CustomExercise, SetEntry, WorkoutSets } from "@/domain/types";
 import type { WorkoutState } from "@/state/workoutTypes";
 
-export const buildWorkoutSets = (
-  exercises: string[],
-  deloadWeights: Record<string, number> = {},
-  customExercises: CustomExercise[] = [],
-): WorkoutSets =>
-  exercises.reduce<WorkoutSets>((acc, exerciseId) => {
-    acc[exerciseId] = getDefaultSetsForExercise(
-      exerciseId,
-      deloadWeights[exerciseId],
-      customExercises,
-    );
-    return acc;
-  }, {});
+export {
+  addWorkoutExercise,
+  substituteWorkoutExercise,
+} from "@/state/workoutExerciseMutations";
 
 export function toggleSetCompletion(
   state: WorkoutState,
@@ -42,59 +33,24 @@ export function updateWorkoutSet<K extends keyof SetEntry>(
   value: SetEntry[K],
 ): Pick<WorkoutState, "workoutSets"> {
   const sets = state.workoutSets[exerciseId] ?? [];
+  const previousWeight = sets[setIndex]?.weight;
   return {
     workoutSets: {
       ...state.workoutSets,
-      [exerciseId]: sets.map((entry, index) =>
-        index === setIndex ? { ...entry, [field]: value } : entry,
-      ),
-    },
-  };
-}
-
-export function substituteWorkoutExercise(
-  state: WorkoutState,
-  targetId: string,
-  subId: string,
-  customExercises: CustomExercise[] = [],
-): Partial<WorkoutState> {
-  const index = state.activeWorkoutList.indexOf(targetId);
-  if (index === -1) return state;
-  const list = [...state.activeWorkoutList];
-  list[index] = subId;
-  return {
-    activeWorkoutList: list,
-    selectedExIndex: index,
-    selectedSetIndex: 0,
-    adaptedDuringSession: true,
-    workoutSets: {
-      ...state.workoutSets,
-      [subId]:
-        state.workoutSets[subId] ??
-        getDefaultSetsForExercise(subId, undefined, customExercises),
-    },
-  };
-}
-
-export function addWorkoutExercise(
-  state: WorkoutState,
-  exerciseId: string,
-  customExercises: CustomExercise[] = [],
-): Partial<WorkoutState> {
-  const existing = state.activeWorkoutList.indexOf(exerciseId);
-  if (existing !== -1) {
-    return { selectedExIndex: existing, selectedSetIndex: 0 };
-  }
-  const list = [...state.activeWorkoutList, exerciseId];
-  return {
-    activeWorkoutList: list,
-    selectedExIndex: list.length - 1,
-    selectedSetIndex: 0,
-    workoutSets: {
-      ...state.workoutSets,
-      [exerciseId]:
-        state.workoutSets[exerciseId] ??
-        getDefaultSetsForExercise(exerciseId, undefined, customExercises),
+      [exerciseId]: sets.map((entry, index) => {
+        if (index === setIndex) return { ...entry, [field]: value };
+        // Straight sets: later uncompleted sets still at the old weight
+        // follow a weight edit; individually adjusted sets are left alone.
+        if (
+          field === "weight" &&
+          index > setIndex &&
+          !entry.completed &&
+          entry.weight === previousWeight
+        ) {
+          return { ...entry, weight: value as SetEntry["weight"] };
+        }
+        return entry;
+      }),
     },
   };
 }
@@ -106,7 +62,11 @@ export function appendWorkoutSet(
 ): Pick<WorkoutState, "workoutSets"> {
   const sets = state.workoutSets[exerciseId] ?? [];
   const prev = sets[sets.length - 1];
-  const fallback = getDefaultSetsForExercise(exerciseId, undefined, customExercises)[0];
+  const fallback = getDefaultSetsForExercise(
+    exerciseId,
+    undefined,
+    customExercises,
+  )[0];
   const next: SetEntry = prev
     ? {
         id: prev.id + 1,

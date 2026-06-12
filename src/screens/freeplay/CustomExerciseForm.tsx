@@ -1,7 +1,19 @@
 import { Plus, X } from "lucide-react";
 import { useEffect } from "react";
 
-const TARGETS = ["Biceps", "Triceps", "Chest", "Back", "Shoulders", "Quads", "Hamstrings", "Glutes", "Calves", "Core", "Conditioning"];
+const TARGETS = [
+  "Biceps",
+  "Triceps",
+  "Chest",
+  "Back",
+  "Shoulders",
+  "Quads",
+  "Hamstrings",
+  "Glutes",
+  "Calves",
+  "Core",
+  "Conditioning",
+];
 
 interface CustomExerciseFormProps {
   name: string;
@@ -33,9 +45,7 @@ export function CustomExerciseForm({
   useEffect(() => {
     const prior = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prior;
-    };
+    return () => void (document.body.style.overflow = prior);
   }, []);
 
   return (

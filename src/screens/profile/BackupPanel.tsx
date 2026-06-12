@@ -64,7 +64,9 @@ export function BackupPanel() {
       hydrateHistory(parsed.history);
       hydrateInjuries(parsed.injuries);
       hydrateSettings(parsed.settings as Settings);
-      hydrateCustomExercises((parsed.customExercises ?? []) as CustomExercise[]);
+      hydrateCustomExercises(
+        (parsed.customExercises ?? []) as CustomExercise[],
+      );
       hydrateUpgrades((parsed.upgrades ?? []) as UpgradeItem[]);
     } catch {
       setError("Invalid backup file.");

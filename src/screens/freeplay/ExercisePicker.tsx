@@ -49,7 +49,10 @@ export function ExercisePicker({
   const [openSections, setOpenSections] =
     useState<Record<SectionKey, boolean>>(SECTION_DEFAULT_OPEN);
 
-  const allExercises = useMemo(() => getAllExercises(customExercises), [customExercises]);
+  const allExercises = useMemo(
+    () => getAllExercises(customExercises),
+    [customExercises],
+  );
   const grouped = useMemo(
     () => groupLibraryBySection(allExercises),
     [allExercises],

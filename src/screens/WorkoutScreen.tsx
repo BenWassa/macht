@@ -1,4 +1,3 @@
-import { Plus } from "lucide-react";
 import { useState } from "react";
 import { PlateVisualizer } from "@/components/PlateVisualizer";
 import { getExerciseConflict } from "@/domain/injuries";
@@ -8,6 +7,7 @@ import type { SetEntry } from "@/domain/types";
 import { useWakeLock } from "@/hooks/useWakeLock";
 import { vibrate } from "@/lib/haptics";
 import { ExerciseTabs } from "@/screens/workout/ExerciseTabs";
+import { WorkoutActionsBar } from "@/screens/workout/WorkoutActionsBar";
 import { InjuryConflictBanner } from "@/screens/workout/InjuryConflictBanner";
 import { WorkoutSetTable } from "@/screens/workout/WorkoutSetTable";
 import { useCustomExerciseStore } from "@/state/useCustomExerciseStore";
@@ -19,9 +19,14 @@ import { useWorkoutStore } from "@/state/useWorkoutStore";
 interface WorkoutScreenProps {
   onFinish: () => void;
   onSetCompleted: (options: { advanceAfterRest: boolean }) => void;
+  onStartWarmup: () => void;
 }
 
-export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) {
+export function WorkoutScreen({
+  onFinish,
+  onSetCompleted,
+  onStartWarmup,
+}: WorkoutScreenProps) {
   const settings = useSettingsStore();
   const customExercises = useCustomExerciseStore((state) => state.exercises);
   const injuries = useInjuryStore((state) => state.injuries);
@@ -54,7 +59,10 @@ export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) 
   const selectedExerciseId = workout.activeWorkoutList[workout.selectedExIndex];
   const selectedSets = workout.workoutSets[selectedExerciseId] ?? [];
   const selectedSet = selectedSets[workout.selectedSetIndex] ?? selectedSets[0];
-  const selectedPrescription = getExercisePrescription(selectedExerciseId, customExercises);
+  const selectedPrescription = getExercisePrescription(
+    selectedExerciseId,
+    customExercises,
+  );
   const conflict = getExerciseConflict(selectedExerciseId, injuries);
   const lastSetText = selectedSet?.last;
   const showLastSet =
@@ -63,13 +71,25 @@ export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) 
   const toggleComplete = (exerciseId: string, setIndex: number) => {
     const completedNow = workout.toggleComplete(exerciseId, setIndex);
     if (completedNow) {
-      vibrate(15);
-      const advanceAfterRest = setIndex === selectedSets.length - 1;
-      onSetCompleted({ advanceAfterRest });
-      showToast(`Set ${setIndex + 1} logged`, {
-        label: "Undo",
-        onAction: () => workout.toggleComplete(exerciseId, setIndex),
-      });
+      const { workoutSets, activeWorkoutList } = useWorkoutStore.getState();
+      const allSetsComplete = activeWorkoutList.every((id) =>
+        (workoutSets[id] ?? []).every((set) => set.completed),
+      );
+      if (allSetsComplete) {
+        vibrate([20, 60, 20]);
+        showToast("All sets complete · Session done", {
+          label: "Finish",
+          onAction: onFinish,
+        });
+      } else {
+        vibrate(15);
+        const advanceAfterRest = setIndex === selectedSets.length - 1;
+        onSetCompleted({ advanceAfterRest });
+        showToast(`Set ${setIndex + 1} logged`, {
+          label: "Undo",
+          onAction: () => workout.toggleComplete(exerciseId, setIndex),
+        });
+      }
     }
     return completedNow;
   };
@@ -82,35 +102,15 @@ export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) 
 
   return (
     <div className="animate-fadeIn">
-      <div className="mb-5 flex items-center justify-between">
-        <button
-          onClick={() => setShowAddExercise(true)}
-          className="flex items-center gap-1.5 border border-[#222] bg-black px-3 py-2 font-mono text-[9px] font-bold uppercase tracking-widest text-neutral-400 transition hover:text-neutral-200"
-        >
-          <Plus className="h-3.5 w-3.5" /> Add
-        </button>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() =>
-              workout.setIsMinimumSession(!workout.isMinimumSession)
-            }
-            aria-pressed={workout.isMinimumSession}
-            className={`border px-3 py-2 font-mono text-[9px] font-bold uppercase tracking-widest transition ${
-              workout.isMinimumSession
-                ? "border-blue-700 bg-blue-950 text-blue-300"
-                : "border-[#222] bg-black text-neutral-500 hover:text-neutral-300"
-            }`}
-          >
-            Min
-          </button>
-          <button
-            onClick={onFinish}
-            className="bg-emerald-600 px-5 py-2.5 font-mono text-xs font-bold uppercase tracking-widest text-white transition hover:bg-emerald-700 active:bg-emerald-800"
-          >
-            Finish
-          </button>
-        </div>
-      </div>
+      <WorkoutActionsBar
+        isMinimumSession={workout.isMinimumSession}
+        onAddExercise={() => setShowAddExercise(true)}
+        onStartWarmup={onStartWarmup}
+        onToggleMinimum={() =>
+          workout.setIsMinimumSession(!workout.isMinimumSession)
+        }
+        onFinish={onFinish}
+      />
 
       <ExerciseTabs
         exercises={workout.activeWorkoutList}
@@ -132,6 +132,7 @@ export function WorkoutScreen({ onFinish, onSetCompleted }: WorkoutScreenProps) 
         selectedSetIndex={workout.selectedSetIndex}
         prescription={selectedPrescription}
         settings={settings}
+        suggestion={workout.loadSuggestions?.[selectedExerciseId]}
         onSelectSet={workout.setSelectedSetIndex}
         onToggleComplete={(index) => toggleComplete(selectedExerciseId, index)}
         onUpdateSet={updateSet}

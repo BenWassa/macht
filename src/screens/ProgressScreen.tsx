@@ -1,7 +1,13 @@
-import { SparklineChart } from "@/components/SparklineChart";
 import { deriveE1rmHistory } from "@/domain/e1rm";
 import { PROGRESS_LIFTS, getExerciseById } from "@/domain/exercises";
 import { getExerciseConflict } from "@/domain/injuries";
+import {
+  monthlyGainPct,
+  progressionStreak,
+  projectedE1rm,
+} from "@/domain/progressionStats";
+import { LiftCard } from "@/screens/progress/LiftCard";
+import { useCustomExerciseStore } from "@/state/useCustomExerciseStore";
 import { useHistoryStore } from "@/state/useHistoryStore";
 import { useInjuryStore } from "@/state/useInjuryStore";
 import { useSettingsStore } from "@/state/useSettingsStore";
@@ -9,18 +15,8 @@ import { useSettingsStore } from "@/state/useSettingsStore";
 export function ProgressScreen() {
   const sessions = useHistoryStore((state) => state.sessions);
   const injuries = useInjuryStore((state) => state.injuries);
-  const units = useSettingsStore((state) => state.units);
-
-  const liftData = PROGRESS_LIFTS.map((exerciseId) => {
-    const history = deriveE1rmHistory(sessions, exerciseId);
-    const values = history;
-    return {
-      exerciseId,
-      exercise: getExerciseById(exerciseId),
-      values,
-      conflict: getExerciseConflict(exerciseId, injuries),
-    };
-  });
+  const settings = useSettingsStore();
+  const customExercises = useCustomExerciseStore((state) => state.exercises);
 
   if (sessions.length === 0) {
     return (
@@ -53,78 +49,23 @@ export function ProgressScreen() {
         </h1>
       </div>
       <div className="space-y-6">
-        {liftData.map(({ exerciseId, exercise, values, conflict }) => {
-          const current = values[values.length - 1] ?? 0;
-          const best = Math.max(...values, 0);
-          const delta =
-            values.length > 1
-              ? current - values[Math.max(0, values.length - 6)]
-              : 0;
-          const paused = conflict?.level === "avoid";
-          return (
-            <div
-              key={exerciseId}
-              className="space-y-4 border border-[#1a1a1a] bg-[#0c0c0c] p-5"
-            >
-              <div className="flex flex-col justify-between gap-2 border-b border-[#1a1a1a] pb-3 sm:flex-row sm:items-center">
-                <div>
-                  <h3 className="font-mono text-sm font-bold uppercase tracking-tight text-neutral-200">
-                    {exercise?.name}
-                  </h3>
-                  <p className="mt-0.5 font-mono text-[9px] uppercase text-neutral-500">
-                    Estimated 1RM · Brzycki
-                  </p>
-                </div>
-                <div className="flex space-x-6 text-right">
-                  <div>
-                    <span className="block font-mono text-[9px] uppercase text-neutral-500">
-                      Current
-                    </span>
-                    <span className="font-mono text-sm font-bold text-neutral-200">
-                      {current || "-"} {current ? units : ""}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="block font-mono text-[9px] uppercase text-neutral-500">
-                      Best
-                    </span>
-                    <span className="font-mono text-sm font-bold text-neutral-300">
-                      {best || "-"} {best ? units : ""}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="block font-mono text-[9px] uppercase text-neutral-500">
-                      6-wk
-                    </span>
-                    <span
-                      className={`block font-mono text-sm font-bold ${paused ? "text-neutral-500" : "text-emerald-400"}`}
-                    >
-                      {paused
-                        ? "Paused"
-                        : `${delta >= 0 ? "+" : ""}${delta} ${units}`}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="relative">
-                {paused && (
-                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center border border-[#1a1a1a] bg-black/90 p-4 text-center">
-                    <span className="border border-red-900 bg-red-950/40 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-widest text-red-400">
-                      Tracking paused
-                    </span>
-                    <p className="mt-2 max-w-sm text-[11px] text-neutral-500">
-                      {conflict?.injury} affects this lift.
-                    </p>
-                  </div>
-                )}
-                <SparklineChart
-                  data={values.length ? values : [0, 0]}
-                  paused={paused}
-                />
-              </div>
-            </div>
-          );
-        })}
+        {PROGRESS_LIFTS.map((exerciseId) => (
+          <LiftCard
+            key={exerciseId}
+            exercise={getExerciseById(exerciseId)}
+            values={deriveE1rmHistory(sessions, exerciseId)}
+            conflict={getExerciseConflict(exerciseId, injuries)}
+            units={settings.units}
+            streak={progressionStreak(exerciseId, sessions)}
+            monthPct={monthlyGainPct(exerciseId, sessions)}
+            projected={projectedE1rm(
+              exerciseId,
+              sessions,
+              settings,
+              customExercises,
+            )}
+          />
+        ))}
       </div>
     </div>
   );
