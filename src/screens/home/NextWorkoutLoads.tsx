@@ -16,7 +16,15 @@ const deltaTone = (target: ProgressionForecastTarget) => {
   return "text-neutral-500";
 };
 
-export function NextWorkoutLoads({ exercises }: { exercises: string[] }) {
+export function NextWorkoutLoads({
+  exercises,
+  templateName,
+  isNextSession,
+}: {
+  exercises: string[];
+  templateName: string;
+  isNextSession: boolean;
+}) {
   const sessions = useHistoryStore((state) => state.sessions);
   const settings = useSettingsStore();
   const customExercises = useCustomExerciseStore((state) => state.exercises);
@@ -31,9 +39,16 @@ export function NextWorkoutLoads({ exercises }: { exercises: string[] }) {
 
   return (
     <div className="w-full border-t border-edge pt-5">
-      <span className="mb-3 block font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-neutral-500">
-        Next session forecast
-      </span>
+      <div className="mb-3">
+        <span className="block font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-neutral-500">
+          {isNextSession ? "Next session forecast" : "Next load forecast"}
+        </span>
+        {!isNextSession && (
+          <span className="mt-1 block truncate font-mono text-[10px] text-neutral-600">
+            Upcoming: {templateName}
+          </span>
+        )}
+      </div>
 
       <div className="border-2 border-neutral-800 bg-black p-4">
         <div className="flex items-start justify-between gap-3 border-b border-edge pb-3">

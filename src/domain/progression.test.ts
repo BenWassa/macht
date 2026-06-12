@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { suggestNextLoad } from "./progression";
+import { buildProgressionForecast } from "./progressionForecast";
 import { monthlyGainPct, progressionStreak } from "./progressionStats";
 import type { SessionLog, SetEntry, Settings } from "./types";
 
@@ -209,5 +210,22 @@ describe("progression stats", () => {
     ];
     expect(monthlyGainPct("leg_press", sessions, TODAY)).toBe(10);
     expect(monthlyGainPct("leg_press", [sessions[0]], TODAY)).toBeNull();
+  });
+});
+
+describe("buildProgressionForecast", () => {
+  it("uses a real load suggestion before a baseline placeholder", () => {
+    const sessions = [
+      session("1", "2026-06-10", "hamstring_curl", [set(65, 12, 8)]),
+      session("2", "2026-06-03", "hamstring_curl", [set(65, 10, 8)]),
+    ];
+
+    expect(
+      buildProgressionForecast(
+        ["hack_squat", "hamstring_curl"],
+        sessions,
+        SETTINGS,
+      ).primaryTarget?.exerciseId,
+    ).toBe("hamstring_curl");
   });
 });

@@ -2,7 +2,12 @@ import { brzyckiE1rm } from "@/domain/e1rm";
 import type { ExerciseSnapshot, SessionLog, SetEntry } from "@/domain/types";
 import { MOCK_HISTORY } from "@/data/mockData";
 
-const set = (id: number, weight: number, reps: number, rpe: number): SetEntry => ({
+const set = (
+  id: number,
+  weight: number,
+  reps: number,
+  rpe: number,
+): SetEntry => ({
   id,
   weight,
   reps,
@@ -36,8 +41,7 @@ const progressSession = (
   duration: `${52 + (index % 4) * 3}m`,
   volume: lifts.reduce(
     (total, lift) =>
-      total +
-      lift.sets.reduce((sum, item) => sum + item.weight * item.reps, 0),
+      total + lift.sets.reduce((sum, item) => sum + item.weight * item.reps, 0),
     0,
   ),
   sets: lifts.reduce((total, lift) => total + lift.sets.length, 0),

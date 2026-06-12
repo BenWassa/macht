@@ -67,8 +67,7 @@ const COMPOUND_EXTERNAL_LIFTS = new Set([
   "dip",
 ]);
 
-const deltaUnit = (units: Settings["units"]) =>
-  units === "lbs" ? "lb" : "kg";
+const deltaUnit = (units: Settings["units"]) => (units === "lbs" ? "lb" : "kg");
 
 const signedLoadDelta = (delta: number, units: Settings["units"]) =>
   delta > 0
@@ -226,15 +225,24 @@ export function buildProgressionForecast(
     );
     return target ? [target] : [];
   });
+  const suggestedTargets = targets.filter((target) => target.suggestion);
   const primaryTarget =
+    suggestedTargets.find((target) =>
+      isEligiblePrimaryTarget(target.exerciseId, customExercises),
+    ) ??
+    suggestedTargets[0] ??
     targets.find((target) =>
       isEligiblePrimaryTarget(target.exerciseId, customExercises),
-    ) ?? targets[0] ?? null;
+    ) ??
+    targets[0] ??
+    null;
 
   return {
     primaryTarget,
     subordinateTargets: primaryTarget
-      ? targets.filter((target) => target.exerciseId !== primaryTarget.exerciseId)
+      ? targets.filter(
+          (target) => target.exerciseId !== primaryTarget.exerciseId,
+        )
       : targets,
   };
 }

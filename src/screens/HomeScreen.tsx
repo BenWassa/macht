@@ -1,12 +1,17 @@
 import { Play, Wand2 } from "lucide-react";
 import { getRunnableTemplate } from "@/domain/injuries";
-import { getNextTrainingTemplate } from "@/domain/trainingPlan";
+import {
+  getNextLoadForecastTemplate,
+  getNextTrainingTemplate,
+} from "@/domain/trainingPlan";
 import { ActivityHistory } from "@/screens/home/ActivityHistory";
 import { ConsistencyChart } from "@/screens/home/ConsistencyChart";
 import { NextWorkoutLoads } from "@/screens/home/NextWorkoutLoads";
 import type { TabId } from "@/App";
+import { useCustomExerciseStore } from "@/state/useCustomExerciseStore";
 import { useHistoryStore } from "@/state/useHistoryStore";
 import { useInjuryStore } from "@/state/useInjuryStore";
+import { useSettingsStore } from "@/state/useSettingsStore";
 import { useWorkoutStore } from "@/state/useWorkoutStore";
 
 interface HomeScreenProps {
@@ -16,9 +21,20 @@ interface HomeScreenProps {
 export function HomeScreen({ setActiveTab }: HomeScreenProps) {
   const sessions = useHistoryStore((state) => state.sessions);
   const injuries = useInjuryStore((state) => state.injuries);
+  const settings = useSettingsStore();
+  const customExercises = useCustomExerciseStore((state) => state.exercises);
   const startTemplate = useWorkoutStore((state) => state.startTemplate);
   const nextTemplate = getNextTrainingTemplate(sessions);
   const runnable = getRunnableTemplate(nextTemplate, injuries);
+  const forecastTemplate = getNextLoadForecastTemplate(
+    sessions,
+    injuries,
+    settings,
+    customExercises,
+  );
+  const forecastRunnable = forecastTemplate
+    ? getRunnableTemplate(forecastTemplate, injuries)
+    : null;
 
   const start = () => {
     startTemplate(runnable);
@@ -64,7 +80,13 @@ export function HomeScreen({ setActiveTab }: HomeScreenProps) {
             </button>
           </div>
         </div>
-        <NextWorkoutLoads exercises={runnable.exercises} />
+        {forecastRunnable && (
+          <NextWorkoutLoads
+            exercises={forecastRunnable.exercises}
+            templateName={forecastRunnable.name}
+            isNextSession={forecastRunnable.id === runnable.id}
+          />
+        )}
       </div>
 
       <ConsistencyChart sessions={sessions} />

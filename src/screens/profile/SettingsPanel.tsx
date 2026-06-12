@@ -1,3 +1,4 @@
+import { APP_VERSION } from "@/lib/appMeta";
 import { useSettingsStore } from "@/state/useSettingsStore";
 import type { ReactNode } from "react";
 
@@ -68,6 +69,9 @@ export function SettingsPanel() {
             </button>
           ))}
         </SettingRow>
+        <InfoRow title="App version" subtitle="Installed build">
+          v{APP_VERSION}
+        </InfoRow>
       </div>
     </div>
   );
@@ -95,6 +99,32 @@ function SettingRow({
       <div className="flex border border-[#1a1a1a] bg-black p-0.5 font-mono">
         {children}
       </div>
+    </div>
+  );
+}
+
+function InfoRow({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4 p-4">
+      <div>
+        <span className="block text-xs font-bold uppercase tracking-tight">
+          {title}
+        </span>
+        <span className="font-mono text-[10px] text-neutral-500">
+          {subtitle}
+        </span>
+      </div>
+      <span className="font-mono text-xs font-bold text-neutral-300">
+        {children}
+      </span>
     </div>
   );
 }
