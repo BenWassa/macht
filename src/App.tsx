@@ -130,8 +130,11 @@ export default function App() {
           onSaved={(summary) => {
             setShowFinishModal(false);
             clear();
+            const receipt = summary.targetsModified
+              ? "Targets modified mid-session. Next forecasts re-anchored based on logged effort."
+              : "Next forecasts re-anchored based on logged effort.";
             showToast(
-              `Session saved · ${summary.duration} · ${summary.sets} sets · ${summary.volume.toLocaleString()} lbs`,
+              `Session saved · ${summary.duration} · ${summary.sets} sets · ${summary.volume.toLocaleString()} lbs · ${receipt}`,
             );
             setActiveTab("home");
           }}

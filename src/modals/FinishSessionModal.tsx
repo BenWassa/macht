@@ -13,6 +13,7 @@ interface FinishSessionModalProps {
     duration: string;
     sets: number;
     volume: number;
+    targetsModified: boolean;
   }) => void;
 }
 
@@ -35,6 +36,13 @@ export function FinishSessionModal({
       (sum, item) => sum + item.set.weight * item.set.reps,
       0,
     );
+    const targetsModified = completedSets.some(({ exerciseId, set }) => {
+      const suggestion = workout.loadSuggestions[exerciseId];
+      return (
+        Boolean(suggestion) &&
+        (set.weight !== suggestion.weight || set.reps !== suggestion.repTarget)
+      );
+    });
     const adapted =
       workout.adaptedDuringSession ||
       workout.activeWorkoutList.some(
@@ -67,6 +75,7 @@ export function FinishSessionModal({
       duration: session.duration,
       sets: session.sets,
       volume: session.volume,
+      targetsModified,
     });
   };
 

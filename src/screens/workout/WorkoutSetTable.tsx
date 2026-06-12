@@ -1,6 +1,7 @@
 import { SetRow } from "@/components/SetRow";
 import type { ExercisePrescription } from "@/domain/prescriptions";
 import type { LoadSuggestion } from "@/domain/progression";
+import { buildSuggestionForecastTarget } from "@/domain/progressionForecast";
 import type { SetEntry, Settings } from "@/domain/types";
 import { EffortSlider } from "@/screens/workout/EffortSlider";
 import { SetNavigator } from "@/screens/workout/SetNavigator";
@@ -38,17 +39,17 @@ export function WorkoutSetTable({
   const canGoNext = activeIndex < sets.length - 1;
 
   const firstOpenIndex = sets.findIndex((set) => !set.completed);
+  const suggestionTarget = suggestion
+    ? buildSuggestionForecastTarget(suggestion, settings.units)
+    : null;
 
   const revertSuggestion = () => {
     if (!suggestion || firstOpenIndex === -1) return;
-    if (suggestion.basis === "add-rep") {
-      sets.forEach((set, index) => {
-        if (!set.completed) onUpdateSet(index, "reps", suggestion.lastReps);
-      });
-      return;
-    }
-    // Cascade in updateWorkoutSet carries this to later untouched sets.
-    onUpdateSet(firstOpenIndex, "weight", suggestion.lastWeight);
+    sets.forEach((set, index) => {
+      if (set.completed) return;
+      onUpdateSet(index, "weight", suggestion.lastWeight);
+      onUpdateSet(index, "reps", suggestion.lastReps);
+    });
   };
 
   const handleToggleComplete = () => {
@@ -82,9 +83,9 @@ export function WorkoutSetTable({
         onSelect={onSelectSet}
         onAppendSet={handleAppendSet}
       />
-      {suggestion && (
+      {suggestionTarget && (
         <SuggestionMarker
-          suggestion={suggestion}
+          target={suggestionTarget}
           units={settings.units}
           onRevert={revertSuggestion}
         />
