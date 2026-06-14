@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { chirp } from "@/lib/audio";
+import { chirp, voiceCue } from "@/lib/audio";
 
 export function useRestTimer(defaultRest: number) {
   const [seconds, setSeconds] = useState(defaultRest);
@@ -21,6 +21,7 @@ export function useRestTimer(defaultRest: number) {
       if (remaining === 0 && !firedRef.current) {
         firedRef.current = true;
         chirp();
+        voiceCue("Resume");
         setRunning(false);
       }
     };

@@ -51,10 +51,12 @@ export function FinishSessionModal({
       );
     const exerciseSnapshots = workout.activeWorkoutList.map((exerciseId) => {
       const sets = workout.workoutSets[exerciseId] ?? [];
+      const notes = workout.exerciseNotes[exerciseId];
       return {
         exerciseId,
         sets,
         e1rm: computeExerciseE1rm(exerciseId, sets),
+        ...(notes ? { notes } : {}),
       };
     });
     const session: SessionLog = {

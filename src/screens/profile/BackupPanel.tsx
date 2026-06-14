@@ -29,6 +29,7 @@ export function BackupPanel() {
         rpeMode: settings.rpeMode,
         haptics: settings.haptics,
         audioCue: settings.audioCue,
+        voiceCue: settings.voiceCue,
       },
       customExercises,
     );

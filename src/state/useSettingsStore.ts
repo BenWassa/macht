@@ -9,6 +9,7 @@ interface SettingsState extends Settings {
   setRpeMode: (rpeMode: EffortMode) => void;
   setHaptics: (haptics: boolean) => void;
   setAudioCue: (audioCue: boolean) => void;
+  setVoiceCue: (voiceCue: boolean) => void;
   hydrateSettings: (settings: Partial<Settings>) => void;
 }
 
@@ -20,11 +21,13 @@ export const useSettingsStore = create<SettingsState>()(
       rpeMode: "RPE",
       haptics: true,
       audioCue: false,
+      voiceCue: false,
       setUnits: (units) => set({ units }),
       setDefaultRest: (defaultRest) => set({ defaultRest }),
       setRpeMode: (rpeMode) => set({ rpeMode }),
       setHaptics: (haptics) => set({ haptics }),
       setAudioCue: (audioCue) => set({ audioCue }),
+      setVoiceCue: (voiceCue) => set({ voiceCue }),
       hydrateSettings: (settings) =>
         set((state) => ({
           units: settings.units ?? state.units,
@@ -32,6 +35,7 @@ export const useSettingsStore = create<SettingsState>()(
           rpeMode: settings.rpeMode ?? state.rpeMode,
           haptics: settings.haptics ?? state.haptics,
           audioCue: settings.audioCue ?? state.audioCue,
+          voiceCue: settings.voiceCue ?? state.voiceCue,
         })),
     }),
     { name: demoStorageKey("macht_settings") },

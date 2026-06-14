@@ -410,6 +410,42 @@ export const EXERCISE_LIBRARY: Exercise[] = [
     target: "Biceps",
     tags: [],
   },
+  {
+    id: "barbell_curl",
+    name: "Barbell Curl",
+    target: "Biceps",
+    tags: [],
+  },
+  {
+    id: "ez_bar_curl",
+    name: "EZ-Bar Curl",
+    target: "Biceps",
+    tags: [],
+  },
+  {
+    id: "cable_curl",
+    name: "Cable Curl",
+    target: "Biceps",
+    tags: [],
+  },
+  {
+    id: "hammer_curl",
+    name: "Hammer Curl",
+    target: "Biceps / Brachialis",
+    tags: [],
+  },
+  {
+    id: "preacher_curl",
+    name: "Preacher Curl",
+    target: "Biceps",
+    tags: [],
+  },
+  {
+    id: "incline_dumbbell_curl",
+    name: "Incline Dumbbell Curl",
+    target: "Biceps (long head)",
+    tags: [],
+  },
 ];
 
 export const TRAINING_TEMPLATES: TemplatePlan[] = [

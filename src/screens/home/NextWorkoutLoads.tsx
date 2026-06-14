@@ -16,6 +16,25 @@ const deltaTone = (target: ProgressionForecastTarget) => {
   return "text-neutral-500";
 };
 
+const momentumMessage = (target: ProgressionForecastTarget): string => {
+  if (target.state === "progress") {
+    return "Trajectory is up — you earned this load increase.";
+  }
+  if (target.state === "add-rep") {
+    return "Rep ceiling hit — one more rep this session before adding weight.";
+  }
+  if (target.state === "deload") {
+    return "Scheduled back-off. Your body earns recovery the same way it earns PRs.";
+  }
+  if (target.state === "rust") {
+    return "Easing back in after a break. Progress resumes from here.";
+  }
+  if (target.state === "baseline") {
+    return "Establishing your baseline. Two logged sessions unlock forecasting.";
+  }
+  return "Holding the baseline. Consistent reps compound into strength.";
+};
+
 export function NextWorkoutLoads({
   exercises,
   templateName,
@@ -84,6 +103,15 @@ export function NextWorkoutLoads({
           </span>
           <span className="mt-1 block font-mono text-[10px] leading-relaxed text-neutral-600">
             {forecast.primaryTarget.reason}
+          </span>
+        </div>
+
+        <div className="mt-3 border-t border-edge pt-3">
+          <span className="block font-mono text-[9px] leading-relaxed text-neutral-600">
+            {momentumMessage(forecast.primaryTarget)}
+          </span>
+          <span className="mt-2 block font-mono text-[9px] leading-relaxed text-neutral-700">
+            Starting suggestion only — lift more if you feel strong, ease off if fatigued. Projections auto-update from completed sessions.
           </span>
         </div>
       </div>

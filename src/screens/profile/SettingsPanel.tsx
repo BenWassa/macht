@@ -58,12 +58,23 @@ export function SettingsPanel() {
             </button>
           ))}
         </SettingRow>
-        <SettingRow title="Rest sound" subtitle="Audio cue at timer zero">
+        <SettingRow title="Rest sound" subtitle="Triple beep at timer zero">
           {([false, true] as const).map((val) => (
             <button
               key={String(val)}
               onClick={() => settings.setAudioCue(val)}
               className={`px-3 py-1 text-xs transition ${settings.audioCue === val ? "bg-blue-600 font-bold text-white" : "text-neutral-500 hover:text-neutral-300"}`}
+            >
+              {val ? "ON" : "OFF"}
+            </button>
+          ))}
+        </SettingRow>
+        <SettingRow title="Voice cue" subtitle={"Says \"Resume\" at timer zero"}>
+          {([false, true] as const).map((val) => (
+            <button
+              key={String(val)}
+              onClick={() => settings.setVoiceCue(val)}
+              className={`px-3 py-1 text-xs transition ${settings.voiceCue === val ? "bg-blue-600 font-bold text-white" : "text-neutral-500 hover:text-neutral-300"}`}
             >
               {val ? "ON" : "OFF"}
             </button>

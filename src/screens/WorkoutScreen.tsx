@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PlateVisualizer } from "@/components/PlateVisualizer";
 import { getExerciseConflict } from "@/domain/injuries";
 import { AddExerciseModal } from "@/modals/AddExerciseModal";
@@ -35,6 +35,45 @@ export function WorkoutScreen({
   const [showAddExercise, setShowAddExercise] = useState(false);
 
   useWakeLock(workout.workoutActive);
+
+  // Media Session API — enables lock-screen "next set" button on mobile
+  useEffect(() => {
+    if (!workout.workoutActive || !("mediaSession" in navigator)) return;
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: workout.workoutName,
+      artist: "Macht",
+    });
+    const markSetDone = () => {
+      const { activeWorkoutList, selectedExIndex, selectedSetIndex, workoutSets } =
+        useWorkoutStore.getState();
+      const exerciseId = activeWorkoutList[selectedExIndex];
+      if (!exerciseId) return;
+      const sets = workoutSets[exerciseId] ?? [];
+      if (sets[selectedSetIndex] && !sets[selectedSetIndex].completed) {
+        workout.toggleComplete(exerciseId, selectedSetIndex);
+      }
+    };
+    navigator.mediaSession.setActionHandler("play", markSetDone);
+    navigator.mediaSession.setActionHandler("pause", markSetDone);
+    navigator.mediaSession.setActionHandler("nexttrack", () => {
+      const { activeWorkoutList, selectedExIndex } = useWorkoutStore.getState();
+      if (selectedExIndex < activeWorkoutList.length - 1) {
+        workout.setSelectedExIndex(selectedExIndex + 1);
+      }
+    });
+    navigator.mediaSession.setActionHandler("previoustrack", () => {
+      const { selectedExIndex } = useWorkoutStore.getState();
+      if (selectedExIndex > 0) {
+        workout.setSelectedExIndex(selectedExIndex - 1);
+      }
+    });
+    return () => {
+      navigator.mediaSession.setActionHandler("play", null);
+      navigator.mediaSession.setActionHandler("pause", null);
+      navigator.mediaSession.setActionHandler("nexttrack", null);
+      navigator.mediaSession.setActionHandler("previoustrack", null);
+    };
+  }, [workout.workoutActive, workout.workoutName]);
 
   if (!workout.workoutActive) {
     return (
@@ -149,6 +188,21 @@ export function WorkoutScreen({
           </span>
         </div>
       )}
+
+      <div className="mb-3 border-t border-edge pt-2.5">
+        <label className="mb-1 block font-mono text-[10px] uppercase tracking-widest text-neutral-500">
+          Notes
+        </label>
+        <textarea
+          value={workout.exerciseNotes[selectedExerciseId] ?? ""}
+          onChange={(e) =>
+            workout.setExerciseNote(selectedExerciseId, e.target.value)
+          }
+          placeholder="Form cues, observations, upgrades..."
+          rows={2}
+          className="w-full resize-none border border-edge bg-black p-2 font-mono text-[11px] text-neutral-300 placeholder-neutral-700 focus:border-neutral-600 focus:outline-none"
+        />
+      </div>
 
       {selectedSet &&
         selectedPrescription.showPlateVisualizer &&
