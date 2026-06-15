@@ -10,6 +10,14 @@ import type { ExerciseSnapshot, SetEntry } from "./types";
  * Only the load mode matters, since an e1RM is only meaningful for externally
  * loaded lifts.
  */
+/**
+ * Reps are clamped before the Brzycki estimate: the formula loses accuracy past
+ * ~10 reps and is undefined at 37. Clamping (rather than discarding higher-rep
+ * sets) means a lift logged only at higher reps still records progress instead
+ * of silently dropping off the Progress screen.
+ */
+const E1RM_REP_CLAMP = 10;
+
 export function computeExerciseE1rm(
   exerciseId: string,
   sets: SetEntry[],
@@ -18,12 +26,12 @@ export function computeExerciseE1rm(
   const tracksE1rm =
     PROGRESS_LIFTS.includes(exerciseId) && prescription.loadMode === "external";
   if (!tracksE1rm) return undefined;
-  const topSet = sets
-    .filter((set) => set.completed && set.reps <= 10)
-    .sort(
-      (a, b) => brzyckiE1rm(b.weight, b.reps) - brzyckiE1rm(a.weight, a.reps),
-    )[0];
-  return topSet ? brzyckiE1rm(topSet.weight, topSet.reps) : undefined;
+  const e1rms = sets
+    .filter((set) => set.completed && set.weight > 0 && set.reps >= 1)
+    .map((set) =>
+      brzyckiE1rm(set.weight, Math.min(set.reps, E1RM_REP_CLAMP)),
+    );
+  return e1rms.length ? Math.max(...e1rms) : undefined;
 }
 
 /** Total volume and completed-set count derived from exercise snapshots. */
