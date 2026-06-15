@@ -69,17 +69,6 @@ export function SettingsPanel() {
             </button>
           ))}
         </SettingRow>
-        <SettingRow title="Voice cue" subtitle={"Says \"Resume\" at timer zero"}>
-          {([false, true] as const).map((val) => (
-            <button
-              key={String(val)}
-              onClick={() => settings.setVoiceCue(val)}
-              className={`px-3 py-1 text-xs transition ${settings.voiceCue === val ? "bg-blue-600 font-bold text-white" : "text-neutral-500 hover:text-neutral-300"}`}
-            >
-              {val ? "ON" : "OFF"}
-            </button>
-          ))}
-        </SettingRow>
         <InfoRow title="App version" subtitle="Installed build">
           v{APP_VERSION}
         </InfoRow>

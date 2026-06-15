@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { PlateVisualizer } from "@/components/PlateVisualizer";
 import { getExerciseConflict } from "@/domain/injuries";
 import { AddExerciseModal } from "@/modals/AddExerciseModal";
 import { getExercisePrescription } from "@/domain/prescriptions";
 import type { SetEntry } from "@/domain/types";
 import { useWakeLock } from "@/hooks/useWakeLock";
+import { useWorkoutMediaSession } from "@/hooks/useWorkoutMediaSession";
 import { vibrate } from "@/lib/haptics";
 import { ExerciseTabs } from "@/screens/workout/ExerciseTabs";
 import { WorkoutActionsBar } from "@/screens/workout/WorkoutActionsBar";
@@ -35,45 +36,7 @@ export function WorkoutScreen({
   const [showAddExercise, setShowAddExercise] = useState(false);
 
   useWakeLock(workout.workoutActive);
-
-  // Media Session API — enables lock-screen "next set" button on mobile
-  useEffect(() => {
-    if (!workout.workoutActive || !("mediaSession" in navigator)) return;
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: workout.workoutName,
-      artist: "Macht",
-    });
-    const markSetDone = () => {
-      const { activeWorkoutList, selectedExIndex, selectedSetIndex, workoutSets } =
-        useWorkoutStore.getState();
-      const exerciseId = activeWorkoutList[selectedExIndex];
-      if (!exerciseId) return;
-      const sets = workoutSets[exerciseId] ?? [];
-      if (sets[selectedSetIndex] && !sets[selectedSetIndex].completed) {
-        workout.toggleComplete(exerciseId, selectedSetIndex);
-      }
-    };
-    navigator.mediaSession.setActionHandler("play", markSetDone);
-    navigator.mediaSession.setActionHandler("pause", markSetDone);
-    navigator.mediaSession.setActionHandler("nexttrack", () => {
-      const { activeWorkoutList, selectedExIndex } = useWorkoutStore.getState();
-      if (selectedExIndex < activeWorkoutList.length - 1) {
-        workout.setSelectedExIndex(selectedExIndex + 1);
-      }
-    });
-    navigator.mediaSession.setActionHandler("previoustrack", () => {
-      const { selectedExIndex } = useWorkoutStore.getState();
-      if (selectedExIndex > 0) {
-        workout.setSelectedExIndex(selectedExIndex - 1);
-      }
-    });
-    return () => {
-      navigator.mediaSession.setActionHandler("play", null);
-      navigator.mediaSession.setActionHandler("pause", null);
-      navigator.mediaSession.setActionHandler("nexttrack", null);
-      navigator.mediaSession.setActionHandler("previoustrack", null);
-    };
-  }, [workout.workoutActive, workout.workoutName]);
+  useWorkoutMediaSession(workout.workoutActive ? workout.workoutName : "");
 
   if (!workout.workoutActive) {
     return (

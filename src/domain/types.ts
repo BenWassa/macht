@@ -63,7 +63,6 @@ export interface Settings {
   rpeMode: EffortMode;
   haptics: boolean;
   audioCue: boolean;
-  voiceCue: boolean;
 }
 
 export interface TemplatePlan {

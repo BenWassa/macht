@@ -47,18 +47,3 @@ export function chirp(): void {
     // ignore — autoplay policies may block
   }
 }
-
-export function voiceCue(message = "Go"): void {
-  if (!useSettingsStore.getState().voiceCue) return;
-  if (typeof window === "undefined" || !window.speechSynthesis) return;
-  try {
-    window.speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(message);
-    utter.rate = 1.1;
-    utter.pitch = 1.0;
-    utter.volume = 0.9;
-    window.speechSynthesis.speak(utter);
-  } catch {
-    // ignore
-  }
-}

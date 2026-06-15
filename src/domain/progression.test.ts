@@ -12,7 +12,6 @@ const SETTINGS: Settings = {
   rpeMode: "RPE",
   haptics: true,
   audioCue: false,
-  voiceCue: false,
 };
 
 const set = (
