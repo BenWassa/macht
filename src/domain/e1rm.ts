@@ -6,20 +6,36 @@ export function brzyckiE1rm(weight: number, reps: number): number {
   return Math.round(weight * (36 / (37 - reps)));
 }
 
+export interface DatedE1rm {
+  date: string;
+  e1rm: number;
+}
+
+/** Recorded e1RM points for a lift, oldest first, ordered by session date. */
+export function datedE1rmHistory(
+  sessions: SessionLog[],
+  exerciseId: string,
+): DatedE1rm[] {
+  return sessions
+    .slice()
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .flatMap((session) =>
+      (session.exerciseSnapshots ?? [])
+        .filter(
+          (snapshot) =>
+            snapshot.exerciseId === exerciseId &&
+            typeof snapshot.e1rm === "number" &&
+            snapshot.e1rm > 0,
+        )
+        .map((snapshot) => ({ date: session.date, e1rm: snapshot.e1rm! })),
+    );
+}
+
 export function deriveE1rmHistory(
   sessions: SessionLog[],
   exerciseId: string,
 ): number[] {
-  return sessions
-    .slice()
-    .reverse()
-    .flatMap(
-      (session) =>
-        session.exerciseSnapshots?.filter(
-          (snapshot) => snapshot.exerciseId === exerciseId,
-        ) ?? [],
-    )
-    .map((snapshot) => snapshot.e1rm)
-    .filter((value): value is number => typeof value === "number" && value > 0)
+  return datedE1rmHistory(sessions, exerciseId)
+    .map((point) => point.e1rm)
     .slice(-12);
 }

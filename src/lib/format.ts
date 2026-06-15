@@ -19,3 +19,8 @@ export function formatDate(iso: string): string {
 export function todayIso(): string {
   return new Date().toISOString().split("T")[0];
 }
+
+/** A percentage with an explicit sign on gains: "+10%", "0%", "-3.2%". */
+export function signedPct(value: number): string {
+  return `${value > 0 ? "+" : ""}${value}%`;
+}

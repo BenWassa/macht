@@ -9,7 +9,14 @@ export function SparklineChart({
   paused = false,
   projected = null,
 }: SparklineChartProps) {
-  const values = data.length > 1 ? data : [0, 0];
+  // A single recorded point is drawn as a flat line at its real value rather
+  // than collapsed to zero, so one logged session still reads as data.
+  const values =
+    data.length === 0
+      ? [0, 0]
+      : data.length === 1
+        ? [data[0], data[0]]
+        : data;
   const showProjection =
     typeof projected === "number" && projected > 0 && !paused;
   const all = showProjection ? [...values, projected] : values;

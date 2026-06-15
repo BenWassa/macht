@@ -7,6 +7,7 @@ import {
 import { ActivityHistory } from "@/screens/home/ActivityHistory";
 import { ConsistencyChart } from "@/screens/home/ConsistencyChart";
 import { NextWorkoutLoads } from "@/screens/home/NextWorkoutLoads";
+import { StrengthProfile } from "@/screens/home/StrengthProfile";
 import type { TabId } from "@/App";
 import { useCustomExerciseStore } from "@/state/useCustomExerciseStore";
 import { useHistoryStore } from "@/state/useHistoryStore";
@@ -51,6 +52,8 @@ export function HomeScreen({ setActiveTab }: HomeScreenProps) {
           Console
         </h1>
       </div>
+
+      <StrengthProfile setActiveTab={setActiveTab} />
 
       <div className="mb-10 flex flex-col gap-5 border border-edge bg-canvas p-6">
         <div className="flex flex-col items-start justify-between gap-5 sm:flex-row sm:items-center">
