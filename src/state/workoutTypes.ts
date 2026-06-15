@@ -14,6 +14,8 @@ export interface WorkoutState {
   adaptedDuringSession: boolean;
   deloadWeights: Record<string, number>;
   loadSuggestions: Record<string, LoadSuggestion>;
+  exerciseNotes: Record<string, string>;
+  setExerciseNote: (exerciseId: string, note: string) => void;
   tick: () => void;
   startTemplate: (
     template?: TemplatePlan,

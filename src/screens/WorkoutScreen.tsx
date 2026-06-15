@@ -5,6 +5,7 @@ import { AddExerciseModal } from "@/modals/AddExerciseModal";
 import { getExercisePrescription } from "@/domain/prescriptions";
 import type { SetEntry } from "@/domain/types";
 import { useWakeLock } from "@/hooks/useWakeLock";
+import { useWorkoutMediaSession } from "@/hooks/useWorkoutMediaSession";
 import { vibrate } from "@/lib/haptics";
 import { ExerciseTabs } from "@/screens/workout/ExerciseTabs";
 import { WorkoutActionsBar } from "@/screens/workout/WorkoutActionsBar";
@@ -35,6 +36,7 @@ export function WorkoutScreen({
   const [showAddExercise, setShowAddExercise] = useState(false);
 
   useWakeLock(workout.workoutActive);
+  useWorkoutMediaSession(workout.workoutActive ? workout.workoutName : "");
 
   if (!workout.workoutActive) {
     return (
@@ -149,6 +151,21 @@ export function WorkoutScreen({
           </span>
         </div>
       )}
+
+      <div className="mb-3 border-t border-edge pt-2.5">
+        <label className="mb-1 block font-mono text-[10px] uppercase tracking-widest text-neutral-500">
+          Notes
+        </label>
+        <textarea
+          value={workout.exerciseNotes[selectedExerciseId] ?? ""}
+          onChange={(e) =>
+            workout.setExerciseNote(selectedExerciseId, e.target.value)
+          }
+          placeholder="Form cues, observations, upgrades..."
+          rows={2}
+          className="w-full resize-none border border-edge bg-black p-2 font-mono text-[11px] text-neutral-300 placeholder-neutral-700 focus:border-neutral-600 focus:outline-none"
+        />
+      </div>
 
       {selectedSet &&
         selectedPrescription.showPlateVisualizer &&

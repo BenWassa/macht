@@ -32,6 +32,11 @@ export const useWorkoutStore = create<WorkoutState>()(
       adaptedDuringSession: false,
       deloadWeights: {},
       loadSuggestions: {},
+      exerciseNotes: {},
+      setExerciseNote: (exerciseId, note) =>
+        set((state) => ({
+          exerciseNotes: { ...state.exerciseNotes, [exerciseId]: note },
+        })),
       tick: () =>
         set((state) => {
           if (!state.workoutActive || !state.startedAt) return state;
@@ -71,6 +76,7 @@ export const useWorkoutStore = create<WorkoutState>()(
           isMinimumSession: false,
           adaptedDuringSession: false,
           loadSuggestions: {},
+          exerciseNotes: {},
         }),
       setSelectedExIndex: (selectedExIndex) =>
         set({ selectedExIndex, selectedSetIndex: 0 }),

@@ -41,6 +41,7 @@ export interface ExerciseSnapshot {
   exerciseId: string;
   sets: SetEntry[];
   e1rm?: number;
+  notes?: string;
 }
 
 export interface SessionLog {
@@ -53,6 +54,7 @@ export interface SessionLog {
   adapted: boolean;
   isMinimumSession: boolean;
   exerciseSnapshots?: ExerciseSnapshot[];
+  notes?: string;
 }
 
 export interface Settings {

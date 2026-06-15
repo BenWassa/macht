@@ -58,7 +58,7 @@ export function SettingsPanel() {
             </button>
           ))}
         </SettingRow>
-        <SettingRow title="Rest sound" subtitle="Audio cue at timer zero">
+        <SettingRow title="Rest sound" subtitle="Triple beep at timer zero">
           {([false, true] as const).map((val) => (
             <button
               key={String(val)}
