@@ -29,9 +29,14 @@ export function ProgressScreen() {
             Strength progress
           </h1>
         </div>
-        <div className="border border-dashed border-[#1a1a1a] bg-black p-8 text-center">
-          <p className="font-mono text-xs uppercase tracking-widest text-neutral-500">
+        <div className="border border-dashed border-[#1a1a1a] bg-black p-6">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-neutral-500">
             Log sessions to begin tracking progression.
+          </p>
+          <p className="mt-3 font-mono text-[10px] leading-relaxed text-neutral-700">
+            Each lift card shows estimated 1RM over time, calculated from your
+            logged weight and reps using the Brzycki formula. Two sessions on a
+            lift are enough to start the chart.
           </p>
         </div>
       </div>

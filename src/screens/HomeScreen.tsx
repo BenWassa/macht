@@ -45,10 +45,10 @@ export function HomeScreen({ setActiveTab }: HomeScreenProps) {
   return (
     <div className="animate-fadeIn">
       <div className="mb-8">
-        <p className="mb-1 font-mono text-[11px] uppercase tracking-[0.15em] text-neutral-400">
+        <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-neutral-500">
           Strength log
         </p>
-        <h1 className="font-mono text-2xl font-bold uppercase tracking-tight text-white">
+        <h1 className="font-mono text-xl font-bold uppercase tracking-tight">
           Console
         </h1>
       </div>

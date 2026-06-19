@@ -34,8 +34,9 @@ export function WorkoutScreen({
   const workout = useWorkoutStore();
   const showToast = useToastStore((state) => state.show);
   const [showAddExercise, setShowAddExercise] = useState(false);
+  const [wakeLockEnabled, setWakeLockEnabled] = useState(true);
 
-  useWakeLock(workout.workoutActive);
+  useWakeLock(workout.workoutActive && wakeLockEnabled);
   useWorkoutMediaSession(workout.workoutActive ? workout.workoutName : "");
 
   if (!workout.workoutActive) {
@@ -106,11 +107,13 @@ export function WorkoutScreen({
     <div className="animate-fadeIn">
       <WorkoutActionsBar
         isMinimumSession={workout.isMinimumSession}
+        wakeLockActive={wakeLockEnabled}
         onAddExercise={() => setShowAddExercise(true)}
         onStartWarmup={onStartWarmup}
         onToggleMinimum={() =>
           workout.setIsMinimumSession(!workout.isMinimumSession)
         }
+        onToggleWakeLock={() => setWakeLockEnabled((prev) => !prev)}
         onFinish={onFinish}
       />
 

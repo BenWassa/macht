@@ -43,13 +43,26 @@ export function StrengthProfile({ setActiveTab }: StrengthProfileProps) {
       </button>
 
       {profile.trackedCount === 0 ? (
-        <div className="px-4 py-8 text-center">
-          <p className="font-mono text-xs uppercase tracking-widest text-neutral-500">
-            Log a big-five lift to build your profile
+        <div className="px-4 py-6">
+          <p className="font-mono text-[10px] uppercase tracking-wider text-neutral-500">
+            Log any of the big five to build your profile.
           </p>
-          <p className="mt-2 font-mono text-[10px] uppercase tracking-wider text-neutral-700">
-            {profile.lifts.map((lift) => lift.name).join(" · ")}
-          </p>
+          <ul className="mt-3 space-y-0 divide-y divide-edge">
+            {profile.lifts.map((lift) => (
+              <li key={lift.exerciseId}>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("templates")}
+                  className="flex w-full items-center justify-between py-2.5 font-mono text-[11px] font-bold uppercase tracking-tight text-neutral-600 transition hover:text-neutral-400"
+                >
+                  {lift.name}
+                  <span className="text-[9px] tracking-widest text-neutral-700">
+                    Start →
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
         </div>
       ) : (
         <>

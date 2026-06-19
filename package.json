@@ -1,7 +1,7 @@
 {
   "name": "macht",
   "private": true,
-  "version": "0.5.1",
+  "version": "0.5.2",
   "homepage": "https://BenWassa.github.io/macht/",
   "type": "module",
   "scripts": {

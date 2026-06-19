@@ -69,7 +69,7 @@ export function NextWorkoutLoads({
         )}
       </div>
 
-      <div className="border-2 border-neutral-800 bg-black p-4">
+      <div className="border border-neutral-800 bg-black p-4">
         <div className="flex items-start justify-between gap-3 border-b border-edge pb-3">
           <div className="min-w-0">
             <span className="block font-mono text-[9px] font-bold uppercase tracking-[0.24em] text-blue-400">

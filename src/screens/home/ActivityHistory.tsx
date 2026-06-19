@@ -2,6 +2,8 @@ import { Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRef, useState } from "react";
 import { useHistoryStore } from "@/state/useHistoryStore";
+import { useToastStore } from "@/state/useToastStore";
+import { useSettingsStore } from "@/state/useSettingsStore";
 import type { SessionLog } from "@/domain/types";
 import { formatWorkoutName } from "@/lib/format";
 import { WorkoutSummaryModal } from "@/modals/WorkoutSummaryModal";
@@ -13,6 +15,9 @@ interface ActivityHistoryProps {
 
 export function ActivityHistory({ sessions, onStart }: ActivityHistoryProps) {
   const deleteSession = useHistoryStore((state) => state.deleteSession);
+  const addSession = useHistoryStore((state) => state.addSession);
+  const showToast = useToastStore((state) => state.show);
+  const units = useSettingsStore((state) => state.units);
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
   const dragOccurred = useRef(false);
@@ -23,9 +28,13 @@ export function ActivityHistory({ sessions, onStart }: ActivityHistoryProps) {
     setPendingDelete(id);
   }
 
-  function handleConfirmDelete(id: string) {
-    deleteSession(id);
+  function handleConfirmDelete(session: SessionLog) {
+    deleteSession(session.id);
     setPendingDelete(null);
+    showToast(`${formatWorkoutName(session.template)} deleted`, {
+      label: "Undo",
+      onAction: () => addSession(session),
+    });
   }
 
   function handleCancel() {
@@ -67,7 +76,7 @@ export function ActivityHistory({ sessions, onStart }: ActivityHistoryProps) {
                         Cancel
                       </button>
                       <button
-                        onClick={() => handleConfirmDelete(session.id)}
+                        onClick={() => handleConfirmDelete(session)}
                         className="h-full px-5 font-mono text-[10px] uppercase tracking-wider text-white bg-red-600 hover:bg-red-500 transition-colors"
                       >
                         Delete
@@ -124,18 +133,30 @@ export function ActivityHistory({ sessions, onStart }: ActivityHistoryProps) {
                       {session.date} · {session.duration} · {session.sets} sets
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="font-mono text-sm font-bold text-neutral-300">
-                      {session.volume.toLocaleString()}{" "}
-                      <span className="font-mono text-[10px] text-neutral-500">
-                        lbs
-                      </span>
-                    </p>
-                    {session.adapted && (
-                      <span className="mt-0.5 block font-mono text-[10px] uppercase text-blue-400">
-                        Adapted
-                      </span>
-                    )}
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <p className="font-mono text-sm font-bold text-neutral-300">
+                        {session.volume.toLocaleString()}{" "}
+                        <span className="font-mono text-[10px] text-neutral-500">
+                          {units}
+                        </span>
+                      </p>
+                      {session.adapted && (
+                        <span className="mt-0.5 block font-mono text-[10px] uppercase text-blue-400">
+                          Adapted
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      aria-label="Delete session"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSwipe(session.id);
+                      }}
+                      className="hidden group-hover:flex items-center justify-center p-1.5 text-neutral-600 hover:text-red-400 transition-colors"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </div>
                 </motion.div>
               </motion.div>

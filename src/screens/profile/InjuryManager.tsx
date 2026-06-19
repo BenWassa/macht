@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { useInjuryStore } from "@/state/useInjuryStore";
+import { useToastStore } from "@/state/useToastStore";
 import type { ExerciseInjury } from "@/domain/types";
 
 interface InjuryManagerProps {
@@ -12,6 +13,8 @@ export function InjuryManager({ onEdit, onAdd }: InjuryManagerProps) {
   const injuries = useInjuryStore((state) => state.injuries);
   const removeInjury = useInjuryStore((state) => state.removeInjury);
   const clearInjury = useInjuryStore((state) => state.clearInjury);
+  const updateInjury = useInjuryStore((state) => state.updateInjury);
+  const showToast = useToastStore((state) => state.show);
   const [showPast, setShowPast] = useState(false);
 
   const active = injuries.filter((injury) => !injury.clearedDate);
@@ -74,7 +77,16 @@ export function InjuryManager({ onEdit, onAdd }: InjuryManagerProps) {
             </button>
             <div className="flex gap-2">
               <button
-                onClick={() => clearInjury(injury.id)}
+                onClick={() => {
+                  const cleared = clearInjury(injury.id);
+                  if (cleared) {
+                    showToast(`${cleared.name} cleared`, {
+                      label: "Undo",
+                      onAction: () =>
+                        updateInjury(cleared.id, { clearedDate: undefined }),
+                    });
+                  }
+                }}
                 className="font-mono text-[9px] uppercase text-emerald-400"
               >
                 Clear
