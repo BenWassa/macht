@@ -483,5 +483,14 @@ export const PROGRESS_LIFTS = [
   "barbell_row",
 ];
 
+/** Compact labels for the Big Five strip on Home. */
+export const PROGRESS_LIFT_SHORT: Record<string, string> = {
+  squat: "SQ",
+  bench_press: "BP",
+  deadlift: "DL",
+  overhead_press: "OHP",
+  barbell_row: "ROW",
+};
+
 export const getExerciseById = (exerciseId: string): Exercise | undefined =>
   EXERCISE_LIBRARY.find((exercise) => exercise.id === exerciseId);

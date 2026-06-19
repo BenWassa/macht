@@ -4,7 +4,6 @@ interface WeekBucket {
   week: string;
   count: number;
   restricted: boolean;
-  note: string;
 }
 
 function rollingWeeks(sessions: SessionLog[]): WeekBucket[] {
@@ -19,88 +18,61 @@ function rollingWeeks(sessions: SessionLog[]): WeekBucket[] {
       const date = new Date(`${session.date}T00:00:00`);
       return date >= start && date < end;
     });
-    const restricted = weekSessions.some((session) => session.adapted);
     return {
       week: index === 5 ? "NOW" : `${weeksAgo}W`,
       count: weekSessions.length,
-      restricted,
-      note: restricted ? "Adapted" : "",
+      restricted: weekSessions.some((session) => session.adapted),
     };
   });
 }
 
+/**
+ * Slim six-week consistency strip. No floor/stretch lines or legend — the bar
+ * heights and the trailing labels carry it. Injury weeks read as a muted hatch,
+ * not an alarm.
+ */
 export function ConsistencyChart({ sessions }: { sessions: SessionLog[] }) {
   const weeks = rollingWeeks(sessions);
+  const total = weeks.reduce((sum, week) => sum + week.count, 0);
 
   return (
     <div className="mb-10">
-      <h2 className="mb-3 font-mono text-[11px] uppercase tracking-wider text-neutral-400">
-        Consistency
-      </h2>
-      <div className="border border-edge bg-canvas p-4 pb-3">
-        <div className="mb-6 flex items-center justify-between">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-400">
-            Trailing six weeks
-          </span>
-          <div className="flex space-x-4 font-mono text-[10px]">
-            <span className="flex items-center space-x-1.5">
-              <span className="inline-block h-2 w-2 bg-blue-600" />
-              <span className="uppercase text-neutral-500">Logged</span>
+      <div className="mb-3 flex items-baseline justify-between">
+        <h2 className="font-mono text-[11px] uppercase tracking-wider text-neutral-400">
+          Consistency
+        </h2>
+        <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-600">
+          {total} sessions / 6w
+        </span>
+      </div>
+      <div className="grid grid-cols-6 gap-2">
+        {weeks.map((week) => (
+          <div key={week.week} className="flex flex-col items-center gap-1.5">
+            <span className="font-mono text-[10px] tabular-nums text-neutral-400">
+              {week.count}
             </span>
-            <span className="flex items-center space-x-1.5">
-              <span className="inline-block h-2 w-2 border-t border-red-500 bg-neutral-800" />
-              <span className="uppercase text-neutral-500">Injury</span>
-            </span>
-          </div>
-        </div>
-        <div className="relative grid h-24 grid-cols-6 items-end gap-2 border-b border-edge pb-2">
-          <div
-            className="absolute left-0 right-0 border-t border-dashed border-neutral-800/50"
-            style={{ bottom: "33.3%" }}
-          >
-            <span className="absolute -top-2 right-0 bg-canvas pl-1 font-mono text-[10px] text-neutral-500">
-              Floor: 2
-            </span>
-          </div>
-          <div
-            className="absolute left-0 right-0 border-t border-[#1f1f1f]"
-            style={{ bottom: "66.6%" }}
-          >
-            <span className="absolute -top-2 right-0 bg-canvas pl-1 font-mono text-[10px] text-neutral-500">
-              Stretch: 4
-            </span>
-          </div>
-          {weeks.map((week) => (
-            <div
-              key={week.week}
-              className="group flex h-full flex-col items-center justify-end"
-            >
-              <span className="mb-1 font-mono text-[11px] text-neutral-300">
-                {week.count}
-              </span>
+            <div className="flex h-12 w-full items-end">
               <div
-                className={`relative w-full transition-all duration-300 ${week.restricted ? "border-t border-red-500 bg-neutral-800" : "bg-blue-600"}`}
-                style={{ height: `${Math.max((week.count / 6) * 100, 6)}%` }}
-              >
-                {week.note && (
-                  <div className="absolute bottom-full left-1/2 mb-1 -translate-x-1/2 whitespace-nowrap border border-red-900 bg-red-950 px-1 font-mono text-[9px] uppercase text-red-400">
-                    {week.note}
-                  </div>
-                )}
-              </div>
+                className={`w-full transition-all duration-500 ease-out ${
+                  week.count === 0
+                    ? "h-px bg-neutral-800"
+                    : week.restricted
+                      ? "bg-yellow-700/60"
+                      : "bg-blue-600"
+                }`}
+                style={{
+                  height:
+                    week.count === 0
+                      ? undefined
+                      : `${Math.min((week.count / 4) * 100, 100)}%`,
+                }}
+              />
             </div>
-          ))}
-        </div>
-        <div className="grid grid-cols-6 gap-2 pt-2 text-center">
-          {weeks.map((week) => (
-            <span
-              key={week.week}
-              className="font-mono text-[10px] uppercase text-neutral-500"
-            >
+            <span className="font-mono text-[9px] uppercase tracking-wider text-neutral-600">
               {week.week}
             </span>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   );
