@@ -1,19 +1,19 @@
 # Macht Reboot — Execution Tracker
 
-This file is the live implementation checklist for draft PR #13. Update it as work lands so the reboot stays aligned with `MACHT_PRODUCT_REBOOT_PLAN.md`.
+This file is the live implementation checklist for the Macht product reboot. Update it as work lands so implementation stays aligned with `MACHT_PRODUCT_REBOOT_PLAN.md`.
 
 ## Current focus
 
-**Phase 3 — Program and mesocycle system**
+**Phase 4 — Design system**
 
-Phases 0–2 are implemented. The full implementation head has passed lint, tests, and TypeScript/build.
+Phases 0–3 are implemented and have passed lint, the full test suite, and TypeScript/build validation.
 
 ## Validation status
 
-- Fresh PR #13 CI: lint ✅, tests ✅, TypeScript/build ✅.
-- Bundle-size gate ❌ due to pre-existing runtime bundle at roughly 405 KB raw / 125 KB gz versus the stale 400 / 120 budget.
+- Latest Phase 3 CI: lint ✅, tests ✅, TypeScript/build ✅.
+- Bundle-size gate ❌ due to the pre-existing runtime bundle at roughly 405 KB raw / 125 KB gz versus the stale 400 / 120 budget.
 - Lighthouse is skipped after the bundle-size failure.
-- The new foundation/progression code is additive and does not increase the shipped runtime bundle while unused.
+- The new domain architecture is additive and does not increase the shipped runtime bundle while unused.
 - CI includes `npm test` and targets `agent/**` pushes, `main`, and pull requests.
 
 ## Phase 0 — Reboot contract
@@ -72,14 +72,27 @@ Phases 0–2 are implemented. The full implementation head has passed lint, test
 
 ## Phase 3 — Program and mesocycle system
 
-- [ ] Program create/edit.
-- [ ] 2–6 sessions/week.
-- [ ] Muscle priorities.
-- [ ] Exercise selection/substitution.
-- [ ] Accumulation + deload weeks.
-- [ ] Session generation.
-- [ ] Session-time budget.
-- [ ] Missed-session schedule repair.
+- [x] Program create/edit.
+- [x] 2–6 sessions/week.
+- [x] Muscle priorities.
+- [x] Exercise selection/substitution.
+- [x] Accumulation + deload weeks.
+- [x] Session generation.
+- [x] Session-time budget.
+- [x] Missed-session schedule repair.
+- [x] Propagate progression decisions to the next matching program slot.
+- [x] Enforce program-wide unique slot IDs for independent progression streams.
+
+### Gate
+
+- [x] A validated program generates a complete mesocycle.
+- [x] Same exercises in different program slots can progress independently.
+- [x] Session-time budgets preserve higher-priority work first.
+- [x] Missed-session repair preserves session order.
+- [x] Equipment-aware substitutions are filterable and user overrides propagate intentionally.
+- [x] Lint passes.
+- [x] Full test suite passes.
+- [x] TypeScript/build passes.
 
 ## Phase 4 — Design system
 
