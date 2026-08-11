@@ -6,7 +6,14 @@ This is the canonical implementation checklist for the Macht product reboot defi
 
 **Reboot implementation complete through Phase 11.**
 
-The final implementation head before tracker consolidation (`691fd9bc`) passed the complete CI pipeline: lint, full tests, TypeScript/build, bundle-size budget, and Lighthouse.
+Final enforced quality measurements on the completed implementation:
+
+- lint passes
+- 126 tests pass across 21 files
+- TypeScript/build passes
+- total JavaScript: 399.6 KB raw / 118.8 KB gzip, inside the unchanged 400 KB / 120 KB budget
+- Lighthouse: performance 0.98, accessibility 1.00, best practices 0.96, PWA 1.00
+- enforced CI minimums: performance 0.90, accessibility 0.95, best practices 0.90
 
 Primary information architecture:
 
@@ -257,18 +264,25 @@ Primary information architecture:
 - [x] Rewrite README for the adaptive training product.
 - [x] Update PWA name/description while preserving installable standalone configuration.
 - [x] Offline audit: local persisted stores, persisted active workout, local-first execution, and generated service worker remain intact.
-- [x] Accessibility audit: focus-visible, forced colors, reduced motion, semantic charts, dialog semantics, labels, pressed state, and minimum primary touch targets.
+- [x] Accessibility audit: focus-visible, forced colors, reduced motion, semantic charts, dialog semantics, labels, pressed state, browser zoom, and minimum primary touch targets.
 - [x] Upgrade settings controls and substitution/finish dialogs where the audit found gaps.
 - [x] Mobile interaction audit: safe-area bottom navigation, large workout controls, responsive settings, and bundle/Lighthouse gates.
 - [x] Export/import audit completed against complete v2 payload + v1 migration path.
+- [x] Reduce first-load main-thread work by deferring secondary application routes and below-the-fold Today insights.
+- [x] Defer service-worker registration until after page load.
+- [x] Remove the external font request from the startup path.
+- [x] Convert Lighthouse performance/accessibility/best-practices targets from warnings into CI errors.
 
 ### Gate
 
 - [x] Lint passes.
-- [x] Full tests pass.
+- [x] 126 tests pass across 21 files.
 - [x] TypeScript/build passes.
-- [x] Bundle-size budget passes.
-- [x] Lighthouse passes.
+- [x] Bundle-size budget passes at 399.6 KB raw / 118.8 KB gzip against 400 KB / 120 KB limits.
+- [x] Lighthouse performance passes at 0.98 against a hard 0.90 minimum.
+- [x] Lighthouse accessibility passes at 1.00 against a hard 0.95 minimum.
+- [x] Lighthouse best practices passes at 0.96 against a hard 0.90 minimum.
+- [x] Lighthouse PWA scores 1.00.
 - [x] Final implementation route/file audit shows no temporary App/Today/You/Habit `V2` shims remain.
 
 ## Non-negotiables — final status
