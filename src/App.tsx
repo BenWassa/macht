@@ -4,6 +4,7 @@ import { RestTimerBanner } from "@/components/RestTimerBanner";
 import { Toast } from "@/components/Toast";
 import { useSessionClock } from "@/hooks/useSessionClock";
 import { useSessionTimers } from "@/hooks/useSessionTimers";
+import { formatTime, formatWorkoutName } from "@/lib/format";
 import { FinishSessionModal } from "@/modals/FinishSessionModal";
 import { FreePlayScreen } from "@/screens/FreePlayScreen";
 import { HomeScreen } from "@/screens/HomeScreen";
@@ -14,7 +15,6 @@ import { WorkoutScreen } from "@/screens/WorkoutScreen";
 import { useToastStore } from "@/state/useToastStore";
 import { useUiStore } from "@/state/useUiStore";
 import { useWorkoutStore } from "@/state/useWorkoutStore";
-import { formatTime, formatWorkoutName } from "@/lib/format";
 import { useState } from "react";
 
 export type { TabId } from "@/state/useUiStore";
@@ -34,45 +34,42 @@ export default function App() {
   useSessionClock();
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#060606] text-[#f0f0f0] selection:bg-blue-600 selection:text-white">
+    <div className="flex min-h-screen flex-col bg-bg text-text selection:bg-signal-soft selection:text-text">
       <header
-        className={`sticky top-0 z-40 flex items-center justify-between border-b px-4 py-3 ${
+        className={`sticky top-0 z-40 border-b backdrop-blur ${
           isWorkoutScreen
-            ? "border-blue-900/60 bg-blue-950/15"
-            : "border-[#1a1a1a] bg-[#0c0c0c]"
+            ? "border-positive/20 bg-surface-1/96"
+            : "border-divider bg-bg/92"
         }`}
       >
-        <div className="flex min-w-0 flex-1 items-center space-x-3 pr-3">
-          <div
-            className={`h-1.5 w-1.5 animate-pulse rounded-full ${
-              isWorkoutScreen ? "bg-emerald-500" : "bg-blue-500"
-            }`}
-          />
-          <span
-            className={`truncate font-mono font-bold tracking-tight ${
-              isWorkoutScreen
-                ? "text-[12px] text-neutral-100"
-                : "text-[11px] uppercase tracking-[0.28em] text-neutral-200"
-            }`}
-          >
-            {isWorkoutScreen ? formatWorkoutName(workoutName) : "MACHT"}
-          </span>
-        </div>
-        {workoutActive && (
-          <button
-            onClick={() => setActiveTab("workout")}
-            className="flex items-center space-x-2 border border-[#222] bg-[#121212] px-3 py-1 transition hover:bg-[#1a1a1a]"
-          >
-            <span className="h-1 w-1 animate-pulse rounded-full bg-emerald-500" />
-            <span className="font-mono text-[9px] font-bold uppercase tracking-widest text-neutral-300">
-              {formatTime(workoutDuration)}
+        <div className="mx-auto flex w-full max-w-2xl items-center justify-between px-4 py-3">
+          <div className="flex min-w-0 flex-1 items-center gap-2.5 pr-3">
+            <span
+              className={`h-2 w-2 shrink-0 rounded-full ${
+                isWorkoutScreen ? "bg-positive" : "bg-signal"
+              }`}
+              aria-hidden="true"
+            />
+            <span className="truncate text-sm font-bold tracking-[-0.02em] text-text">
+              {isWorkoutScreen ? formatWorkoutName(workoutName) : "MACHT"}
             </span>
-          </button>
-        )}
+          </div>
+          {workoutActive ? (
+            <button
+              type="button"
+              onClick={() => setActiveTab("workout")}
+              className="inline-flex min-h-11 items-center gap-2 rounded-md bg-surface-2 px-3 text-sm font-semibold text-text-secondary transition hover:bg-surface-3 hover:text-text"
+              aria-label={`Resume workout, ${formatTime(workoutDuration)} elapsed`}
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-positive" aria-hidden="true" />
+              <span data-metric="true">{formatTime(workoutDuration)}</span>
+            </button>
+          ) : null}
+        </div>
       </header>
       <DemoModeBanner />
 
-      <main className="mx-auto w-full max-w-2xl flex-1 overflow-y-auto px-4 py-6 pb-36">
+      <main className="mx-auto w-full max-w-2xl flex-1 overflow-y-auto px-4 py-6 pb-32 sm:px-5">
         {activeTab === "home" && <HomeScreen setActiveTab={setActiveTab} />}
         {activeTab === "freeplay" && (
           <FreePlayScreen setActiveTab={setActiveTab} />
@@ -91,7 +88,7 @@ export default function App() {
         {activeTab === "profile" && <ProfileScreen />}
       </main>
 
-      {restTimer.visible && (
+      {restTimer.visible ? (
         <RestTimerBanner
           seconds={restTimer.seconds}
           running={restTimer.running}
@@ -100,9 +97,9 @@ export default function App() {
           onReset={restTimer.reset}
           onDismiss={dismissRest}
         />
-      )}
+      ) : null}
 
-      {warmupTimer.visible && !restTimer.visible && (
+      {warmupTimer.visible && !restTimer.visible ? (
         <RestTimerBanner
           label="Warm-up"
           doneText="Done - start lifting"
@@ -114,7 +111,7 @@ export default function App() {
           onReset={warmupTimer.reset}
           onDismiss={warmupTimer.dismiss}
         />
-      )}
+      ) : null}
 
       <Toast />
 
@@ -124,7 +121,7 @@ export default function App() {
         workoutActive={workoutActive}
       />
 
-      {showFinishModal && (
+      {showFinishModal ? (
         <FinishSessionModal
           onClose={() => setShowFinishModal(false)}
           onSaved={(summary) => {
@@ -139,7 +136,7 @@ export default function App() {
             setActiveTab("home");
           }}
         />
-      )}
+      ) : null}
     </div>
   );
 }

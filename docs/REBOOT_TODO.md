@@ -1,19 +1,17 @@
 # Macht Reboot — Execution Tracker
 
-This file is the live implementation checklist for draft PR #13. Update it as work lands so the reboot stays aligned with `MACHT_PRODUCT_REBOOT_PLAN.md`.
+This file is the live implementation checklist for the Macht product reboot. Update it as work lands so implementation stays aligned with `MACHT_PRODUCT_REBOOT_PLAN.md`.
 
 ## Current focus
 
-**Phase 3 — Program and mesocycle system**
+**Phase 6 — Workout execution**
 
-Phases 0–2 are implemented. The full implementation head has passed lint, tests, and TypeScript/build.
+Phases 0–5 are implemented. The latest Phase 5 code head passed the complete CI pipeline: lint, tests, TypeScript/build, bundle-size budget, and Lighthouse.
 
 ## Validation status
 
-- Fresh PR #13 CI: lint ✅, tests ✅, TypeScript/build ✅.
-- Bundle-size gate ❌ due to pre-existing runtime bundle at roughly 405 KB raw / 125 KB gz versus the stale 400 / 120 budget.
-- Lighthouse is skipped after the bundle-size failure.
-- The new foundation/progression code is additive and does not increase the shipped runtime bundle while unused.
+- Latest Phase 5 CI: lint ✅, tests ✅, TypeScript/build ✅, bundle size ✅, Lighthouse ✅.
+- Replacing the old Home dashboard removed enough shipped UI code to bring the runtime bundle back under budget.
 - CI includes `npm test` and targets `agent/**` pushes, `main`, and pull requests.
 
 ## Phase 0 — Reboot contract
@@ -64,45 +62,77 @@ Phases 0–2 are implemented. The full implementation head has passed lint, test
 
 ### Gate
 
-- [x] Lint passes.
-- [x] Full test suite passes.
-- [x] TypeScript/build passes.
 - [x] Every automated progression decision exposes persisted reasons/evidence.
 - [x] Competing signals prioritize deload/fatigue protection before progression.
+- [x] Lint, tests, and TypeScript/build pass.
 
 ## Phase 3 — Program and mesocycle system
 
-- [ ] Program create/edit.
-- [ ] 2–6 sessions/week.
-- [ ] Muscle priorities.
-- [ ] Exercise selection/substitution.
-- [ ] Accumulation + deload weeks.
-- [ ] Session generation.
-- [ ] Session-time budget.
-- [ ] Missed-session schedule repair.
+- [x] Program create/edit.
+- [x] 2–6 sessions/week.
+- [x] Muscle priorities.
+- [x] Exercise selection/substitution.
+- [x] Accumulation + deload weeks.
+- [x] Session generation.
+- [x] Session-time budget.
+- [x] Missed-session schedule repair.
+- [x] Propagate progression decisions to the next matching program slot.
+- [x] Enforce program-wide unique slot IDs for independent progression streams.
+
+### Gate
+
+- [x] A validated program generates a complete mesocycle.
+- [x] Same exercises in different program slots can progress independently.
+- [x] Session-time budgets preserve higher-priority work first.
+- [x] Missed-session repair preserves session order.
+- [x] Equipment-aware substitutions are filterable and user overrides propagate intentionally.
+- [x] Lint, tests, and TypeScript/build pass.
 
 ## Phase 4 — Design system
 
-- [ ] Typography system.
-- [ ] Semantic color tokens.
-- [ ] Surfaces / spacing / radius / elevation.
-- [ ] Motion system.
-- [ ] Numeric typography.
-- [ ] Chart language.
-- [ ] Empty / success / PR / warning / recovery states.
-- [ ] WCAG and reduced-motion audit.
+- [x] Typography system.
+- [x] Semantic color tokens.
+- [x] Surfaces / spacing / radius / elevation.
+- [x] Motion system.
+- [x] Numeric typography.
+- [x] Chart language.
+- [x] Empty / success / PR / warning / recovery states.
+- [x] WCAG and reduced-motion audit.
+- [x] Shared tactile button, metric, and state-panel primitives.
+
+### Gate
+
+- [x] Sans-serif UI typography replaces monospace as the system default.
+- [x] Muted normal text meets AA contrast even on Surface 3.
+- [x] Semantic state pairs meet AA contrast.
+- [x] Shared button touch target is at least 44px high.
+- [x] Focus-visible, forced-colors, and reduced-motion behavior are defined globally.
+- [x] Lint, tests, and TypeScript/build pass.
 
 ## Phase 5 — Today
 
-- [ ] Primary Today surface.
-- [ ] Dominant Start Workout action.
-- [ ] Planned session preview and duration.
-- [ ] Mesocycle/week state.
-- [ ] Weekly adherence.
-- [ ] Recent meaningful progress.
+- [x] Primary Today surface.
+- [x] Dominant Start Workout / Resume Workout action.
+- [x] Planned session exercise preview and duration.
+- [x] Active program / mesocycle / week state with safe legacy fallback.
+- [x] Weekly adherence.
+- [x] Recent meaningful progress.
+- [x] Persisted v2 program context available to Today.
+- [x] Navigation aligned to TODAY / PROGRAM / SESSION / PROGRESS / YOU.
+- [x] Remove StrengthHero / ActivityHistory / ConsistencyChart from the Home render path.
+
+### Gate
+
+- [x] Opening a new UI state lands on Today.
+- [x] An active workout shows Resume Workout and cannot be overwritten from Today.
+- [x] Today view-model behavior is unit tested independently of React.
+- [x] The runtime bundle is back within the configured budget.
+- [x] Lint, full tests, TypeScript/build, bundle-size check, and Lighthouse pass.
 
 ## Phase 6 — Workout
 
+- [ ] Execute a v2 PlannedSession / ExercisePrescription directly in the workout store.
+- [ ] Preserve prescription snapshots separately from actual set performance.
 - [ ] Exercise-focused execution surface.
 - [ ] Prescription + previous performance together.
 - [ ] Fast numeric entry.
@@ -112,6 +142,7 @@ Phases 0–2 are implemented. The full implementation head has passed lint, test
 - [ ] Effort capture.
 - [ ] Minimal feedback capture.
 - [ ] Progress cues and restrained PR celebration.
+- [ ] Prevent accidental navigation from destroying an active session.
 
 ## Phase 7 — Progress
 
@@ -154,7 +185,7 @@ Phases 0–2 are implemented. The full implementation head has passed lint, test
 - [ ] Update README and PWA manifest.
 - [x] Run tests in CI configuration.
 - [x] Migration fixtures.
-- [ ] Resolve stale bundle-size budget or reduce bundle below the current gate.
+- [x] Resolve the stale bundle-size budget or reduce the runtime below the current gate.
 - [ ] Offline audit.
 - [ ] Accessibility audit.
 - [ ] Export/import audit.
