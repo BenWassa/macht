@@ -15,7 +15,7 @@ export default {
         text: {
           DEFAULT: "#f3f1e9",
           secondary: "#b9b7af",
-          muted: "#85847e",
+          muted: "#96948d",
           disabled: "#5d5d58",
         },
         signal: {
