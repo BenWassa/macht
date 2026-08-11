@@ -52,6 +52,7 @@ export interface WorkoutState {
     setPerformanceId: SetPerformanceId,
     patch: SetPerformancePatch,
   ) => void;
+  appendV2Set: (exercisePerformanceId: ExercisePerformanceId) => void;
   toggleV2Complete: (
     exercisePerformanceId: ExercisePerformanceId,
     setPerformanceId: SetPerformanceId,
