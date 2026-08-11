@@ -21,6 +21,17 @@ const MUSCLE_RULES: Array<{ pattern: RegExp; muscleId: MuscleId }> = [
   { pattern: /core|anti-rotation|abdom/i, muscleId: "core" },
 ];
 
+const clampEffort = (effort?: EffortTarget): EffortTarget | undefined => {
+  if (!effort) return undefined;
+  return {
+    scale: effort.scale,
+    value:
+      effort.scale === "RIR"
+        ? clamp(effort.value, 0, 6)
+        : clamp(effort.value, 5, 10),
+  };
+};
+
 export function inferTargetMuscles(
   targetLabel: string,
   fallback: MuscleId[] = [],
@@ -118,7 +129,7 @@ export function updateProgramSlotTraining(
       ),
       repRange: { min, max },
       startingRepTarget,
-      targetEffort: patch.targetEffort ?? slot.targetEffort,
+      targetEffort: clampEffort(patch.targetEffort ?? slot.targetEffort),
       restSeconds: clamp(
         Math.round(patch.restSeconds ?? slot.restSeconds ?? 90),
         30,
