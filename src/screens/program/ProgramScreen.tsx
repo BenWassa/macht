@@ -14,7 +14,6 @@ import {
 import { validateProgram } from "@/domain/training/program";
 import { createStarterProgram } from "@/domain/training/starterProgram";
 import type { Program } from "@/domain/training/types";
-import type { TabId } from "@/App";
 import { ProgramConstraintsCard } from "@/screens/constraints/ProgramConstraintsCard";
 import { useCustomExerciseStore } from "@/state/useCustomExerciseStore";
 import { useProgramStore } from "@/state/useProgramStore";
@@ -28,11 +27,7 @@ import { ProgramActionsCard } from "./ProgramActionsCard";
 import { ProgramSessionEditor } from "./ProgramSessionEditor";
 import { ProgramSetupCard } from "./ProgramSetupCard";
 
-interface ProgramScreenProps {
-  setActiveTab: (tab: TabId) => void;
-}
-
-export function ProgramScreen({ setActiveTab: _setActiveTab }: ProgramScreenProps) {
+export function ProgramScreen() {
   const programs = useProgramStore((state) => state.programs);
   const mesocycles = useProgramStore((state) => state.mesocycles);
   const activeProgramId = useProgramStore((state) => state.activeProgramId);
