@@ -6,7 +6,6 @@ import type {
   SessionLog,
   Settings,
 } from "@/domain/types";
-import { MOCK_HISTORY } from "@/data/mockData";
 import { DEMO_HISTORY } from "@/data/demoData";
 import { todayIso } from "@/lib/format";
 import { IS_DEMO_MODE, demoStorageKey } from "@/lib/demoMode";
@@ -38,7 +37,7 @@ interface HistoryState {
 export const useHistoryStore = create<HistoryState>()(
   persist(
     (set, get) => ({
-      sessions: IS_DEMO_MODE ? DEMO_HISTORY : MOCK_HISTORY,
+      sessions: IS_DEMO_MODE ? DEMO_HISTORY : [],
       snapshots: [],
       addSession: (session) =>
         set((state) => ({
@@ -47,13 +46,13 @@ export const useHistoryStore = create<HistoryState>()(
         })),
       updateSession: (id, patch) =>
         set((state) => ({
-          sessions: state.sessions.map((s) =>
-            s.id === id ? { ...s, ...patch } : s,
+          sessions: state.sessions.map((session) =>
+            session.id === id ? { ...session, ...patch } : session,
           ),
         })),
       deleteSession: (id) =>
         set((state) => ({
-          sessions: state.sessions.filter((s) => s.id !== id),
+          sessions: state.sessions.filter((session) => session.id !== id),
         })),
       clearSessions: () => set({ sessions: [] }),
       hydrateHistory: (sessions) => set({ sessions }),
