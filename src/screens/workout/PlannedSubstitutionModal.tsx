@@ -6,12 +6,14 @@ import { useCustomExerciseStore } from "@/state/useCustomExerciseStore";
 
 interface PlannedSubstitutionModalProps {
   currentExerciseId: string;
+  allowedExerciseIds?: string[];
   onSelect: (exerciseId: string) => void;
   onClose: () => void;
 }
 
 export function PlannedSubstitutionModal({
   currentExerciseId,
+  allowedExerciseIds,
   onSelect,
   onClose,
 }: PlannedSubstitutionModalProps) {
@@ -22,8 +24,12 @@ export function PlannedSubstitutionModal({
   const normalized = query.trim().toLowerCase();
 
   const candidates = useMemo(() => {
+    const allowed = allowedExerciseIds?.length
+      ? new Set(allowedExerciseIds)
+      : null;
     const all = getAllExercises(customExercises).filter(
-      (exercise) => exercise.id !== currentExerciseId,
+      (exercise) =>
+        exercise.id !== currentExerciseId && (!allowed || allowed.has(exercise.id)),
     );
     const filtered = normalized
       ? all.filter(
@@ -38,7 +44,13 @@ export function PlannedSubstitutionModal({
       if (aSameTarget !== bSameTarget) return bSameTarget - aSameTarget;
       return a.name.localeCompare(b.name);
     });
-  }, [current?.target, currentExerciseId, customExercises, normalized]);
+  }, [
+    allowedExerciseIds,
+    current?.target,
+    currentExerciseId,
+    customExercises,
+    normalized,
+  ]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 p-3 sm:items-center">
@@ -97,7 +109,9 @@ export function PlannedSubstitutionModal({
               </button>
             ))
           ) : (
-            <p className="p-6 text-center text-sm text-text-muted">No matching exercises.</p>
+            <p className="p-6 text-center text-sm text-text-muted">
+              No allowed replacement matches this search.
+            </p>
           )}
         </div>
       </div>
