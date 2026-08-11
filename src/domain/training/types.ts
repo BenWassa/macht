@@ -111,6 +111,7 @@ export interface ExercisePrescription {
   recommendedLoad?: number;
   restSeconds?: number;
   substitutionFamilyId?: string;
+  allowedSubstitutionExerciseIds?: ExerciseId[];
   source: "program_initial" | "progression_engine" | "user_override" | "schedule_repair";
   progressionDecisionId?: string;
   sets: SetPrescription[];

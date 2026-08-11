@@ -1,5 +1,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import {
+  appendSetPerformance,
+  createPlannedWorkout,
+  substituteExercisePerformance,
+  toggleSetPerformance,
+  updateExerciseNote,
+  updateSetPerformance,
+} from "@/domain/execution/plannedWorkout";
 import { DEFAULT_TEMPLATE } from "@/domain/exercises";
 import { buildWorkoutSets } from "@/domain/workoutPrefill";
 import { demoStorageKey } from "@/lib/demoMode";
@@ -26,6 +34,7 @@ export const useWorkoutStore = create<WorkoutState>()(
       startedAt: null,
       activeWorkoutList: DEFAULT_TEMPLATE.exercises,
       workoutSets: buildWorkoutSets(DEFAULT_TEMPLATE.exercises),
+      activeV2Workout: null,
       selectedExIndex: 0,
       selectedSetIndex: 0,
       isMinimumSession: false,
@@ -46,26 +55,58 @@ export const useWorkoutStore = create<WorkoutState>()(
         }),
       startTemplate: (template = DEFAULT_TEMPLATE, deloadWeights = {}) => {
         const loadSuggestions = suggestForTemplate(template);
-        set({
-          workoutActive: true,
-          workoutName: template.name,
-          workoutDuration: 0,
-          startedAt: Date.now(),
-          activeWorkoutList: template.exercises,
-          workoutSets: buildWorkoutSets(
-            template.exercises,
+        set((state) => {
+          if (state.workoutActive) return {};
+          return {
+            workoutActive: true,
+            workoutName: template.name,
+            workoutDuration: 0,
+            startedAt: Date.now(),
+            activeWorkoutList: template.exercises,
+            workoutSets: buildWorkoutSets(
+              template.exercises,
+              deloadWeights,
+              customExercises(),
+              loadSuggestions,
+            ),
+            activeV2Workout: null,
+            selectedExIndex: 0,
+            selectedSetIndex: 0,
+            isMinimumSession: Boolean(template.isMinimumSession),
+            adaptedDuringSession: false,
             deloadWeights,
-            customExercises(),
             loadSuggestions,
-          ),
-          selectedExIndex: 0,
-          selectedSetIndex: 0,
-          isMinimumSession: Boolean(template.isMinimumSession),
-          adaptedDuringSession: false,
-          deloadWeights,
-          loadSuggestions,
+          };
         });
       },
+      startPlannedSession: (plannedSession, context) =>
+        set((state) => {
+          if (state.workoutActive) return {};
+          const startedAt = new Date().toISOString();
+          const activeV2Workout = createPlannedWorkout({
+            plannedSession,
+            context,
+            startedAt,
+          });
+          return {
+            workoutActive: true,
+            workoutName: plannedSession.name,
+            workoutDuration: 0,
+            startedAt: Date.now(),
+            activeWorkoutList: activeV2Workout.exercisePerformances.map(
+              (exercise) => exercise.exerciseId,
+            ),
+            workoutSets: {},
+            activeV2Workout,
+            selectedExIndex: 0,
+            selectedSetIndex: 0,
+            isMinimumSession: false,
+            adaptedDuringSession: false,
+            deloadWeights: {},
+            loadSuggestions: {},
+            exerciseNotes: {},
+          };
+        }),
       endSession: () =>
         set({
           workoutActive: false,
@@ -77,6 +118,7 @@ export const useWorkoutStore = create<WorkoutState>()(
           adaptedDuringSession: false,
           loadSuggestions: {},
           exerciseNotes: {},
+          activeV2Workout: null,
         }),
       setSelectedExIndex: (selectedExIndex) =>
         set({ selectedExIndex, selectedSetIndex: 0 }),
@@ -95,6 +137,59 @@ export const useWorkoutStore = create<WorkoutState>()(
         set((state) =>
           updateWorkoutSet(state, exerciseId, setIndex, field, value),
         ),
+      updateV2Set: (exercisePerformanceId, setPerformanceId, patch) =>
+        set((state) => ({
+          activeV2Workout: state.activeV2Workout
+            ? updateSetPerformance(
+                state.activeV2Workout,
+                exercisePerformanceId,
+                setPerformanceId,
+                patch,
+              )
+            : null,
+        })),
+      appendV2Set: (exercisePerformanceId) =>
+        set((state) => {
+          if (!state.activeV2Workout) return {};
+          const exercise = state.activeV2Workout.exercisePerformances.find(
+            (item) => item.id === exercisePerformanceId,
+          );
+          const selectedSetIndex = exercise?.sets.length ?? state.selectedSetIndex;
+          return {
+            activeV2Workout: appendSetPerformance(
+              state.activeV2Workout,
+              exercisePerformanceId,
+              crypto.randomUUID(),
+            ),
+            adaptedDuringSession: true,
+            selectedSetIndex,
+          };
+        }),
+      toggleV2Complete: (exercisePerformanceId, setPerformanceId) => {
+        let completedNow = false;
+        set((state) => {
+          if (!state.activeV2Workout) return state;
+          const result = toggleSetPerformance(
+            state.activeV2Workout,
+            exercisePerformanceId,
+            setPerformanceId,
+            new Date().toISOString(),
+          );
+          completedNow = result.completedNow;
+          return { activeV2Workout: result.session };
+        });
+        return completedNow;
+      },
+      setV2ExerciseNote: (exercisePerformanceId, note) =>
+        set((state) => ({
+          activeV2Workout: state.activeV2Workout
+            ? updateExerciseNote(
+                state.activeV2Workout,
+                exercisePerformanceId,
+                note,
+              )
+            : null,
+        })),
       substituteExercise: (targetId, subId) =>
         set((state) =>
           substituteWorkoutExercise(
@@ -105,6 +200,22 @@ export const useWorkoutStore = create<WorkoutState>()(
             suggestFor(subId),
           ),
         ),
+      substituteV2Exercise: (exercisePerformanceId, replacementExerciseId) =>
+        set((state) => {
+          if (!state.activeV2Workout) return state;
+          const activeV2Workout = substituteExercisePerformance(
+            state.activeV2Workout,
+            exercisePerformanceId,
+            replacementExerciseId,
+          );
+          return {
+            activeV2Workout,
+            adaptedDuringSession: activeV2Workout.adaptedDuringSession,
+            activeWorkoutList: activeV2Workout.exercisePerformances.map(
+              (exercise) => exercise.exerciseId,
+            ),
+          };
+        }),
       addExercise: (exerciseId) =>
         set((state) =>
           addWorkoutExercise(

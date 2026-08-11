@@ -1,32 +1,147 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/Button";
+import { applyWorkoutProgression } from "@/domain/execution/applyWorkoutProgression";
+import { toLegacySessionLog, v2WorkoutSummary } from "@/domain/execution/legacyBridge";
+import { completeWorkout } from "@/domain/execution/plannedWorkout";
+import type { WorkoutSession } from "@/domain/execution/types";
+import type { SessionWorkload } from "@/domain/feedback/types";
 import { getExerciseConflict } from "@/domain/injuries";
 import { computeExerciseE1rm } from "@/domain/sessionStats";
 import type { SessionLog } from "@/domain/types";
 import { useModalA11y } from "@/hooks/useModalA11y";
 import { formatTime, todayIso } from "@/lib/format";
+import { useExecutionHistoryStore } from "@/state/useExecutionHistoryStore";
 import { useHistoryStore } from "@/state/useHistoryStore";
 import { useInjuryStore } from "@/state/useInjuryStore";
+import { useProgramStore } from "@/state/useProgramStore";
+import { useProgressionStore } from "@/state/useProgressionStore";
+import { useSettingsStore } from "@/state/useSettingsStore";
 import { useWorkoutStore } from "@/state/useWorkoutStore";
+
+interface SavedSummary {
+  duration: string;
+  sets: number;
+  volume: number;
+  targetsModified: boolean;
+  personalRecords: number;
+  recommendationsApplied: number;
+}
 
 interface FinishSessionModalProps {
   onClose: () => void;
-  onSaved: (summary: {
-    duration: string;
-    sets: number;
-    volume: number;
-    targetsModified: boolean;
-  }) => void;
+  onSaved: (summary: SavedSummary) => void;
 }
+
+const WORKLOAD_OPTIONS: Array<{ value: SessionWorkload; label: string }> = [
+  { value: "easy", label: "Easy" },
+  { value: "appropriate", label: "On target" },
+  { value: "pushing_limit", label: "Near limit" },
+  { value: "too_much", label: "Too much" },
+];
+
+const countPrs = (session: SessionLog, history: SessionLog[]): number =>
+  (session.exerciseSnapshots ?? []).filter((snapshot) => {
+    if (!snapshot.e1rm) return false;
+    const previousBest = Math.max(
+      0,
+      ...history.flatMap((item) =>
+        (item.exerciseSnapshots ?? [])
+          .filter((prior) => prior.exerciseId === snapshot.exerciseId)
+          .map((prior) => prior.e1rm ?? 0),
+      ),
+    );
+    return previousBest > 0 && snapshot.e1rm > previousBest;
+  }).length;
+
+const v2TargetsModified = (workout: WorkoutSession): boolean =>
+  workout.exercisePerformances.some((exercise) =>
+    exercise.sets.some((set) => {
+      if (!set.completed) return false;
+      if (!set.prescription) return true;
+      return (
+        (set.prescription.targetLoad != null &&
+          set.actualLoad !== set.prescription.targetLoad) ||
+        (set.prescription.targetReps != null &&
+          set.actualReps !== set.prescription.targetReps)
+      );
+    }),
+  );
 
 export function FinishSessionModal({
   onClose,
   onSaved,
 }: FinishSessionModalProps) {
+  const sessions = useHistoryStore((state) => state.sessions);
   const addSession = useHistoryStore((state) => state.addSession);
+  const addV2Workout = useExecutionHistoryStore((state) => state.addWorkout);
+  const programs = useProgramStore((state) => state.programs);
+  const mesocycles = useProgramStore((state) => state.mesocycles);
+  const upsertMesocycle = useProgramStore((state) => state.upsertMesocycle);
+  const completePlannedSession = useProgramStore(
+    (state) => state.completePlannedSession,
+  );
+  const addDecisions = useProgressionStore((state) => state.addDecisions);
+  const units = useSettingsStore((state) => state.units);
   const injuries = useInjuryStore((state) => state.injuries);
   const workout = useWorkoutStore();
   const containerRef = useModalA11y<HTMLDivElement>(onClose);
+  const [workload, setWorkload] = useState<SessionWorkload | undefined>();
 
-  const save = () => {
+  const saveV2 = (active: WorkoutSession) => {
+    const withFeedback: WorkoutSession = {
+      ...active,
+      sessionFeedback: workload
+        ? {
+            workload,
+            durationPressure:
+              workload === "pushing_limit" || workload === "too_much",
+          }
+        : active.sessionFeedback,
+    };
+    const completed = completeWorkout(
+      withFeedback,
+      new Date().toISOString(),
+      workout.workoutDuration,
+    );
+    const legacy = toLegacySessionLog(completed);
+    const summary = v2WorkoutSummary(completed);
+    const personalRecords = countPrs(legacy, sessions);
+    const targetsModified = v2TargetsModified(completed);
+    let recommendationsApplied = 0;
+
+    const program = programs.find((item) => item.id === completed.programId);
+    const mesocycle = mesocycles.find((item) => item.id === completed.mesocycleId);
+    if (program && mesocycle) {
+      const progression = applyWorkoutProgression({
+        workout: completed,
+        program,
+        mesocycle,
+        availableLoadIncrement: units === "kgs" ? 1.25 : 2.5,
+      });
+      recommendationsApplied = progression.decisions.length;
+      if (progression.decisions.length) {
+        addDecisions(progression.decisions);
+        upsertMesocycle(progression.mesocycle);
+      }
+    }
+
+    addV2Workout(completed);
+    addSession(legacy);
+    if (completed.plannedSessionId) {
+      completePlannedSession(completed.plannedSessionId);
+    }
+    workout.endSession();
+    onSaved({
+      duration: legacy.duration,
+      sets: summary.sets,
+      volume: summary.volume,
+      targetsModified,
+      personalRecords,
+      recommendationsApplied,
+    });
+  };
+
+  const saveLegacy = () => {
     const completedSets = workout.activeWorkoutList.flatMap((exerciseId) =>
       (workout.workoutSets[exerciseId] ?? [])
         .filter((set) => set.completed)
@@ -40,7 +155,7 @@ export function FinishSessionModal({
       const suggestion = workout.loadSuggestions[exerciseId];
       return (
         Boolean(suggestion) &&
-        (set.weight !== suggestion.weight || set.reps !== suggestion.repTarget)
+        (set.weight !== suggestion?.weight || set.reps !== suggestion?.repTarget)
       );
     });
     const adapted =
@@ -71,6 +186,7 @@ export function FinishSessionModal({
       isMinimumSession: workout.isMinimumSession,
       exerciseSnapshots,
     };
+    const personalRecords = countPrs(session, sessions);
     addSession(session);
     workout.endSession();
     onSaved({
@@ -78,43 +194,71 @@ export function FinishSessionModal({
       sets: session.sets,
       volume: session.volume,
       targetsModified,
+      personalRecords,
+      recommendationsApplied: 0,
     });
   };
 
+  const save = () => {
+    if (workout.activeV2Workout) saveV2(workout.activeV2Workout);
+    else saveLegacy();
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 p-3 sm:items-center">
       <div
         ref={containerRef}
-        className="w-full max-w-sm space-y-4 border border-[#1a1a1a] bg-[#0c0c0c] p-6"
+        className="surface-raised w-full max-w-sm space-y-5 p-5"
       >
-        <div className="space-y-2 text-center">
-          <h3 className="font-mono text-sm font-bold uppercase tracking-tight text-neutral-200">
-            Save this session?
+        <div>
+          <h3 className="text-xl font-bold tracking-[-0.03em] text-text">
+            Finish session
           </h3>
-          <p className="mx-auto max-w-xs text-xs text-neutral-500">
-            Session time:{" "}
-            <strong className="text-neutral-300">
-              {formatTime(workout.workoutDuration)}
-            </strong>
-            .
-            {workout.isMinimumSession && (
-              <span className="text-blue-400"> Logged as minimum session.</span>
-            )}
+          <p className="mt-1 text-sm text-text-muted">
+            {formatTime(workout.workoutDuration)} elapsed
+            {workout.isMinimumSession ? " · minimum session" : ""}
           </p>
         </div>
+
+        {workout.activeV2Workout ? (
+          <fieldset>
+            <legend className="text-sm font-semibold text-text-secondary">
+              How demanding was the session?
+            </legend>
+            <p className="mt-1 text-xs text-text-muted">
+              Optional. This helps future volume decisions.
+            </p>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              {WORKLOAD_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  aria-pressed={workload === option.value}
+                  onClick={() =>
+                    setWorkload((current) =>
+                      current === option.value ? undefined : option.value,
+                    )
+                  }
+                  className={`min-h-11 rounded-sm px-3 text-sm font-semibold transition ${
+                    workload === option.value
+                      ? "bg-signal-soft text-signal-strong"
+                      : "bg-surface-3 text-text-secondary"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+        ) : null}
+
         <div className="flex gap-2">
-          <button
-            onClick={onClose}
-            className="flex-1 border border-[#222] bg-transparent py-3 font-mono text-[10px] font-bold uppercase text-neutral-400 transition hover:bg-neutral-900"
-          >
+          <Button variant="secondary" onClick={onClose} className="flex-1">
             Cancel
-          </button>
-          <button
-            onClick={save}
-            className="flex-1 bg-emerald-600 py-3 font-mono text-[10px] font-bold uppercase text-white transition hover:bg-emerald-700"
-          >
+          </Button>
+          <Button onClick={save} className="flex-1">
             Save session
-          </button>
+          </Button>
         </div>
       </div>
     </div>

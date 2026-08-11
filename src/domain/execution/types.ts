@@ -6,6 +6,7 @@ import type {
   IsoDate,
   IsoDateTime,
   MesocycleId,
+  MuscleId,
   PlannedSessionId,
   ProgramId,
   SetPerformanceId,
@@ -13,7 +14,11 @@ import type {
   WeekId,
   WorkoutSessionId,
 } from "@/domain/shared/ids";
-import type { EffortScale, SetType } from "@/domain/training/types";
+import type {
+  EffortScale,
+  ExercisePrescription as PlannedExercisePrescription,
+  SetType,
+} from "@/domain/training/types";
 
 export type WorkoutCompletionState = "active" | "completed" | "abandoned";
 
@@ -31,10 +36,31 @@ export interface SetPrescriptionSnapshot {
     min: number;
     max: number;
   };
+  targetReps?: number;
   targetEffort?: {
     scale: EffortScale;
     value: number;
   };
+}
+
+export interface ExercisePrescriptionSnapshot {
+  exercisePrescriptionId: ExercisePrescriptionId;
+  programExerciseSlotId?: string;
+  exerciseId: ExerciseId;
+  targetMuscleIds: MuscleId[];
+  plannedSetCount: number;
+  repRange: { min: number; max: number };
+  targetRep?: number;
+  targetEffort?: {
+    scale: EffortScale;
+    value: number;
+  };
+  recommendedLoad?: number;
+  restSeconds?: number;
+  substitutionFamilyId?: string;
+  allowedSubstitutionExerciseIds?: ExerciseId[];
+  source: PlannedExercisePrescription["source"];
+  progressionDecisionId?: string;
 }
 
 export interface SetPerformance {
@@ -52,6 +78,7 @@ export interface ExercisePerformance {
   id: ExercisePerformanceId;
   exerciseId: ExerciseId;
   prescriptionId?: ExercisePrescriptionId;
+  prescription?: ExercisePrescriptionSnapshot;
   order: number;
   substitutedFromExerciseId?: ExerciseId;
   sets: SetPerformance[];

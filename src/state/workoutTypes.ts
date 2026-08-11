@@ -1,4 +1,14 @@
+import type { WorkoutSession } from "@/domain/execution/types";
+import type {
+  PlannedWorkoutContext,
+  SetPerformancePatch,
+} from "@/domain/execution/plannedWorkout";
 import type { LoadSuggestion } from "@/domain/progression";
+import type {
+  ExercisePerformanceId,
+  SetPerformanceId,
+} from "@/domain/shared/ids";
+import type { PlannedSession } from "@/domain/training/types";
 import type { SetEntry, TemplatePlan, WorkoutSets } from "@/domain/types";
 
 export interface WorkoutState {
@@ -8,6 +18,7 @@ export interface WorkoutState {
   startedAt: number | null;
   activeWorkoutList: string[];
   workoutSets: WorkoutSets;
+  activeV2Workout: WorkoutSession | null;
   selectedExIndex: number;
   selectedSetIndex: number;
   isMinimumSession: boolean;
@@ -21,6 +32,10 @@ export interface WorkoutState {
     template?: TemplatePlan,
     deloadWeights?: Record<string, number>,
   ) => void;
+  startPlannedSession: (
+    plannedSession: PlannedSession,
+    context: PlannedWorkoutContext,
+  ) => void;
   endSession: () => void;
   setSelectedExIndex: (index: number) => void;
   setSelectedSetIndex: (index: number) => void;
@@ -32,7 +47,25 @@ export interface WorkoutState {
     field: K,
     value: SetEntry[K],
   ) => void;
+  updateV2Set: (
+    exercisePerformanceId: ExercisePerformanceId,
+    setPerformanceId: SetPerformanceId,
+    patch: SetPerformancePatch,
+  ) => void;
+  appendV2Set: (exercisePerformanceId: ExercisePerformanceId) => void;
+  toggleV2Complete: (
+    exercisePerformanceId: ExercisePerformanceId,
+    setPerformanceId: SetPerformanceId,
+  ) => boolean;
+  setV2ExerciseNote: (
+    exercisePerformanceId: ExercisePerformanceId,
+    note: string,
+  ) => void;
   substituteExercise: (targetId: string, subId: string) => void;
+  substituteV2Exercise: (
+    exercisePerformanceId: ExercisePerformanceId,
+    replacementExerciseId: string,
+  ) => void;
   addExercise: (exerciseId: string) => void;
   applyDeloadWeight: (exerciseId: string, weight: number) => void;
   appendSet: (exerciseId: string) => void;

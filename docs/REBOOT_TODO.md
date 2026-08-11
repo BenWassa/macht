@@ -4,14 +4,15 @@ This file is the live implementation checklist for the Macht product reboot. Upd
 
 ## Current focus
 
-**Phase 6 — Workout execution**
+**Phase 6.5 — Program surface integration**
 
-Phases 0–5 are implemented. The latest Phase 5 code head passed the complete CI pipeline: lint, tests, TypeScript/build, bundle-size budget, and Lighthouse.
+Phases 0–6 are implemented. The final Phase 6 code head passed the complete CI pipeline: lint, tests, TypeScript/build, bundle-size budget, and Lighthouse.
 
 ## Validation status
 
-- Latest Phase 5 CI: lint ✅, tests ✅, TypeScript/build ✅, bundle size ✅, Lighthouse ✅.
-- Replacing the old Home dashboard removed enough shipped UI code to bring the runtime bundle back under budget.
+- Latest Phase 6 CI: lint ✅, tests ✅, TypeScript/build ✅, bundle size ✅, Lighthouse ✅.
+- V2 planned workouts now run through the persistent execution store and feed progression decisions back into future prescriptions.
+- The existing PROGRAM tab is still the legacy Templates screen; Phase 6.5 closes that user-facing integration gap before Progress work begins.
 - CI includes `npm test` and targets `agent/**` pushes, `main`, and pull requests.
 
 ## Phase 0 — Reboot contract
@@ -68,10 +69,10 @@ Phases 0–5 are implemented. The latest Phase 5 code head passed the complete C
 
 ## Phase 3 — Program and mesocycle system
 
-- [x] Program create/edit.
+- [x] Program create/edit domain model.
 - [x] 2–6 sessions/week.
 - [x] Muscle priorities.
-- [x] Exercise selection/substitution.
+- [x] Exercise selection/substitution model.
 - [x] Accumulation + deload weeks.
 - [x] Session generation.
 - [x] Session-time budget.
@@ -129,20 +130,62 @@ Phases 0–5 are implemented. The latest Phase 5 code head passed the complete C
 - [x] The runtime bundle is back within the configured budget.
 - [x] Lint, full tests, TypeScript/build, bundle-size check, and Lighthouse pass.
 
-## Phase 6 — Workout
+## Phase 6 — Workout execution
 
-- [ ] Execute a v2 PlannedSession / ExercisePrescription directly in the workout store.
-- [ ] Preserve prescription snapshots separately from actual set performance.
-- [ ] Exercise-focused execution surface.
-- [ ] Prescription + previous performance together.
-- [ ] Fast numeric entry.
-- [ ] One-tap complete + undo.
-- [ ] Preserve timers, haptics, wake lock, offline persistence.
-- [ ] Fast substitution.
-- [ ] Effort capture.
-- [ ] Minimal feedback capture.
-- [ ] Progress cues and restrained PR celebration.
-- [ ] Prevent accidental navigation from destroying an active session.
+- [x] Execute the exact v2 PlannedSession / ExercisePrescription shown on Today.
+- [x] Preserve immutable prescription snapshots separately from actual set performance.
+- [x] Exercise-focused execution surface.
+- [x] Prescription + previous performance together.
+- [x] Fast direct numeric entry and load/rep nudges.
+- [x] One-tap complete + undo.
+- [x] Preserve rest/warm-up timers, haptics, media session, wake lock, and offline persistence.
+- [x] Prescription-specific rest durations.
+- [x] Fast substitution with stored program allow-lists.
+- [x] RIR/RPE effort capture.
+- [x] Minimal optional session workload feedback.
+- [x] Exercise notes and explicit Add Set user override.
+- [x] Progress cues and restrained PR/save feedback.
+- [x] Persist completed workouts in dedicated v2 history.
+- [x] Dual-write a temporary legacy SessionLog compatibility record.
+- [x] Mark completed planned sessions in the mesocycle.
+- [x] Apply and persist progression decisions to the next occurrence of the same stable program slot.
+- [x] Prevent active workouts from being overwritten by any start entry point.
+- [x] Preserve substitution and user-added-set provenance so they cannot corrupt future load progression.
+
+### Gate
+
+- [x] Today and Workout resolve the same next v2 PlannedSession.
+- [x] Editing actual load/reps/effort cannot mutate the original prescription snapshot.
+- [x] Active v2 sessions persist through Zustand storage and start actions are guarded while active.
+- [x] Completing a planned workout saves v2 history, keeps legacy history compatible, and advances the planned session state.
+- [x] Completed performance flows through progression v2 and updates only the next matching program slot.
+- [x] Same-exercise/different-slot progression remains isolated.
+- [x] User-added sets stay outside prescribed-set progression evidence.
+- [x] One-session substitutions do not alter the original exercise's future targets.
+- [x] Upcoming deloads outrank rep/load progression.
+- [x] Generated prescriptions retain substitution constraints needed by the executor.
+- [x] Lint, full tests, TypeScript/build, bundle-size check, and Lighthouse pass.
+
+## Phase 6.5 — Program surface integration
+
+- [ ] Replace the legacy injury-heavy Templates screen as the primary PROGRAM surface.
+- [ ] Create and activate a v2 Program from the UI without developer tooling.
+- [ ] Configure sustainable sessions/week and target session duration.
+- [ ] Configure Emphasize / Grow / Maintain muscle priorities.
+- [ ] Edit session exercise slots, set counts, rep ranges, effort targets, rest, and substitutions.
+- [ ] Generate and activate a mesocycle from the configured program.
+- [ ] Show active mesocycle, current week, planned sessions, and deload state.
+- [ ] Edit future programming without rewriting completed workout history.
+- [ ] Keep legacy templates available only as a migration/fallback path during the transition.
+- [ ] Use the v3 design system and generic training constraints rather than injury-first primary UI.
+
+### Gate
+
+- [ ] A normal new user can create and activate a v2 program entirely through PROGRAM.
+- [ ] PROGRAM → TODAY → SESSION uses one shared v2 program/mesocycle source of truth.
+- [ ] Program edits preserve completed history and cannot overwrite an active workout.
+- [ ] A generated plan exposes the same prescriptions the workout executor receives.
+- [ ] Lint, full tests, TypeScript/build, bundle-size check, and Lighthouse pass.
 
 ## Phase 7 — Progress
 

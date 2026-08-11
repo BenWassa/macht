@@ -1,5 +1,11 @@
-import type { ExercisePerformance } from "@/domain/execution/types";
-import type { ExercisePrescription, EffortTarget } from "@/domain/training/types";
+import type {
+  ExercisePerformance,
+  SetPerformance,
+} from "@/domain/execution/types";
+import type {
+  ExercisePrescription,
+  EffortTarget,
+} from "@/domain/training/types";
 
 export type EffortStatus = "unknown" | "too_easy" | "on_target" | "too_hard";
 
@@ -22,13 +28,18 @@ export interface PerformanceSummary {
 const effortHardness = (scale: "RIR" | "RPE", value: number): number =>
   scale === "RPE" ? value : 10 - value;
 
+const progressionSets = (performance: ExercisePerformance): SetPerformance[] => {
+  const prescribed = performance.sets.filter((set) => set.prescription);
+  return prescribed.length > 0 ? prescribed : performance.sets;
+};
+
 function summarizeEffort(
-  performance: ExercisePerformance,
+  sets: SetPerformance[],
   target?: EffortTarget,
 ): Pick<PerformanceSummary, "effortStatus" | "representativeEffort"> {
   if (!target) return { effortStatus: "unknown" };
 
-  const actuals = performance.sets
+  const actuals = sets
     .filter((set) => set.completed && set.actualEffort)
     .map((set) => set.actualEffort!);
   if (actuals.length === 0) return { effortStatus: "unknown" };
@@ -55,15 +66,19 @@ export function summarizePerformance(
   prescription: ExercisePrescription,
   performance: ExercisePerformance,
 ): PerformanceSummary {
-  const completed = performance.sets.filter((set) => set.completed);
+  const consideredSets = progressionSets(performance);
+  const completed = consideredSets.filter((set) => set.completed);
   const reps = completed.flatMap((set) =>
     set.actualReps == null ? [] : [set.actualReps],
   );
   const targetRep = Math.min(
-    Math.max(prescription.targetRep ?? prescription.repRange.min, prescription.repRange.min),
+    Math.max(
+      prescription.targetRep ?? prescription.repRange.min,
+      prescription.repRange.min,
+    ),
     prescription.repRange.max,
   );
-  const effort = summarizeEffort(performance, prescription.targetEffort);
+  const effort = summarizeEffort(consideredSets, prescription.targetEffort);
 
   return {
     completedWorkingSets: completed.length,

@@ -49,6 +49,9 @@ function buildPrescription(
     recommendedLoad: slot.startingLoad,
     restSeconds: slot.restSeconds,
     substitutionFamilyId: slot.substitutionFamilyId,
+    allowedSubstitutionExerciseIds: slot.allowedSubstitutionExerciseIds
+      ? [...slot.allowedSubstitutionExerciseIds]
+      : undefined,
     source: "program_initial",
     sets: Array.from({ length: setCount }, (_, setIndex) => ({
       id: id(prescriptionId, "set", setIndex + 1),

@@ -89,5 +89,5 @@ export interface ProgressionDecision {
   evidence: ProgressionEvidence;
   delta: PrescriptionDelta;
   confidence?: number;
-  userDisposition?: "pending" | "accepted" | "overridden";
+  userDisposition?: "pending" | "accepted" | "overridden" | "auto_applied";
 }

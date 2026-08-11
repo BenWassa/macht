@@ -1,5 +1,6 @@
 import { getRunnableTemplate } from "@/domain/injuries";
 import { buildTodayModel } from "@/domain/today";
+import { findNextPlannedSession } from "@/domain/training/activeSession";
 import { getNextTrainingTemplate } from "@/domain/trainingPlan";
 import { RecentProgressCard } from "@/screens/today/RecentProgressCard";
 import { TodaySessionCard } from "@/screens/today/TodaySessionCard";
@@ -29,15 +30,20 @@ export function HomeScreen({ setActiveTab }: HomeScreenProps) {
   const activeProgramId = useProgramStore((state) => state.activeProgramId);
   const workoutActive = useWorkoutStore((state) => state.workoutActive);
   const startTemplate = useWorkoutStore((state) => state.startTemplate);
+  const startPlannedSession = useWorkoutStore(
+    (state) => state.startPlannedSession,
+  );
   const nextTemplate = getNextTrainingTemplate(sessions);
   const runnable = getRunnableTemplate(nextTemplate, injuries);
-  const adjusted = runnable.exercises.length < nextTemplate.exercises.length;
   const activeProgram = programs.find((item) => item.id === activeProgramId);
   const activeMesocycle = mesocycles.find(
     (item) =>
       item.id === activeProgram?.activeMesocycleId ||
       (item.programId === activeProgram?.id && item.status === "active"),
   );
+  const nextPlanned = findNextPlannedSession(activeMesocycle);
+  const adjusted =
+    !nextPlanned && runnable.exercises.length < nextTemplate.exercises.length;
   const model = buildTodayModel({
     sessions,
     legacyTemplate: runnable,
@@ -46,7 +52,16 @@ export function HomeScreen({ setActiveTab }: HomeScreenProps) {
   });
 
   const openWorkout = () => {
-    if (!workoutActive) startTemplate(runnable);
+    if (!workoutActive) {
+      if (nextPlanned && activeProgram && activeMesocycle) {
+        startPlannedSession(nextPlanned.session, {
+          programId: activeProgram.id,
+          mesocycleId: activeMesocycle.id,
+        });
+      } else {
+        startTemplate(runnable);
+      }
+    }
     setActiveTab("workout");
   };
 
