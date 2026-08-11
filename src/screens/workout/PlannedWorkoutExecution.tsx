@@ -4,6 +4,7 @@ import { getExerciseById } from "@/domain/exerciseLibrary";
 import { allWorkingSetsComplete } from "@/domain/execution/plannedWorkout";
 import { findPreviousExercisePerformance } from "@/domain/execution/previousPerformance";
 import { vibrate } from "@/lib/haptics";
+import { ExerciseFeedbackCard } from "@/screens/workout/ExerciseFeedbackCard";
 import { PlannedExerciseNav } from "@/screens/workout/PlannedExerciseNav";
 import { PlannedSetCard } from "@/screens/workout/PlannedSetCard";
 import { PlannedSubstitutionModal } from "@/screens/workout/PlannedSubstitutionModal";
@@ -173,6 +174,11 @@ export function PlannedWorkoutExecution({
           workout.updateV2Set(exercise.id, selectedSet.id, patch)
         }
         onToggleComplete={toggleComplete}
+      />
+
+      <ExerciseFeedbackCard
+        feedback={exercise.feedback}
+        onUpdate={(patch) => workout.updateV2ExerciseFeedback(exercise.id, patch)}
       />
 
       <label className="block">
