@@ -5,6 +5,7 @@ import type {
   IsoDate,
   IsoDateTime,
   MesocycleId,
+  MuscleId,
   PlannedSessionId,
   ProgramId,
   SetPrescriptionId,
@@ -79,12 +80,13 @@ export interface ExercisePrescription {
   plannedSessionId: PlannedSessionId;
   exerciseId: ExerciseId;
   order: number;
-  targetMuscleIds: string[];
+  targetMuscleIds: MuscleId[];
   plannedSetCount: number;
   repRange: {
     min: number;
     max: number;
   };
+  targetRep?: number;
   targetEffort?: EffortTarget;
   recommendedLoad?: number;
   restSeconds?: number;
@@ -108,5 +110,6 @@ export interface SetPrescription {
     min: number;
     max: number;
   };
+  targetReps?: number;
   targetEffort?: EffortTarget;
 }
