@@ -23,6 +23,9 @@ const priorityRank: Record<MusclePriority, number> = {
   emphasize: 2,
 };
 
+const priorityKey = (muscleId: string): string =>
+  muscleId === "biceps" || muscleId === "triceps" ? "arms" : muscleId;
+
 const prescriptionLocations = (mesocycle: Mesocycle): PrescriptionLocation[] =>
   [...mesocycle.weeks]
     .sort((a, b) => a.index - b.index)
@@ -41,7 +44,7 @@ const priorityFor = (
   program: Program,
 ): MusclePriority => {
   const priorities = prescription.targetMuscleIds.map(
-    (muscleId) => program.musclePriorities[muscleId] ?? "grow",
+    (muscleId) => program.musclePriorities[priorityKey(muscleId)] ?? "grow",
   );
   if (!priorities.length) return "grow";
   return priorities.slice(1).reduce(
