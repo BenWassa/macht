@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import {
+  appendSetPerformance,
   createPlannedWorkout,
   substituteExercisePerformance,
   toggleSetPerformance,
@@ -147,6 +148,23 @@ export const useWorkoutStore = create<WorkoutState>()(
               )
             : null,
         })),
+      appendV2Set: (exercisePerformanceId) =>
+        set((state) => {
+          if (!state.activeV2Workout) return {};
+          const exercise = state.activeV2Workout.exercisePerformances.find(
+            (item) => item.id === exercisePerformanceId,
+          );
+          const selectedSetIndex = exercise?.sets.length ?? state.selectedSetIndex;
+          return {
+            activeV2Workout: appendSetPerformance(
+              state.activeV2Workout,
+              exercisePerformanceId,
+              crypto.randomUUID(),
+            ),
+            adaptedDuringSession: true,
+            selectedSetIndex,
+          };
+        }),
       toggleV2Complete: (exercisePerformanceId, setPerformanceId) => {
         let completedNow = false;
         set((state) => {
@@ -192,7 +210,7 @@ export const useWorkoutStore = create<WorkoutState>()(
           );
           return {
             activeV2Workout,
-            adaptedDuringSession: true,
+            adaptedDuringSession: activeV2Workout.adaptedDuringSession,
             activeWorkoutList: activeV2Workout.exercisePerformances.map(
               (exercise) => exercise.exerciseId,
             ),
