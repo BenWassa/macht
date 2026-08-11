@@ -163,6 +163,35 @@ export function updateSetPerformance(
   };
 }
 
+export function appendSetPerformance(
+  session: WorkoutSession,
+  exercisePerformanceId: ExercisePerformanceId,
+  setPerformanceId: SetPerformanceId,
+): WorkoutSession {
+  return {
+    ...session,
+    adaptedDuringSession: true,
+    exercisePerformances: session.exercisePerformances.map((exercise) => {
+      if (exercise.id !== exercisePerformanceId) return exercise;
+      const previous = exercise.sets[exercise.sets.length - 1];
+      return {
+        ...exercise,
+        sets: [
+          ...exercise.sets,
+          {
+            id: setPerformanceId,
+            index: exercise.sets.length,
+            completed: false,
+            actualLoad: previous?.actualLoad,
+            actualReps: previous?.actualReps,
+            actualEffort: previous?.actualEffort,
+          },
+        ],
+      };
+    }),
+  };
+}
+
 export function toggleSetPerformance(
   session: WorkoutSession,
   exercisePerformanceId: ExercisePerformanceId,
@@ -209,20 +238,25 @@ export function substituteExercisePerformance(
   exercisePerformanceId: ExercisePerformanceId,
   replacementExerciseId: ExerciseId,
 ): WorkoutSession {
-  return {
-    ...session,
-    adaptedDuringSession: true,
-    exercisePerformances: session.exercisePerformances.map((exercise) => {
-      if (exercise.id !== exercisePerformanceId) return exercise;
-      const substitutedFromExerciseId =
-        exercise.substitutedFromExerciseId ?? exercise.exerciseId;
-      return {
-        ...exercise,
-        exerciseId: replacementExerciseId,
-        substitutedFromExerciseId,
-      };
-    }),
-  };
+  let changed = false;
+  const exercisePerformances = session.exercisePerformances.map((exercise) => {
+    if (exercise.id !== exercisePerformanceId) return exercise;
+    const allowed = exercise.prescription?.allowedSubstitutionExerciseIds;
+    if (allowed?.length && !allowed.includes(replacementExerciseId)) {
+      return exercise;
+    }
+    changed = true;
+    const substitutedFromExerciseId =
+      exercise.substitutedFromExerciseId ?? exercise.exerciseId;
+    return {
+      ...exercise,
+      exerciseId: replacementExerciseId,
+      substitutedFromExerciseId,
+    };
+  });
+  return changed
+    ? { ...session, adaptedDuringSession: true, exercisePerformances }
+    : session;
 }
 
 export function completeWorkout(
