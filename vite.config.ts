@@ -25,8 +25,8 @@ export default defineConfig({
         short_name: "MACHT",
         description:
           "Adaptive, local-first hypertrophy and strength training with explainable progression.",
-        theme_color: "#0b0b0c",
-        background_color: "#0b0b0c",
+        theme_color: "#111210",
+        background_color: "#111210",
         display: "standalone",
         orientation: "portrait",
         icons: [
