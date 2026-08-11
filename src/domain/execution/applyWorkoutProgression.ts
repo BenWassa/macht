@@ -39,11 +39,17 @@ const prescriptionLocations = (mesocycle: Mesocycle): PrescriptionLocation[] =>
 const priorityFor = (
   prescription: ExercisePrescription,
   program: Program,
-): MusclePriority =>
-  prescription.targetMuscleIds.reduce<MusclePriority>((best, muscleId) => {
-    const candidate = program.musclePriorities[muscleId] ?? "grow";
-    return priorityRank[candidate] > priorityRank[best] ? candidate : best;
-  }, "grow");
+): MusclePriority => {
+  const priorities = prescription.targetMuscleIds.map(
+    (muscleId) => program.musclePriorities[muscleId] ?? "grow",
+  );
+  if (!priorities.length) return "grow";
+  return priorities.slice(1).reduce(
+    (best, candidate) =>
+      priorityRank[candidate] > priorityRank[best] ? candidate : best,
+    priorities[0],
+  );
+};
 
 function findNextOccurrence(
   locations: PrescriptionLocation[],
