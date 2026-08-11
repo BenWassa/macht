@@ -1,5 +1,6 @@
 import type { WorkoutSession } from "@/domain/execution/types";
 import type {
+  ExerciseFeedbackPatch,
   PlannedWorkoutContext,
   SetPerformancePatch,
 } from "@/domain/execution/plannedWorkout";
@@ -51,6 +52,10 @@ export interface WorkoutState {
     exercisePerformanceId: ExercisePerformanceId,
     setPerformanceId: SetPerformanceId,
     patch: SetPerformancePatch,
+  ) => void;
+  updateV2ExerciseFeedback: (
+    exercisePerformanceId: ExercisePerformanceId,
+    patch: ExerciseFeedbackPatch,
   ) => void;
   appendV2Set: (exercisePerformanceId: ExercisePerformanceId) => void;
   toggleV2Complete: (
