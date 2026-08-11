@@ -1,12 +1,12 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { finalizeMesocycleState } from "@/domain/habit/cycleState";
 import { buildTrainingMilestones } from "@/domain/habit/milestones";
 import {
   applyScheduleRecovery,
   findMissedSessionRecovery,
 } from "@/domain/habit/scheduleRecovery";
-import { rollingPlanStatus, weeklyPlanStatus } from "@/domain/habit/weeklyPlan";
 import type { ScheduleRecoveryChoice } from "@/domain/habit/types";
+import { rollingPlanStatus, weeklyPlanStatus } from "@/domain/habit/weeklyPlan";
 import { detectProgressRecords } from "@/domain/progress/exercises";
 import { normalizeProgressHistory } from "@/domain/progress/normalize";
 import { todayIso } from "@/lib/format";
@@ -40,6 +40,31 @@ export function HabitTodayPanel() {
           (cycle.programId === activeProgram.id && cycle.status === "active"),
       )
     : undefined;
+  const finalizedMesocycle = activeMesocycle
+    ? finalizeMesocycleState(activeMesocycle)
+    : undefined;
+
+  useEffect(() => {
+    if (
+      !activeMesocycle ||
+      !finalizedMesocycle ||
+      activeMesocycle.status === finalizedMesocycle.status
+    ) {
+      return;
+    }
+    hydrateProgramData(
+      programs,
+      mesocycles.map((cycle) =>
+        cycle.id === finalizedMesocycle.id ? finalizedMesocycle : cycle,
+      ),
+    );
+  }, [
+    activeMesocycle,
+    finalizedMesocycle,
+    hydrateProgramData,
+    mesocycles,
+    programs,
+  ]);
 
   const model = useMemo(() => {
     if (!activeProgram) return undefined;
@@ -69,20 +94,25 @@ export function HabitTodayPanel() {
     return {
       current,
       rolling,
-      recovery: findMissedSessionRecovery(activeMesocycle, today),
+      recovery:
+        finalizedMesocycle?.status === "active"
+          ? findMissedSessionRecovery(finalizedMesocycle, today)
+          : undefined,
       milestones: buildTrainingMilestones({
         workouts,
         records,
         decisions,
-        mesocycles,
+        mesocycles: mesocycles.map((cycle) =>
+          cycle.id === finalizedMesocycle?.id ? finalizedMesocycle : cycle,
+        ),
         rollingPlan: milestoneWindow,
       }),
     };
   }, [
-    activeMesocycle,
     activeProgram,
     customExercises,
     decisions,
+    finalizedMesocycle,
     legacySessions,
     mesocycles,
     today,
@@ -92,10 +122,10 @@ export function HabitTodayPanel() {
   if (!activeProgram || !model) return null;
 
   const recover = (choice: ScheduleRecoveryChoice) => {
-    if (!activeMesocycle || !model.recovery) return;
+    if (!finalizedMesocycle || !model.recovery) return;
     const repaired = finalizeMesocycleState(
       applyScheduleRecovery(
-        activeMesocycle,
+        finalizedMesocycle,
         model.recovery,
         choice,
         today,
