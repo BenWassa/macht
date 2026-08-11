@@ -1,3 +1,4 @@
+import { Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { getExerciseById } from "@/domain/exerciseLibrary";
 import { allWorkingSetsComplete } from "@/domain/execution/plannedWorkout";
@@ -53,7 +54,8 @@ export function PlannedWorkoutExecution({
   const session = workout.activeV2Workout;
 
   const exercise = session?.exercisePerformances[workout.selectedExIndex];
-  const selectedSet = exercise?.sets[workout.selectedSetIndex] ?? exercise?.sets[0];
+  const selectedSet =
+    exercise?.sets[workout.selectedSetIndex] ?? exercise?.sets[0];
   const exerciseDefinition = exercise
     ? getExerciseById(exercise.exerciseId, customExercises)
     : undefined;
@@ -74,8 +76,12 @@ export function PlannedWorkoutExecution({
 
   const prescription = exercise.prescription;
   const effortScale =
-    prescription?.targetEffort?.scale ?? selectedSet.prescription?.targetEffort?.scale ?? settings.rpeMode;
-  const activeSetIndex = exercise.sets.findIndex((set) => set.id === selectedSet.id);
+    prescription?.targetEffort?.scale ??
+    selectedSet.prescription?.targetEffort?.scale ??
+    settings.rpeMode;
+  const activeSetIndex = exercise.sets.findIndex(
+    (set) => set.id === selectedSet.id,
+  );
 
   const toggleComplete = () => {
     const completedNow = workout.toggleV2Complete(exercise.id, selectedSet.id);
@@ -149,22 +155,36 @@ export function PlannedWorkoutExecution({
             {index + 1}
           </button>
         ))}
+        <button
+          type="button"
+          onClick={() => workout.appendV2Set(exercise.id)}
+          className="flex min-h-11 min-w-fit items-center gap-1.5 rounded-sm bg-surface-1 px-3 text-sm font-semibold text-text-muted transition hover:bg-surface-3 hover:text-text"
+        >
+          <Plus className="h-4 w-4" aria-hidden="true" />
+          Add set
+        </button>
       </div>
 
       <PlannedSetCard
         set={selectedSet}
         units={settings.units}
         effortScale={effortScale}
-        onUpdate={(patch) => workout.updateV2Set(exercise.id, selectedSet.id, patch)}
+        onUpdate={(patch) =>
+          workout.updateV2Set(exercise.id, selectedSet.id, patch)
+        }
         onToggleComplete={toggleComplete}
       />
 
       <label className="block">
-        <span className="mb-2 block text-xs font-semibold text-text-muted">Exercise notes</span>
+        <span className="mb-2 block text-xs font-semibold text-text-muted">
+          Exercise notes
+        </span>
         <textarea
           rows={2}
           value={exercise.note ?? ""}
-          onChange={(event) => workout.setV2ExerciseNote(exercise.id, event.target.value)}
+          onChange={(event) =>
+            workout.setV2ExerciseNote(exercise.id, event.target.value)
+          }
           placeholder="Form cues or observations"
           className="w-full resize-none rounded-md bg-surface-1 p-3 text-sm text-text outline-none placeholder:text-text-muted focus:ring-2 focus:ring-signal-strong"
         />
