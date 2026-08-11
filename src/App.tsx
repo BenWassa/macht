@@ -72,7 +72,7 @@ export default function App() {
 
       <main className="mx-auto w-full max-w-2xl flex-1 overflow-y-auto px-4 py-6 pb-32 sm:px-5">
         {activeTab === "home" && <HomeScreen setActiveTab={setActiveTab} />}
-        {activeTab === "templates" && <ProgramScreen setActiveTab={setActiveTab} />}
+        {activeTab === "templates" && <ProgramScreen />}
         {activeTab === "workout" && (
           <WorkoutScreen
             onFinish={() => setShowFinishModal(true)}
