@@ -57,6 +57,8 @@ export interface ExercisePrescriptionSnapshot {
   };
   recommendedLoad?: number;
   restSeconds?: number;
+  substitutionFamilyId?: string;
+  allowedSubstitutionExerciseIds?: ExerciseId[];
   source: PlannedExercisePrescription["source"];
   progressionDecisionId?: string;
 }
