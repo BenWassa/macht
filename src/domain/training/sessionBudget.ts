@@ -11,13 +11,13 @@ function slotPriority(
   slot: ProgramExerciseSlot,
   priorities: MusclePriorities,
 ): MusclePriority {
-  let best: MusclePriority = "grow";
+  let best: MusclePriority | undefined;
   for (const muscleId of slot.targetMuscleIds) {
     const priority = priorities[muscleId];
-    if (priority && priorityRank[priority] > priorityRank[best]) best = priority;
-    if (priority === "maintain" && best === "grow") best = "grow";
+    if (!priority) continue;
+    if (!best || priorityRank[priority] > priorityRank[best]) best = priority;
   }
-  return best;
+  return best ?? "grow";
 }
 
 function minutesPerSet(slot: ProgramExerciseSlot): number {
