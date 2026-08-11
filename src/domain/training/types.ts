@@ -15,17 +15,37 @@ import type {
 export type TrainingGoal = "hypertrophy" | "strength_hypertrophy";
 export type MesocycleStatus = "planned" | "active" | "completed" | "archived";
 export type WeekPhase = "accumulation" | "deload";
-export type PlannedSessionStatus =
-  | "planned"
-  | "completed"
-  | "moved"
-  | "skipped";
+export type PlannedSessionStatus = "planned" | "completed" | "moved" | "skipped";
 export type EffortScale = "RIR" | "RPE";
 export type SetType = "working" | "backoff" | "myorep" | "other";
 
 export interface EffortTarget {
   scale: EffortScale;
   value: number;
+}
+
+export interface ProgramExerciseSlot {
+  id: string;
+  exerciseId: ExerciseId;
+  order: number;
+  targetMuscleIds: MuscleId[];
+  baseSetCount: number;
+  repRange: { min: number; max: number };
+  startingRepTarget?: number;
+  startingLoad?: number;
+  targetEffort?: EffortTarget;
+  restSeconds?: number;
+  substitutionFamilyId?: string;
+  allowedSubstitutionExerciseIds?: ExerciseId[];
+  estimatedMinutesPerSet?: number;
+}
+
+export interface ProgramSessionTemplate {
+  id: string;
+  name: string;
+  order: number;
+  targetDurationMinutes?: number;
+  exerciseSlots: ProgramExerciseSlot[];
 }
 
 export interface Program {
@@ -37,7 +57,9 @@ export interface Program {
   sessionsPerWeek: 2 | 3 | 4 | 5 | 6;
   defaultSessionDurationMinutes: number;
   musclePriorities: MusclePriorities;
+  sessionTemplates: ProgramSessionTemplate[];
   preferredWeekdays?: number[];
+  availableEquipment?: string[];
   activeMesocycleId?: MesocycleId;
 }
 
@@ -78,24 +100,18 @@ export interface PlannedSession {
 export interface ExercisePrescription {
   id: ExercisePrescriptionId;
   plannedSessionId: PlannedSessionId;
+  programExerciseSlotId?: string;
   exerciseId: ExerciseId;
   order: number;
   targetMuscleIds: MuscleId[];
   plannedSetCount: number;
-  repRange: {
-    min: number;
-    max: number;
-  };
+  repRange: { min: number; max: number };
   targetRep?: number;
   targetEffort?: EffortTarget;
   recommendedLoad?: number;
   restSeconds?: number;
   substitutionFamilyId?: string;
-  source:
-    | "program_initial"
-    | "progression_engine"
-    | "user_override"
-    | "schedule_repair";
+  source: "program_initial" | "progression_engine" | "user_override" | "schedule_repair";
   progressionDecisionId?: string;
   sets: SetPrescription[];
 }
@@ -106,10 +122,7 @@ export interface SetPrescription {
   index: number;
   type: SetType;
   targetLoad?: number;
-  repRange: {
-    min: number;
-    max: number;
-  };
+  repRange: { min: number; max: number };
   targetReps?: number;
   targetEffort?: EffortTarget;
 }
