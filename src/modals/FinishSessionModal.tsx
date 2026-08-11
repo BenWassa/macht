@@ -6,10 +6,12 @@ import { completeWorkout } from "@/domain/execution/plannedWorkout";
 import type { WorkoutSession } from "@/domain/execution/types";
 import type { SessionWorkload } from "@/domain/feedback/types";
 import { getExerciseConflict } from "@/domain/injuries";
+import { buildPersonalTrainingModel } from "@/domain/personalization/model";
 import { computeExerciseE1rm } from "@/domain/sessionStats";
 import type { SessionLog } from "@/domain/types";
 import { useModalA11y } from "@/hooks/useModalA11y";
 import { formatTime, todayIso } from "@/lib/format";
+import { useCustomExerciseStore } from "@/state/useCustomExerciseStore";
 import { useExecutionHistoryStore } from "@/state/useExecutionHistoryStore";
 import { useHistoryStore } from "@/state/useHistoryStore";
 import { useInjuryStore } from "@/state/useInjuryStore";
@@ -25,6 +27,7 @@ interface SavedSummary {
   targetsModified: boolean;
   personalRecords: number;
   recommendationsApplied: number;
+  personalizationsApplied: number;
 }
 
 interface FinishSessionModalProps {
@@ -80,7 +83,9 @@ export function FinishSessionModal({
   const completePlannedSession = useProgramStore(
     (state) => state.completePlannedSession,
   );
+  const decisions = useProgressionStore((state) => state.decisions);
   const addDecisions = useProgressionStore((state) => state.addDecisions);
+  const customExercises = useCustomExerciseStore((state) => state.exercises);
   const units = useSettingsStore((state) => state.units);
   const injuries = useInjuryStore((state) => state.injuries);
   const workout = useWorkoutStore();
@@ -108,17 +113,29 @@ export function FinishSessionModal({
     const personalRecords = countPrs(legacy, sessions);
     const targetsModified = v2TargetsModified(completed);
     let recommendationsApplied = 0;
+    let personalizationsApplied = 0;
 
     const program = programs.find((item) => item.id === completed.programId);
     const mesocycle = mesocycles.find((item) => item.id === completed.mesocycleId);
     if (program && mesocycle) {
+      const personalTrainingModel = buildPersonalTrainingModel({
+        decisions,
+        mesocycles,
+        customExercises,
+        asOfDate: todayIso(),
+        generatedAt: completed.finishedAt ?? new Date().toISOString(),
+      });
       const progression = applyWorkoutProgression({
         workout: completed,
         program,
         mesocycle,
         availableLoadIncrement: units === "kgs" ? 1.25 : 2.5,
+        personalTrainingModel,
       });
       recommendationsApplied = progression.decisions.length;
+      personalizationsApplied = progression.decisions.filter(
+        (decision) => decision.personalization,
+      ).length;
       if (progression.decisions.length) {
         addDecisions(progression.decisions);
         upsertMesocycle(progression.mesocycle);
@@ -138,6 +155,7 @@ export function FinishSessionModal({
       targetsModified,
       personalRecords,
       recommendationsApplied,
+      personalizationsApplied,
     });
   };
 
@@ -196,6 +214,7 @@ export function FinishSessionModal({
       targetsModified,
       personalRecords,
       recommendationsApplied: 0,
+      personalizationsApplied: 0,
     });
   };
 
