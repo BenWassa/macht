@@ -1,242 +1,90 @@
 # Macht Reboot — Execution Tracker
 
-This file is the live implementation checklist for the Macht product reboot. Update it as work lands so implementation stays aligned with `MACHT_PRODUCT_REBOOT_PLAN.md`.
+This is the canonical implementation checklist for the Macht product reboot. Keep it current as Phase 11 lands.
 
 ## Current focus
 
-**Phase 7 — Progress**
+**Phase 11 — Cleanup and hardening**
 
-Phases 0–6.5 are implemented. The final Phase 6.5 code head passed the complete CI pipeline: lint, tests, TypeScript/build, bundle-size budget, and Lighthouse.
+Phases 0–10 are implemented. The final Phase 10 head `bf614503` passed the complete CI pipeline: lint, full tests, TypeScript/build, bundle-size budget, and Lighthouse.
 
-## Validation status
+## Completed phases
 
-- Latest Phase 6.5 CI: lint ✅, tests ✅, TypeScript/build ✅, bundle size ✅, Lighthouse ✅.
-- PROGRAM, TODAY, SESSION, and adaptive progression now share the same generated v2 Program / Mesocycle / PlannedSession source of truth.
-- Legacy templates remain available only as a collapsed fallback inside PROGRAM.
-- CI includes `npm test` and targets `agent/**` pushes, `main`, and pull requests.
-
-## Phase 0 — Reboot contract
-
-- [x] Replace `PRODUCT.md` with the adaptive-training product contract.
-- [x] Add the v3 PRD.
-- [x] Define the core user loops and information architecture.
-- [x] Replace `DESIGN.md` with the new visual-system brief.
-- [x] Explicitly supersede injury-first positioning and the brutalist visual doctrine.
-
-### Gate
-
-- [x] Product purpose is unambiguous.
-- [x] Major surfaces are defined.
-- [x] Today → Workout → Feedback → Progression is documented end to end.
-- [x] Program → Mesocycle → Week → Session → Prescription hierarchy is locked.
-
-## Phase 1 — Data model and migration
-
-- [x] Define Program, Mesocycle, Week, PlannedSession, ExercisePrescription, and SetPrescription.
-- [x] Define WorkoutSession, ExercisePerformance, and SetPerformance.
-- [x] Separate prescribed values from actual values.
-- [x] Define Muscle and MusclePriority.
-- [x] Define RecoveryObservation and ExerciseFeedback.
-- [x] Define ProgressionDecision and RecommendationReason.
-- [x] Add schema v2 envelope/versioning.
-- [x] Build v1 → v2 history migration.
-- [x] Add migration fixtures/tests.
-- [x] Add backup/rollback protection.
-
-### Gate
-
-- [x] Historical load, reps, effort, date, exercise identity, and duration survive migration under test.
-- [x] Raw stored records can reconstruct a workout under test/build validation.
-- [x] Prescriptions belong to program slots rather than exercise IDs.
-
-## Phase 2 — Progression engine v2
-
-- [x] Rep progression.
-- [x] Load progression using available increments.
-- [x] Effort-target handling.
-- [x] Mesocycle-aware effort progression.
-- [x] Volume recommendations.
-- [x] Recovery/stimulus inputs.
-- [x] Conservative maintain behavior under uncertainty.
-- [x] Persist recommendation reasons and confidence-ready evidence.
-- [x] Comprehensive domain tests.
-
-### Gate
-
-- [x] Every automated progression decision exposes persisted reasons/evidence.
-- [x] Competing signals prioritize deload/fatigue protection before progression.
-- [x] Lint, tests, and TypeScript/build pass.
-
-## Phase 3 — Program and mesocycle system
-
-- [x] Program create/edit domain model.
-- [x] 2–6 sessions/week.
-- [x] Muscle priorities.
-- [x] Exercise selection/substitution model.
-- [x] Accumulation + deload weeks.
-- [x] Session generation.
-- [x] Session-time budget.
-- [x] Missed-session schedule repair.
-- [x] Propagate progression decisions to the next matching program slot.
-- [x] Enforce program-wide unique slot IDs for independent progression streams.
-
-### Gate
-
-- [x] A validated program generates a complete mesocycle.
-- [x] Same exercises in different program slots can progress independently.
-- [x] Session-time budgets preserve higher-priority work first.
-- [x] Missed-session repair preserves session order.
-- [x] Equipment-aware substitutions are filterable and user overrides propagate intentionally.
-- [x] Lint, tests, and TypeScript/build pass.
-
-## Phase 4 — Design system
-
-- [x] Typography system.
-- [x] Semantic color tokens.
-- [x] Surfaces / spacing / radius / elevation.
-- [x] Motion system.
-- [x] Numeric typography.
-- [x] Chart language.
-- [x] Empty / success / PR / warning / recovery states.
-- [x] WCAG and reduced-motion audit.
-- [x] Shared tactile button, metric, and state-panel primitives.
-
-### Gate
-
-- [x] Sans-serif UI typography replaces monospace as the system default.
-- [x] Muted normal text meets AA contrast even on Surface 3.
-- [x] Semantic state pairs meet AA contrast.
-- [x] Shared button touch target is at least 44px high.
-- [x] Focus-visible, forced-colors, and reduced-motion behavior are defined globally.
-- [x] Lint, tests, and TypeScript/build pass.
-
-## Phase 5 — Today
-
-- [x] Primary Today surface.
-- [x] Dominant Start Workout / Resume Workout action.
-- [x] Planned session exercise preview and duration.
-- [x] Active program / mesocycle / week state with safe legacy fallback.
-- [x] Weekly adherence.
-- [x] Recent meaningful progress.
-- [x] Persisted v2 program context available to Today.
-- [x] Navigation aligned to TODAY / PROGRAM / SESSION / PROGRESS / YOU.
-- [x] Remove StrengthHero / ActivityHistory / ConsistencyChart from the Home render path.
-
-### Gate
-
-- [x] Opening a new UI state lands on Today.
-- [x] An active workout shows Resume Workout and cannot be overwritten from Today.
-- [x] Today view-model behavior is unit tested independently of React.
-- [x] The runtime bundle is back within the configured budget.
-- [x] Lint, full tests, TypeScript/build, bundle-size check, and Lighthouse pass.
-
-## Phase 6 — Workout execution
-
-- [x] Execute the exact v2 PlannedSession / ExercisePrescription shown on Today.
-- [x] Preserve immutable prescription snapshots separately from actual set performance.
-- [x] Exercise-focused execution surface.
-- [x] Prescription + previous performance together.
-- [x] Fast direct numeric entry and load/rep nudges.
-- [x] One-tap complete + undo.
-- [x] Preserve rest/warm-up timers, haptics, media session, wake lock, and offline persistence.
-- [x] Prescription-specific rest durations.
-- [x] Fast substitution with stored program allow-lists.
-- [x] RIR/RPE effort capture.
-- [x] Minimal optional session workload feedback.
-- [x] Exercise notes and explicit Add Set user override.
-- [x] Progress cues and restrained PR/save feedback.
-- [x] Persist completed workouts in dedicated v2 history.
-- [x] Dual-write a temporary legacy SessionLog compatibility record.
-- [x] Mark completed planned sessions in the mesocycle.
-- [x] Apply and persist progression decisions to the next occurrence of the same stable program slot.
-- [x] Prevent active workouts from being overwritten by any start entry point.
-- [x] Preserve substitution and user-added-set provenance so they cannot corrupt future load progression.
-
-### Gate
-
-- [x] Today and Workout resolve the same next v2 PlannedSession.
-- [x] Editing actual load/reps/effort cannot mutate the original prescription snapshot.
-- [x] Active v2 sessions persist through Zustand storage and start actions are guarded while active.
-- [x] Completing a planned workout saves v2 history, keeps legacy history compatible, and advances the planned session state.
-- [x] Completed performance flows through progression v2 and updates only the next matching program slot.
-- [x] Same-exercise/different-slot progression remains isolated.
-- [x] User-added sets stay outside prescribed-set progression evidence.
-- [x] One-session substitutions do not alter the original exercise's future targets.
-- [x] Upcoming deloads outrank rep/load progression.
-- [x] Generated prescriptions retain substitution constraints needed by the executor.
-- [x] Lint, full tests, TypeScript/build, bundle-size check, and Lighthouse pass.
-
-## Phase 6.5 — Program surface integration
-
-- [x] Replace the legacy injury-heavy Templates screen as the primary PROGRAM surface.
-- [x] Create and activate a v2 Program from the UI without developer tooling.
-- [x] Configure sustainable sessions/week and target session duration.
-- [x] Configure Emphasize / Grow / Maintain muscle priorities.
-- [x] Edit session exercise slots, set counts, rep ranges, effort targets, rest, and substitutions.
-- [x] Generate and activate a mesocycle from the configured program.
-- [x] Show active mesocycle, current week, planned sessions, and deload state.
-- [x] Edit future programming without rewriting completed workout history.
-- [x] Keep legacy templates available only as a migration/fallback path during the transition.
-- [x] Use the v3 design system and generic programming language rather than injury-first primary UI.
-- [x] Establish the first working-load baseline from completed performance when a new Program starts without a known load.
-- [x] Confirm before archiving an unfinished active cycle.
-
-### Gate
-
-- [x] A normal new user can create and activate a v2 program entirely through PROGRAM.
-- [x] PROGRAM → TODAY → SESSION uses one shared v2 program/mesocycle source of truth.
-- [x] Program edits preserve completed history and cannot overwrite an active workout.
-- [x] A generated plan exposes the same prescriptions the workout executor receives.
-- [x] Program → active cycle → Today → Workout → next-slot progression is covered by an integration test.
-- [x] Lint, full tests, TypeScript/build, bundle-size check, and Lighthouse pass.
-
-## Phase 7 — Progress
-
-- [ ] Overview / Exercises / Muscles / Records.
-- [ ] Consistency windows.
-- [ ] Exercise graphs.
-- [ ] PR detection.
-- [ ] Muscle-level training views.
-- [ ] Mesocycle comparison.
-- [ ] Exercise response history.
-- [ ] De-duplicate Phase 6 v2/legacy dual-write history before analytics.
-
-## Phase 8 — Habit and scheduling
-
-- [ ] Weekly commitment.
-- [ ] Rolling adherence.
-- [ ] Missed-session recovery flow.
-- [ ] Automatic schedule repair.
-- [ ] Real training milestones.
-
-## Phase 9 — Training constraints
-
-- [ ] Replace injury-first IA with generic constraints.
-- [ ] Preserve useful conflict/substitution logic.
-- [ ] Temporary movement avoidance/discomfort.
-- [ ] Remove injury state from primary Home/Progress hierarchy.
-- [ ] Delete legacy injury UI after migration.
-
-## Phase 10 — Personal training model
-
-- [ ] Exercise-response history.
-- [ ] User-specific volume-response ranges.
-- [ ] Movement-specific progression tendencies.
-- [ ] Fatigue/session-duration patterns.
-- [ ] Schedule/adherence patterns.
-- [ ] Explainable personalization only.
+- [x] Phase 0 — Product contract, PRD v3, IA, design doctrine
+- [x] Phase 1 — v2 data model, versioning, migration, rollback protection
+- [x] Phase 2 — progression engine v2 with persisted evidence and conservative uncertainty behavior
+- [x] Phase 3 — Program / mesocycle generation, scheduling, substitutions, time budgets
+- [x] Phase 4 — design system, semantic states, accessibility foundations
+- [x] Phase 5 — Today / Home reboot
+- [x] Phase 6 — v2 planned Workout execution and next-slot progression
+- [x] Phase 6.5 — PROGRAM creation/editing/activation surface
+- [x] Phase 7 — Progress analytics and UI: overview, exercises, muscles, records, cycle comparison
+- [x] Phase 8 — weekly training rhythm, adherence, missed-session recovery, schedule repair, milestones
+- [x] Phase 9 — generic training constraints with legacy injury compatibility
+- [x] Phase 10 — explainable Personal Training Model and conservative personalization
 
 ## Phase 11 — Cleanup and hardening
 
-- [ ] Remove dead legacy code and obsolete docs.
-- [ ] Update README and PWA manifest.
-- [x] Run tests in CI configuration.
-- [x] Migration fixtures.
-- [x] Resolve the stale bundle-size budget or reduce the runtime below the current gate.
-- [ ] Offline audit.
-- [ ] Accessibility audit.
-- [ ] Export/import audit.
-- [ ] Mobile interaction performance audit.
+### Tracker and architecture cleanup
+
+- [x] Consolidate temporary `REBOOT_TODO_ACTIVE.md` state into this canonical tracker.
+- [ ] Delete `REBOOT_TODO_ACTIVE.md`.
+- [ ] Collapse temporary entry-point shims into canonical `App.tsx`, Home, and YOU/Profile entry points.
+- [ ] Remove superseded legacy Home / Progress / Template / Workout compatibility UI from the active product tree.
+- [ ] Remove legacy injury-first primary UI while preserving read-only migration compatibility where required.
+- [ ] Remove obsolete product docs that are explicitly superseded by PRD v3 / current design doctrine.
+
+### Data durability and migration exit
+
+- [ ] Define a current backup envelope that includes v2 Programs, Mesocycles, completed v2 Workouts, progression decisions, training constraints, settings, custom exercises, and retained legacy history where needed.
+- [ ] Export the current backup format from YOU.
+- [ ] Import/validate the current backup format without partial destructive writes.
+- [ ] Continue accepting legacy v1 backups through explicit migration.
+- [ ] Add export → import round-trip tests.
+- [ ] Remove the Phase 6 v2 → legacy SessionLog dual-write after current Progress/backup paths no longer depend on it.
+- [ ] Preserve existing historical legacy records for users who already have them.
+
+### Product/package cleanup
+
+- [ ] Update README to the adaptive-training product.
+- [ ] Update PWA manifest name/description/theme metadata.
+- [ ] Remove obsolete archive/generated repository artifacts that do not belong in the production source tree.
+- [ ] Verify canonical product/version references are consistent.
+
+### Offline audit
+
+- [ ] Active workout survives reload/relaunch from persisted state.
+- [ ] Today / Program / Workout / Progress / You render from local state without a network dependency after installation.
+- [ ] PWA service worker precaches the production shell and required local assets.
+- [ ] No core training action requires an API or remote asset.
+
+### Accessibility audit
+
+- [ ] Keyboard/focus path through primary navigation and dialogs.
+- [ ] Modal focus trapping / close behavior.
+- [ ] 44px minimum primary touch targets.
+- [ ] Contrast and semantic state checks.
+- [ ] Reduced-motion and forced-colors behavior.
+- [ ] Form controls have usable names and pressed/selected states.
+
+### Mobile interaction/performance audit
+
+- [ ] Set logging remains direct and low-friction on narrow screens.
+- [ ] No horizontal overflow on primary surfaces.
+- [ ] Active workout controls remain reachable with bottom navigation/timers present.
+- [ ] Bundle-size budget remains green.
+- [ ] Lighthouse remains green.
+
+### Final gate
+
+- [ ] Lint passes with no errors.
+- [ ] Full test suite passes.
+- [ ] TypeScript/build passes.
+- [ ] Bundle-size budget passes without increasing the budget.
+- [ ] Lighthouse passes.
+- [ ] Backup/export/import round-trip passes.
+- [ ] No user history is deleted or rewritten during the cleanup migration.
+- [ ] Phase 11 checklist is fully closed.
 
 ## Non-negotiables
 
@@ -245,6 +93,6 @@ Phases 0–6.5 are implemented. The final Phase 6.5 code head passed the complet
 - Active sessions survive reload/relaunch.
 - Recommendation logic stays testable outside React.
 - Every automated decision can be explained from persisted evidence.
-- Typical set logging remains at or below the existing three-second target.
 - User overrides remain first-class.
-- Recovery and rest are treated as valid parts of training.
+- Recovery and rest remain valid training states.
+- Personalization remains evidence-gated and does not increase weekly training frequency automatically.
