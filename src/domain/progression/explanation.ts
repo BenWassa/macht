@@ -21,6 +21,7 @@ const REASON_COPY: Record<RecommendationReason, string> = {
   workload_limit_reached: "Session workload or time budget was at its limit.",
   mesocycle_progression: "The next target follows the mesocycle progression.",
   deload_week: "The next session is in the deload phase.",
+  load_baseline_established: "The completed exposure established a working load baseline.",
   load_increment_available: "A usable load increment is available.",
   load_increment_unavailable: "A suitable load increment is unavailable.",
   insufficient_evidence: "The available evidence does not support a progression change.",
