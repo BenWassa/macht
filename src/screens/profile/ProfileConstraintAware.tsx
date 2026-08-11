@@ -1,4 +1,5 @@
 import { TrainingConstraintsManager } from "@/screens/constraints/TrainingConstraintsManager";
+import { PersonalTrainingModelCard } from "./PersonalTrainingModelCard";
 import { ProfileScreen as LegacyProfileScreen } from "./index";
 
 export function ProfileConstraintAware() {
@@ -10,11 +11,11 @@ export function ProfileConstraintAware() {
           Training preferences
         </h1>
         <p className="mt-2 max-w-xl text-sm leading-6 text-text-secondary">
-          Manage optional training constraints here. Existing profile, settings, data,
-          and custom-exercise tools remain available below during the migration.
+          Review what Macht has learned from your training and manage optional training constraints. Existing settings, data, and custom-exercise tools remain available below during the migration.
         </p>
       </section>
 
+      <PersonalTrainingModelCard />
       <TrainingConstraintsManager />
 
       <details className="surface-card group overflow-hidden">
