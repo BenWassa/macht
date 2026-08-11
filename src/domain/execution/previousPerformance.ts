@@ -1,10 +1,14 @@
-import type { WorkoutSession } from "./types";
+import type { EffortScale } from "@/domain/training/types";
 import type { SessionLog } from "@/domain/types";
+import type { WorkoutSession } from "./types";
 
 export interface PreviousSetSummary {
   load: number;
   reps: number;
-  effort?: number;
+  effort?: {
+    value: number;
+    scale?: EffortScale;
+  };
 }
 
 export interface PreviousExerciseSummary {
@@ -48,7 +52,12 @@ export function findPreviousExercisePerformance(
         .map((set) => ({
           load: set.actualLoad ?? 0,
           reps: set.actualReps ?? 0,
-          effort: set.actualEffort?.value,
+          effort: set.actualEffort
+            ? {
+                value: set.actualEffort.value,
+                scale: set.actualEffort.scale,
+              }
+            : undefined,
         })),
     };
   }
@@ -72,7 +81,12 @@ export function findPreviousExercisePerformance(
       .map((set) => ({
         load: set.weight,
         reps: set.reps,
-        effort: set.rpe ?? undefined,
+        effort:
+          set.rpe == null
+            ? undefined
+            : {
+                value: set.rpe,
+              },
       })),
   };
 }
