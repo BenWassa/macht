@@ -47,7 +47,15 @@ function program() {
     availableEquipment: ["dumbbell", "machine"],
     sessionTemplates: [
       { id: "upper-a", name: "Upper A", order: 1, exerciseSlots: [pressSlot, rowSlot] },
-      { id: "upper-b", name: "Upper B", order: 2, exerciseSlots: [pressSlot, rowSlot] },
+      {
+        id: "upper-b",
+        name: "Upper B",
+        order: 2,
+        exerciseSlots: [
+          { ...pressSlot, id: "press-slot-b" },
+          { ...rowSlot, id: "row-slot-b" },
+        ],
+      },
     ],
   });
 }
@@ -84,6 +92,19 @@ describe("program and mesocycle generation", () => {
     expect(result.weeks[0].sessions[0].prescriptions[0].programExerciseSlotId).toBe("press-slot");
   });
 
+  it("rejects duplicate slot ids across session templates", () => {
+    expect(() =>
+      createProgram({
+        ...program(),
+        id: "invalid-program",
+        sessionTemplates: [
+          program().sessionTemplates[0],
+          { ...program().sessionTemplates[1], exerciseSlots: [pressSlot] },
+        ],
+      }),
+    ).toThrow(/unique across the program/);
+  });
+
   it("uses the time budget to reduce lower-priority work first", () => {
     const maintainSlot = { ...rowSlot, id: "maintain", targetMuscleIds: ["triceps"] };
     const counts = allocateSetsWithinDuration(
@@ -106,7 +127,7 @@ describe("program and mesocycle generation", () => {
 });
 
 describe("adaptive prescriptions", () => {
-  it("applies a progression decision only to the next occurrence of the same slot", () => {
+  it("applies progression to the next occurrence of the same program slot", () => {
     const source = mesocycle();
     const first = source.weeks[0].sessions[0].prescriptions[0];
     const decision: ProgressionDecision = {
@@ -121,16 +142,18 @@ describe("adaptive prescriptions", () => {
       userDisposition: "pending",
     };
     const updated = applyDecisionToNextSlotOccurrence(source, first.id, decision);
+    expect(updated.weeks[0].sessions[1].prescriptions[0].targetRep).toBe(10);
     expect(updated.weeks[1].sessions[0].prescriptions[0].targetRep).toBe(11);
     expect(updated.weeks[1].sessions[0].prescriptions[0].source).toBe("progression_engine");
     expect(updated.weeks[2].sessions[0].prescriptions[0].targetRep).toBe(10);
   });
 
-  it("supports a user substitution from a selected week onward", () => {
+  it("supports a user substitution for one slot from a selected week onward", () => {
     const updated = substituteSlotFromWeek(mesocycle(), "press-slot", "machine-press", 2);
     expect(updated.weeks[0].sessions[0].prescriptions[0].exerciseId).toBe("incline-db-press");
     expect(updated.weeks[1].sessions[0].prescriptions[0].exerciseId).toBe("machine-press");
-    expect(updated.weeks[3].sessions[1].prescriptions[0].exerciseId).toBe("machine-press");
+    expect(updated.weeks[3].sessions[0].prescriptions[0].exerciseId).toBe("machine-press");
+    expect(updated.weeks[3].sessions[1].prescriptions[0].exerciseId).toBe("incline-db-press");
   });
 
   it("filters substitution candidates by family, allow-list, and equipment", () => {
