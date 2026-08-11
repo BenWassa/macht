@@ -9,9 +9,9 @@ import { formatTime, formatWorkoutName } from "@/lib/format";
 import { FinishSessionModal } from "@/modals/FinishSessionModal";
 import { HomeScreen } from "@/screens/HomeScreen";
 import { ProfileScreen } from "@/screens/profile";
-import { ConstraintAwareProgramScreen } from "@/screens/program/ConstraintAwareProgramScreen";
+import { ProgramScreen } from "@/screens/program/ProgramScreen";
 import { ProgressScreen } from "@/screens/ProgressScreen";
-import { ConstraintAwareWorkoutScreen } from "@/screens/workout/ConstraintAwareWorkoutScreen";
+import { WorkoutScreen } from "@/screens/WorkoutScreen";
 import { useSettingsStore } from "@/state/useSettingsStore";
 import { useToastStore } from "@/state/useToastStore";
 import { useUiStore } from "@/state/useUiStore";
@@ -72,11 +72,9 @@ export default function App() {
 
       <main className="mx-auto w-full max-w-2xl flex-1 overflow-y-auto px-4 py-6 pb-32 sm:px-5">
         {activeTab === "home" && <HomeScreen setActiveTab={setActiveTab} />}
-        {activeTab === "templates" && (
-          <ConstraintAwareProgramScreen setActiveTab={setActiveTab} />
-        )}
+        {activeTab === "templates" && <ProgramScreen setActiveTab={setActiveTab} />}
         {activeTab === "workout" && (
-          <ConstraintAwareWorkoutScreen
+          <WorkoutScreen
             onFinish={() => setShowFinishModal(true)}
             onSetCompleted={startRest}
             onStartWarmup={startWarmup}
