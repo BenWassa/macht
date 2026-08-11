@@ -5,7 +5,11 @@ import { useWorkoutStore } from "@/state/useWorkoutStore";
 
 const WARMUP_SECONDS = 300;
 
-type PendingAdvance = { exerciseId: string; nextIndex: number };
+type PendingAdvance = {
+  sourceIndex: number;
+  nextIndex: number;
+  legacyExerciseId?: string;
+};
 
 export function useSessionTimers() {
   const defaultRest = useSettingsStore((state) => state.defaultRest);
@@ -22,8 +26,19 @@ export function useSessionTimers() {
     const pending = pendingAdvance.current;
     pendingAdvance.current = null;
     if (!pending || pending.nextIndex >= activeWorkoutList.length) return;
-    const sets = useWorkoutStore.getState().workoutSets[pending.exerciseId];
-    const sourceComplete = sets?.length && sets.every((set) => set.completed);
+
+    const state = useWorkoutStore.getState();
+    const sourceComplete = state.activeV2Workout
+      ? state.activeV2Workout.exercisePerformances[pending.sourceIndex]?.sets.every(
+          (set) => set.completed,
+        )
+      : Boolean(
+          pending.legacyExerciseId &&
+            state.workoutSets[pending.legacyExerciseId]?.length &&
+            state.workoutSets[pending.legacyExerciseId]?.every(
+              (set) => set.completed,
+            ),
+        );
     if (!sourceComplete) return;
     setSelectedExIndex(pending.nextIndex);
   }, [activeWorkoutList.length, setSelectedExIndex]);
@@ -37,16 +52,22 @@ export function useSessionTimers() {
     restTimer.dismiss();
   }, [restTimer, advanceAfterRest]);
 
-  const startRest = (options: { advanceAfterRest: boolean }) => {
+  const startRest = (options: {
+    advanceAfterRest: boolean;
+    restSeconds?: number;
+  }) => {
     warmupTimer.dismiss();
     const exerciseId = activeWorkoutList[selectedExIndex];
     pendingAdvance.current =
       options.advanceAfterRest &&
-      exerciseId &&
       selectedExIndex < activeWorkoutList.length - 1
-        ? { exerciseId, nextIndex: selectedExIndex + 1 }
+        ? {
+            sourceIndex: selectedExIndex,
+            nextIndex: selectedExIndex + 1,
+            legacyExerciseId: exerciseId,
+          }
         : null;
-    restTimer.start();
+    restTimer.start(options.restSeconds ?? defaultRest);
   };
 
   const startWarmup = () => {
