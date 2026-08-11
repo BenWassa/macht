@@ -1,29 +1,52 @@
 import { useRef, useState } from "react";
-import { useHistoryStore, type MachtBackup } from "@/state/useHistoryStore";
+import { Button } from "@/components/ui/Button";
+import {
+  createMachtBackupV2,
+  parseMachtBackupText,
+} from "@/data/backup";
 import { useCustomExerciseStore } from "@/state/useCustomExerciseStore";
+import { useExecutionHistoryStore } from "@/state/useExecutionHistoryStore";
+import { useHistoryStore } from "@/state/useHistoryStore";
 import { useInjuryStore } from "@/state/useInjuryStore";
+import { useProgramStore } from "@/state/useProgramStore";
+import { useProgressionStore } from "@/state/useProgressionStore";
 import { useSettingsStore } from "@/state/useSettingsStore";
-import type { CustomExercise, Settings } from "@/domain/types";
+import { useTrainingConstraintStore } from "@/state/useTrainingConstraintStore";
+import { useWorkoutStore } from "@/state/useWorkoutStore";
 
 export function BackupPanel() {
-  const settings = useSettingsStore();
-  const injuries = useInjuryStore((state) => state.injuries);
-  const customExercises = useCustomExerciseStore((state) => state.exercises);
-  const hydrateCustomExercises = useCustomExerciseStore(
-    (state) => state.hydrateExercises,
+  const programs = useProgramStore((state) => state.programs);
+  const mesocycles = useProgramStore((state) => state.mesocycles);
+  const activeProgramId = useProgramStore((state) => state.activeProgramId);
+  const workouts = useExecutionHistoryStore((state) => state.workouts);
+  const progressionDecisions = useProgressionStore((state) => state.decisions);
+  const trainingConstraints = useTrainingConstraintStore(
+    (state) => state.constraints,
   );
-  const hydrateInjuries = useInjuryStore((state) => state.hydrateInjuries);
-  const hydrateSettings = useSettingsStore((state) => state.hydrateSettings);
-  const hydrateHistory = useHistoryStore((state) => state.hydrateHistory);
-  const createBackup = useHistoryStore((state) => state.createBackup);
-
+  const settings = useSettingsStore();
+  const customExercises = useCustomExerciseStore((state) => state.exercises);
+  const legacyHistory = useHistoryStore((state) => state.sessions);
+  const legacyInjuries = useInjuryStore((state) => state.injuries);
+  const workoutActive = useWorkoutStore((state) => state.workoutActive);
   const [error, setError] = useState("");
+  const [receipt, setReceipt] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   const exportBackup = () => {
-    const backup = createBackup(
-      injuries,
-      {
+    setError("");
+    setReceipt("");
+    if (workoutActive) {
+      setError("Finish the active session before exporting a backup.");
+      return;
+    }
+    const backup = createMachtBackupV2({
+      programs,
+      mesocycles,
+      activeProgramId,
+      workouts,
+      progressionDecisions,
+      trainingConstraints,
+      settings: {
         units: settings.units,
         defaultRest: settings.defaultRest,
         rpeMode: settings.rpeMode,
@@ -31,81 +54,147 @@ export function BackupPanel() {
         audioCue: settings.audioCue,
       },
       customExercises,
-    );
+      legacyHistory,
+      legacyInjuries,
+    });
     const blob = new Blob([JSON.stringify(backup, null, 2)], {
       type: "application/json",
     });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `macht_backup_${backup.exportedAt}.json`;
+    link.download = `macht_backup_${backup.exportedAt.slice(0, 10)}.json`;
     link.click();
     URL.revokeObjectURL(url);
+    setReceipt("Backup exported with current programs, workouts, and training history.");
   };
 
-  const importBackup = async (file: File) => {
+  const applyBackup = (text: string) => {
     setError("");
+    setReceipt("");
+    if (workoutActive) {
+      setError("Finish the active session before restoring a backup.");
+      return;
+    }
+
+    const parsed = parseMachtBackupText(text);
+    if (!parsed.ok) {
+      setError(parsed.error);
+      return;
+    }
+    if (!window.confirm("This will replace current saved training data. Continue?")) {
+      return;
+    }
+
+    const prior = {
+      programs: useProgramStore.getState().programs,
+      mesocycles: useProgramStore.getState().mesocycles,
+      activeProgramId: useProgramStore.getState().activeProgramId,
+      workouts: useExecutionHistoryStore.getState().workouts,
+      decisions: useProgressionStore.getState().decisions,
+      constraints: useTrainingConstraintStore.getState().constraints,
+      settings: useSettingsStore.getState(),
+      customExercises: useCustomExerciseStore.getState().exercises,
+      legacyHistory: useHistoryStore.getState().sessions,
+      legacyInjuries: useInjuryStore.getState().injuries,
+    };
+    const payload = parsed.payload;
+
     try {
-      const parsed = JSON.parse(await file.text()) as Partial<MachtBackup>;
-      if (
-        !Array.isArray(parsed.history) ||
-        !Array.isArray(parsed.injuries) ||
-        !parsed.settings
-      ) {
-        setError("Invalid backup file.");
-        return;
-      }
-      if (!window.confirm("This will replace your current data. Continue?"))
-        return;
-      hydrateHistory(parsed.history);
-      hydrateInjuries(parsed.injuries);
-      hydrateSettings(parsed.settings as Settings);
-      hydrateCustomExercises(
-        (parsed.customExercises ?? []) as CustomExercise[],
+      useProgramStore
+        .getState()
+        .hydrateProgramData(payload.programs, payload.mesocycles);
+      useProgramStore.getState().setActiveProgram(payload.activeProgramId);
+      useExecutionHistoryStore.getState().hydrateWorkouts(payload.workouts);
+      useProgressionStore
+        .getState()
+        .hydrateDecisions(payload.progressionDecisions);
+      useTrainingConstraintStore
+        .getState()
+        .hydrateConstraints(payload.trainingConstraints);
+      useSettingsStore.getState().hydrateSettings(payload.settings);
+      useCustomExerciseStore
+        .getState()
+        .hydrateExercises(payload.customExercises);
+      useHistoryStore.getState().hydrateHistory(payload.legacyHistory);
+      useInjuryStore.getState().hydrateInjuries(payload.legacyInjuries);
+      setReceipt(
+        parsed.sourceVersion === 1
+          ? "Legacy backup restored. Historical records were retained and v2 training data starts empty."
+          : "Backup restored successfully.",
       );
     } catch {
-      setError("Invalid backup file.");
+      useProgramStore
+        .getState()
+        .hydrateProgramData(prior.programs, prior.mesocycles);
+      useProgramStore.getState().setActiveProgram(prior.activeProgramId);
+      useExecutionHistoryStore.getState().hydrateWorkouts(prior.workouts);
+      useProgressionStore.getState().hydrateDecisions(prior.decisions);
+      useTrainingConstraintStore.getState().hydrateConstraints(prior.constraints);
+      useSettingsStore.getState().hydrateSettings(prior.settings);
+      useCustomExerciseStore
+        .getState()
+        .hydrateExercises(prior.customExercises);
+      useHistoryStore.getState().hydrateHistory(prior.legacyHistory);
+      useInjuryStore.getState().hydrateInjuries(prior.legacyInjuries);
+      setError("Restore failed. Previous local data was restored.");
     }
   };
 
   return (
-    <div className="flex items-center justify-between gap-4 border border-[#1a1a1a] bg-[#0c0c0c] p-4 -mt-[17px] border-t-0">
+    <section className="surface-card space-y-4 p-4 sm:p-5">
       <div>
-        <span className="block text-xs font-bold uppercase tracking-tight">
-          Backup
-        </span>
-        <span className="font-mono text-[10px] text-neutral-500">
-          Export or restore local data
-        </span>
-        {error && (
-          <span className="mt-1 block font-mono text-[10px] text-red-400">
-            {error}
-          </span>
-        )}
+        <h2 className="text-base font-bold text-text">Backup and restore</h2>
+        <p className="mt-1 text-sm leading-6 text-text-muted">
+          Export a local JSON backup containing programs, cycles, completed workouts,
+          adaptive decisions, constraints, settings, and retained legacy history.
+        </p>
       </div>
-      <div className="flex gap-2 font-mono">
-        <button
-          onClick={exportBackup}
-          className="border border-[#222] bg-black px-3 py-1 text-[10px] uppercase text-neutral-300"
-        >
-          Export
-        </button>
-        <button
+
+      <div className="grid grid-cols-2 gap-2">
+        <Button variant="secondary" onClick={exportBackup} disabled={workoutActive}>
+          Export backup
+        </Button>
+        <Button
+          variant="secondary"
           onClick={() => inputRef.current?.click()}
-          className="border border-[#222] bg-black px-3 py-1 text-[10px] uppercase text-neutral-300"
+          disabled={workoutActive}
         >
-          Import
-        </button>
+          Restore backup
+        </Button>
         <input
           ref={inputRef}
           type="file"
           accept=".json,application/json"
           className="hidden"
-          onChange={(event) =>
-            event.target.files?.[0] && importBackup(event.target.files[0])
-          }
+          aria-label="Choose Macht backup file"
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            event.target.value = "";
+            if (!file) return;
+            void file.text().then(applyBackup).catch(() => {
+              setError("Could not read that backup file.");
+            });
+          }}
         />
       </div>
-    </div>
+
+      {workoutActive ? (
+        <p className="text-xs leading-5 text-caution">
+          Backup actions are paused while a session is active so in-progress work stays
+          untouched.
+        </p>
+      ) : null}
+      {error ? (
+        <p role="alert" className="text-xs leading-5 text-negative">
+          {error}
+        </p>
+      ) : null}
+      {receipt ? (
+        <p role="status" className="text-xs leading-5 text-positive">
+          {receipt}
+        </p>
+      ) : null}
+    </section>
   );
 }
