@@ -92,7 +92,9 @@ export function applyWorkoutProgression({
   let updatedMesocycle = mesocycle;
 
   for (const performance of workout.exercisePerformances) {
-    if (!performance.prescriptionId) continue;
+    if (!performance.prescriptionId || performance.substitutedFromExerciseId) {
+      continue;
+    }
     const sourceIndex = locations.findIndex(
       ({ prescription }) => prescription.id === performance.prescriptionId,
     );
