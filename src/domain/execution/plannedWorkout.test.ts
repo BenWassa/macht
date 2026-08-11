@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { PlannedSession } from "@/domain/training/types";
 import {
   allWorkingSetsComplete,
+  appendSetPerformance,
   completeWorkout,
   createPlannedWorkout,
   substituteExercisePerformance,
@@ -31,6 +32,7 @@ const plannedSession: PlannedSession = {
       targetEffort: { scale: "RIR", value: 2 },
       recommendedLoad: 30,
       restSeconds: 120,
+      allowedSubstitutionExerciseIds: ["machine_press"],
       source: "progression_engine",
       progressionDecisionId: "decision-1",
       sets: [
@@ -65,14 +67,17 @@ const ids = {
   set: (set: { id: string }) => `performance-${set.id}`,
 };
 
+const start = () =>
+  createPlannedWorkout({
+    plannedSession,
+    context: { programId: "program-1", mesocycleId: "meso-1" },
+    startedAt: "2026-08-11T00:45:00.000Z",
+    ids,
+  });
+
 describe("planned workout execution", () => {
   it("creates an active workout with immutable prescription snapshots", () => {
-    const workout = createPlannedWorkout({
-      plannedSession,
-      context: { programId: "program-1", mesocycleId: "meso-1" },
-      startedAt: "2026-08-11T00:45:00.000Z",
-      ids,
-    });
+    const workout = start();
 
     expect(workout.source).toBe("planned");
     expect(workout.plannedSessionId).toBe("planned-1");
@@ -81,6 +86,7 @@ describe("planned workout execution", () => {
       programExerciseSlotId: "slot-press-a",
       recommendedLoad: 30,
       restSeconds: 120,
+      allowedSubstitutionExerciseIds: ["machine_press"],
       progressionDecisionId: "decision-1",
     });
     expect(workout.exercisePerformances[0].sets[0]).toMatchObject({
@@ -97,12 +103,7 @@ describe("planned workout execution", () => {
   });
 
   it("updates actual performance without mutating the prescription snapshot", () => {
-    const original = createPlannedWorkout({
-      plannedSession,
-      context: { programId: "program-1", mesocycleId: "meso-1" },
-      startedAt: "2026-08-11T00:45:00.000Z",
-      ids,
-    });
+    const original = start();
     const exercise = original.exercisePerformances[0];
     const set = exercise.sets[0];
     const updated = updateSetPerformance(original, exercise.id, set.id, {
@@ -123,13 +124,25 @@ describe("planned workout execution", () => {
     });
   });
 
-  it("supports complete and undo without losing entered performance", () => {
-    const original = createPlannedWorkout({
-      plannedSession,
-      context: { programId: "program-1", mesocycleId: "meso-1" },
-      startedAt: "2026-08-11T00:45:00.000Z",
-      ids,
+  it("records an added set as an explicit user override", () => {
+    const original = start();
+    const exercise = original.exercisePerformances[0];
+    const updated = appendSetPerformance(original, exercise.id, "extra-set");
+    const extra = updated.exercisePerformances[0].sets[2];
+
+    expect(extra).toMatchObject({
+      id: "extra-set",
+      index: 2,
+      actualLoad: 30,
+      actualReps: 10,
+      completed: false,
     });
+    expect(extra.prescription).toBeUndefined();
+    expect(updated.adaptedDuringSession).toBe(true);
+  });
+
+  it("supports complete and undo without losing entered performance", () => {
+    const original = start();
     const exercise = original.exercisePerformances[0];
     const set = exercise.sets[0];
     const completed = toggleSetPerformance(
@@ -154,13 +167,20 @@ describe("planned workout execution", () => {
     expect(undone.session.exercisePerformances[0].sets[0].actualLoad).toBe(30);
   });
 
-  it("tracks notes, substitutions, completion and final timing", () => {
-    let workout = createPlannedWorkout({
-      plannedSession,
-      context: { programId: "program-1", mesocycleId: "meso-1" },
-      startedAt: "2026-08-11T00:45:00.000Z",
-      ids,
-    });
+  it("rejects substitutions outside the stored program allow-list", () => {
+    const original = start();
+    const exerciseId = original.exercisePerformances[0].id;
+    const rejected = substituteExercisePerformance(
+      original,
+      exerciseId,
+      "barbell_bench",
+    );
+    expect(rejected).toBe(original);
+    expect(rejected.adaptedDuringSession).toBe(false);
+  });
+
+  it("tracks notes, allowed substitutions, completion and final timing", () => {
+    let workout = start();
     const exerciseId = workout.exercisePerformances[0].id;
     workout = updateExerciseNote(workout, exerciseId, "Keep elbows tucked");
     workout = substituteExercisePerformance(workout, exerciseId, "machine_press");
