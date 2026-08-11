@@ -76,6 +76,7 @@ export function FinishSessionModal({
 }: FinishSessionModalProps) {
   const sessions = useHistoryStore((state) => state.sessions);
   const addSession = useHistoryStore((state) => state.addSession);
+  const v2History = useExecutionHistoryStore((state) => state.workouts);
   const addV2Workout = useExecutionHistoryStore((state) => state.addWorkout);
   const programs = useProgramStore((state) => state.programs);
   const mesocycles = useProgramStore((state) => state.mesocycles);
@@ -108,9 +109,13 @@ export function FinishSessionModal({
       new Date().toISOString(),
       workout.workoutDuration,
     );
-    const legacy = toLegacySessionLog(completed);
+    const legacyView = toLegacySessionLog(completed);
+    const previousHistory = [
+      ...v2History.map(toLegacySessionLog),
+      ...sessions,
+    ];
     const summary = v2WorkoutSummary(completed);
-    const personalRecords = countPrs(legacy, sessions);
+    const personalRecords = countPrs(legacyView, previousHistory);
     const targetsModified = v2TargetsModified(completed);
     let recommendationsApplied = 0;
     let personalizationsApplied = 0;
@@ -143,13 +148,12 @@ export function FinishSessionModal({
     }
 
     addV2Workout(completed);
-    addSession(legacy);
     if (completed.plannedSessionId) {
       completePlannedSession(completed.plannedSessionId);
     }
     workout.endSession();
     onSaved({
-      duration: legacy.duration,
+      duration: legacyView.duration,
       sets: summary.sets,
       volume: summary.volume,
       targetsModified,
