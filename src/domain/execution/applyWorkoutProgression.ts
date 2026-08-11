@@ -1,4 +1,6 @@
 import type { MusclePriority } from "@/domain/exercises/muscles";
+import { personalizeProgressionDecision } from "@/domain/personalization/personalizedRecommendation";
+import type { PersonalTrainingModel } from "@/domain/personalization/types";
 import { recommendProgression } from "@/domain/progression/recommendation";
 import type { ProgressionDecision } from "@/domain/progression/types";
 import { applyDecisionToNextSlotOccurrence } from "@/domain/training/prescriptionUpdates";
@@ -72,6 +74,7 @@ export interface ApplyWorkoutProgressionInput {
   program: Program;
   mesocycle: Mesocycle;
   availableLoadIncrement: number;
+  personalTrainingModel?: PersonalTrainingModel;
   decisionId?: () => string;
 }
 
@@ -85,6 +88,7 @@ export function applyWorkoutProgression({
   program,
   mesocycle,
   availableLoadIncrement,
+  personalTrainingModel,
   decisionId = () => crypto.randomUUID(),
 }: ApplyWorkoutProgressionInput): ApplyWorkoutProgressionResult {
   const locations = prescriptionLocations(mesocycle);
@@ -106,13 +110,14 @@ export function applyWorkoutProgression({
     const target = findNextOccurrence(locations, sourceIndex);
     if (!target) continue;
 
-    const decision = recommendProgression({
+    const baseDecision = recommendProgression({
       decisionId: decisionId(),
       createdAt: workout.finishedAt ?? new Date().toISOString(),
       prescription: source.prescription,
       performance,
       musclePriority: priorityFor(source.prescription, program),
       availableLoadIncrement,
+      recovery: performance.feedback?.recovery,
       stimulus: performance.feedback?.stimulus,
       workload: workout.sessionFeedback?.workload,
       sessionDurationMinutes:
@@ -122,9 +127,31 @@ export function applyWorkoutProgression({
       mesocyclePhase: target.week.phase,
       baseEffortTarget: startingEffort,
     });
+
+    const personalized = personalTrainingModel
+      ? personalizeProgressionDecision(
+          baseDecision,
+          source.prescription,
+          personalTrainingModel,
+        )
+      : { baseDecision, finalDecision: baseDecision };
+
     const appliedDecision: ProgressionDecision = {
-      ...decision,
+      ...personalized.finalDecision,
       userDisposition: "auto_applied",
+      ...(personalized.adjustment
+        ? {
+            personalization: {
+              baseDecision: personalized.baseDecision.decision,
+              baseDelta: personalized.baseDecision.delta,
+              adjustment: personalized.adjustment.kind,
+              explanation: personalized.adjustment.explanation,
+              evidenceCount: personalized.adjustment.evidenceCount,
+              confidence: personalized.adjustment.confidence,
+              muscleIds: personalized.adjustment.muscleIds,
+            },
+          }
+        : {}),
     };
     decisions.push(appliedDecision);
     updatedMesocycle = applyDecisionToNextSlotOccurrence(

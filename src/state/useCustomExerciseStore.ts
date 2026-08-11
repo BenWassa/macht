@@ -19,6 +19,7 @@ type CreateExerciseResult =
 interface CustomExerciseState {
   exercises: CustomExercise[];
   addExercise: (input: CreateExerciseInput) => CreateExerciseResult;
+  removeExercise: (exerciseId: string) => void;
   hydrateExercises: (exercises: CustomExercise[]) => void;
 }
 
@@ -63,6 +64,10 @@ export const useCustomExerciseStore = create<CustomExerciseState>()(
         set((state) => ({ exercises: [...state.exercises, exercise] }));
         return { ok: true, exercise };
       },
+      removeExercise: (exerciseId) =>
+        set((state) => ({
+          exercises: state.exercises.filter((exercise) => exercise.id !== exerciseId),
+        })),
       hydrateExercises: (exercises) => set({ exercises }),
     }),
     { name: demoStorageKey("macht_custom_exercises") },

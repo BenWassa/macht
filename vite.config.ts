@@ -21,11 +21,12 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "apple-touch-icon.png"],
       manifest: {
-        name: "MACHT - Minimum Viable Strength",
+        name: "Macht — Adaptive Training",
         short_name: "MACHT",
-        description: "Minimalist powerlifting tracker for maximum results.",
-        theme_color: "#0c0c0c",
-        background_color: "#0c0c0c",
+        description:
+          "Adaptive, local-first hypertrophy and strength training with explainable progression.",
+        theme_color: "#111210",
+        background_color: "#111210",
         display: "standalone",
         orientation: "portrait",
         icons: [

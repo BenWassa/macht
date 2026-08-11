@@ -23,7 +23,7 @@ export function RestTimerBanner({
   seconds,
   running,
   label = "Rest",
-  doneText = "Done - load next set",
+  doneText = "Done — load next set",
   increments = [30, -10],
   onAdd,
   onToggle,
@@ -31,53 +31,76 @@ export function RestTimerBanner({
   onDismiss,
 }: RestTimerBannerProps) {
   return (
-    <div className="fixed bottom-16 left-0 right-0 z-30 flex items-center justify-between border-t border-[#1a1a1a] bg-[#0c0c0c] px-4 py-3">
-      <div className="flex items-center space-x-3">
-        <Timer
-          className={`h-4 w-4 ${running ? "animate-pulse text-blue-500" : "text-neutral-500"}`}
-        />
-        <div>
-          <span className="block text-[8px] font-mono uppercase leading-none tracking-wider text-neutral-500">
-            {label}
-          </span>
-          <span
-            className={`text-xs font-mono font-bold leading-none ${seconds === 0 ? "animate-pulse text-emerald-400" : "text-neutral-200"}`}
+    <aside
+      aria-label={`${label} timer`}
+      className="fixed inset-x-0 bottom-[calc(68px+env(safe-area-inset-bottom))] z-40 border-t border-divider bg-surface-1/98 px-3 py-3 shadow-raised backdrop-blur sm:px-4"
+    >
+      <div className="mx-auto flex w-full max-w-2xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-h-11 items-center justify-between gap-3 sm:justify-start">
+          <div className="flex min-w-0 items-center gap-3">
+            <Timer
+              className={`h-5 w-5 shrink-0 ${running ? "text-signal-strong" : "text-text-muted"}`}
+              aria-hidden="true"
+            />
+            <div className="min-w-0">
+              <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">
+                {label}
+              </span>
+              <span
+                className={`metric block truncate text-sm font-bold ${seconds === 0 ? "text-positive" : "text-text"}`}
+                aria-live="polite"
+              >
+                {seconds === 0 ? doneText : formatTime(seconds)}
+              </span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onDismiss}
+            aria-label={`Dismiss ${label.toLowerCase()} timer`}
+            className="flex min-h-11 min-w-11 items-center justify-center rounded-sm text-text-muted transition hover:bg-surface-3 hover:text-text sm:hidden"
           >
-            {seconds === 0 ? doneText : formatTime(seconds)}
-          </span>
+            <X className="h-5 w-5" aria-hidden="true" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-4 gap-2 sm:flex sm:items-center">
+          {increments.map((amount) => (
+            <button
+              key={amount}
+              type="button"
+              onClick={() => onAdd(amount)}
+              className="metric min-h-11 rounded-sm bg-surface-3 px-3 text-xs font-semibold text-text-secondary transition hover:text-text"
+            >
+              {incrementLabel(amount)}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-pressed={running}
+            className="min-h-11 rounded-sm bg-surface-3 px-3 text-xs font-semibold text-text-secondary transition hover:text-text"
+          >
+            {running ? "Pause" : "Resume"}
+          </button>
+          <button
+            type="button"
+            onClick={onReset}
+            aria-label={`Reset ${label.toLowerCase()} timer`}
+            className="flex min-h-11 min-w-11 items-center justify-center rounded-sm bg-surface-3 text-text-secondary transition hover:text-text"
+          >
+            <RotateCcw className="h-4 w-4" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            onClick={onDismiss}
+            aria-label={`Dismiss ${label.toLowerCase()} timer`}
+            className="hidden min-h-11 min-w-11 items-center justify-center rounded-sm text-text-muted transition hover:bg-surface-3 hover:text-text sm:flex"
+          >
+            <X className="h-5 w-5" aria-hidden="true" />
+          </button>
         </div>
       </div>
-      <div className="flex items-center space-x-1 font-mono">
-        {increments.map((amount) => (
-          <button
-            key={amount}
-            onClick={() => onAdd(amount)}
-            className="border border-[#222] bg-[#121212] px-2 py-1 text-[9px] text-neutral-300 hover:bg-[#1a1a1a]"
-          >
-            {incrementLabel(amount)}
-          </button>
-        ))}
-        <button
-          onClick={onToggle}
-          className="border border-[#222] bg-[#121212] px-2.5 py-1 text-[9px] text-neutral-300 hover:bg-[#1a1a1a]"
-        >
-          {running ? "Pause" : "Resume"}
-        </button>
-        <button
-          onClick={onReset}
-          aria-label={`Reset ${label.toLowerCase()} timer`}
-          className="border border-[#222] bg-[#121212] p-1 text-[9px] text-neutral-300 hover:bg-[#1a1a1a]"
-        >
-          <RotateCcw className="h-3 w-3" />
-        </button>
-        <button
-          onClick={onDismiss}
-          aria-label={`Dismiss ${label.toLowerCase()} timer`}
-          className="pl-2 text-neutral-500 hover:text-neutral-100"
-        >
-          <X className="h-4 w-4" />
-        </button>
-      </div>
-    </div>
+    </aside>
   );
 }

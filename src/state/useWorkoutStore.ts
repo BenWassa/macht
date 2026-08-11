@@ -5,6 +5,7 @@ import {
   createPlannedWorkout,
   substituteExercisePerformance,
   toggleSetPerformance,
+  updateExerciseFeedback,
   updateExerciseNote,
   updateSetPerformance,
 } from "@/domain/execution/plannedWorkout";
@@ -18,6 +19,7 @@ import {
   toggleSetCompletion,
   updateWorkoutSet,
 } from "@/state/workoutMutations";
+import { migratePersistedActiveWorkout } from "@/state/workoutPersistence";
 import {
   customExercises,
   suggestFor,
@@ -148,6 +150,17 @@ export const useWorkoutStore = create<WorkoutState>()(
               )
             : null,
         })),
+      updateV2ExerciseFeedback: (exercisePerformanceId, patch) =>
+        set((state) => ({
+          activeV2Workout: state.activeV2Workout
+            ? updateExerciseFeedback(
+                state.activeV2Workout,
+                exercisePerformanceId,
+                patch,
+                new Date().toISOString(),
+              )
+            : null,
+        })),
       appendV2Set: (exercisePerformanceId) =>
         set((state) => {
           if (!state.activeV2Workout) return {};
@@ -232,6 +245,13 @@ export const useWorkoutStore = create<WorkoutState>()(
       appendSet: (exerciseId) =>
         set((state) => appendWorkoutSet(state, exerciseId, customExercises())),
     }),
-    { name: demoStorageKey("macht_workout") },
+    {
+      name: demoStorageKey("macht_workout"),
+      version: 2,
+      migrate: (persisted) =>
+        migratePersistedActiveWorkout(
+          persisted as Parameters<typeof migratePersistedActiveWorkout>[0],
+        ),
+    },
   ),
 );

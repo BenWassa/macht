@@ -1,3 +1,4 @@
+import type { ExerciseFeedback } from "@/domain/feedback/types";
 import type {
   ExercisePerformance,
   ExercisePrescriptionSnapshot,
@@ -142,6 +143,10 @@ export interface SetPerformancePatch {
   actualEffort?: SetPerformance["actualEffort"];
 }
 
+export type ExerciseFeedbackPatch = Partial<
+  Pick<ExerciseFeedback, "quality" | "stimulus" | "recovery" | "comfortIssue" | "note">
+>;
+
 export function updateSetPerformance(
   session: WorkoutSession,
   exercisePerformanceId: ExercisePerformanceId,
@@ -160,6 +165,30 @@ export function updateSetPerformance(
             ),
           },
     ),
+  };
+}
+
+export function updateExerciseFeedback(
+  session: WorkoutSession,
+  exercisePerformanceId: ExercisePerformanceId,
+  patch: ExerciseFeedbackPatch,
+  recordedAt: IsoDateTime,
+): WorkoutSession {
+  return {
+    ...session,
+    exercisePerformances: session.exercisePerformances.map((exercise) => {
+      if (exercise.id !== exercisePerformanceId) return exercise;
+      return {
+        ...exercise,
+        feedback: {
+          ...exercise.feedback,
+          id: exercise.feedback?.id ?? crypto.randomUUID(),
+          exerciseId: exercise.exerciseId,
+          recordedAt,
+          ...patch,
+        },
+      };
+    }),
   };
 }
 

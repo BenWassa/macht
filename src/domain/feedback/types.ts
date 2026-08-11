@@ -18,6 +18,7 @@ export interface ExerciseFeedback {
   recordedAt: IsoDateTime;
   quality?: ExerciseQuality;
   stimulus?: StimulusRating;
+  recovery?: RecoveryState;
   comfortIssue?: ComfortRating;
   note?: string;
 }

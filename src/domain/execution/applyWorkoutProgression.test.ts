@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
-import type { ExercisePerformance, WorkoutSession } from "./types";
+import type { PersonalTrainingModel } from "@/domain/personalization/types";
 import type {
   ExercisePrescription,
   Mesocycle,
   MesocycleWeek,
   Program,
 } from "@/domain/training/types";
+import type { ExercisePerformance, WorkoutSession } from "./types";
 import { applyWorkoutProgression } from "./applyWorkoutProgression";
 
 const prescription = (
@@ -95,6 +96,7 @@ const mesocycle = (
 const performance = (
   prescriptionId: string,
   reps = [10, 10, 10],
+  feedback?: ExercisePerformance["feedback"],
 ): ExercisePerformance => ({
   id: `performance-${prescriptionId}`,
   exerciseId: "incline_db_press",
@@ -108,6 +110,7 @@ const performance = (
     actualReps,
     actualEffort: { scale: "RIR", value: 2 },
   })),
+  feedback,
 });
 
 const workout = (
@@ -121,14 +124,56 @@ const workout = (
   name: "Upper 1",
   date: "2026-08-11",
   startedAt: "2026-08-11T00:00:00Z",
-  finishedAt: "2026-08-11T01:00:00Z",
-  durationSeconds: 3600,
+  finishedAt: "2026-08-11T00:50:00Z",
+  durationSeconds: 3000,
   state: "completed",
   exercisePerformances: [performance("rx-a-1")],
   adaptedDuringSession: false,
   source: "planned",
   ...patch,
 });
+
+const establishedFatigueModel: PersonalTrainingModel = {
+  generatedAt: "2026-08-11T00:00:00Z",
+  exerciseResponses: [],
+  muscleVolumeResponses: [
+    {
+      muscleId: "chest",
+      evidenceCount: 4,
+      confidence: "established",
+      observations: 4,
+      productiveObservations: 0,
+      fatigueLimitedObservations: 3,
+      understimulatedObservations: 1,
+      repeatedFatigueAtOrAboveSets: 3,
+      explanation: "Repeated fatigue has been observed at three working sets.",
+    },
+  ],
+  sessionDuration: {
+    evidenceCount: 0,
+    confidence: "insufficient",
+    observations: 0,
+    explanation: "Insufficient evidence.",
+  },
+  schedule: {
+    evidenceCount: 0,
+    confidence: "insufficient",
+    weekdays: [],
+    strongerWeekdays: [],
+    weakerWeekdays: [],
+    explanation: "Insufficient evidence.",
+  },
+  establishedSignals: 1,
+};
+
+const lowStimulusRecoveredPerformance = () =>
+  performance("rx-a-1", [9, 9, 9], {
+    id: "feedback-1",
+    exerciseId: "incline_db_press",
+    recordedAt: "2026-08-11T00:45:00Z",
+    recovery: "recovered",
+    stimulus: "low",
+  });
 
 const nextPrescription = (
   result: ReturnType<typeof applyWorkoutProgression>,
@@ -161,6 +206,95 @@ describe("applyWorkoutProgression", () => {
     );
     expect(nextPrescription(result, "slot-b").targetRep).toBe(10);
     expect(nextPrescription(result, "slot-b").source).toBe("program_initial");
+  });
+
+  it("can add one set when current recovery and stimulus evidence support more volume", () => {
+    const result = applyWorkoutProgression({
+      workout: workout({
+        exercisePerformances: [lowStimulusRecoveredPerformance()],
+        sessionFeedback: { workload: "easy" },
+      }),
+      program,
+      mesocycle: mesocycle(),
+      availableLoadIncrement: 2.5,
+      decisionId: () => "decision-volume",
+    });
+
+    expect(result.decisions[0]).toMatchObject({
+      decision: "add_set",
+      evidence: {
+        recovery: "recovered",
+        stimulus: "low",
+        workload: "easy",
+      },
+      delta: { setCountDelta: 1, nextSetCount: 4 },
+    });
+    expect(nextPrescription(result, "slot-a").plannedSetCount).toBe(4);
+  });
+
+  it("suppresses a proposed set increase when established personal fatigue evidence reaches that exposure", () => {
+    const result = applyWorkoutProgression({
+      workout: workout({
+        exercisePerformances: [lowStimulusRecoveredPerformance()],
+        sessionFeedback: { workload: "easy" },
+      }),
+      program,
+      mesocycle: mesocycle(),
+      availableLoadIncrement: 2.5,
+      personalTrainingModel: establishedFatigueModel,
+      decisionId: () => "decision-personalized",
+    });
+
+    expect(result.decisions[0]).toMatchObject({
+      id: "decision-personalized",
+      decision: "maintain",
+      userDisposition: "auto_applied",
+      personalization: {
+        baseDecision: "add_set",
+        adjustment: "suppress_volume_increase",
+        evidenceCount: 4,
+        confidence: "established",
+        muscleIds: ["chest"],
+      },
+    });
+    expect(result.decisions[0].personalization?.baseDelta).toMatchObject({
+      setCountDelta: 1,
+      nextSetCount: 4,
+    });
+    expect(nextPrescription(result, "slot-a").plannedSetCount).toBe(3);
+    expect(nextPrescription(result, "slot-a").progressionDecisionId).toBe(
+      "decision-personalized",
+    );
+  });
+
+  it("does not suppress volume progression when personal evidence is still insufficient", () => {
+    const insufficientModel: PersonalTrainingModel = {
+      ...establishedFatigueModel,
+      muscleVolumeResponses: establishedFatigueModel.muscleVolumeResponses.map(
+        (profile) => ({
+          ...profile,
+          evidenceCount: 2,
+          confidence: "insufficient" as const,
+          repeatedFatigueAtOrAboveSets: undefined,
+        }),
+      ),
+      establishedSignals: 0,
+    };
+    const result = applyWorkoutProgression({
+      workout: workout({
+        exercisePerformances: [lowStimulusRecoveredPerformance()],
+        sessionFeedback: { workload: "easy" },
+      }),
+      program,
+      mesocycle: mesocycle(),
+      availableLoadIncrement: 2.5,
+      personalTrainingModel: insufficientModel,
+      decisionId: () => "decision-insufficient-model",
+    });
+
+    expect(result.decisions[0].decision).toBe("add_set");
+    expect(result.decisions[0].personalization).toBeUndefined();
+    expect(nextPrescription(result, "slot-a").plannedSetCount).toBe(4);
   });
 
   it("reduces next-session volume when session workload signals high fatigue", () => {

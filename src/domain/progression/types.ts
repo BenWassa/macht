@@ -80,6 +80,16 @@ export interface PrescriptionDelta {
   replacementExerciseId?: ExerciseId;
 }
 
+export interface ProgressionPersonalizationAudit {
+  baseDecision: ProgressionDecisionType;
+  baseDelta: PrescriptionDelta;
+  adjustment: "suppress_volume_increase";
+  explanation: string;
+  evidenceCount: number;
+  confidence: "established";
+  muscleIds: string[];
+}
+
 export interface ProgressionDecision {
   id: ProgressionDecisionId;
   createdAt: IsoDateTime;
@@ -91,4 +101,5 @@ export interface ProgressionDecision {
   delta: PrescriptionDelta;
   confidence?: number;
   userDisposition?: "pending" | "accepted" | "overridden" | "auto_applied";
+  personalization?: ProgressionPersonalizationAudit;
 }
