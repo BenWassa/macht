@@ -1,6 +1,7 @@
 import { useProgramStore } from "@/state/useProgramStore";
 import type { TabId } from "@/App";
 import { ProgramConstraintsCard } from "@/screens/constraints/ProgramConstraintsCard";
+import { PersonalProgramSignalsCard } from "./PersonalProgramSignalsCard";
 import { ProgramScreen } from "./ProgramScreen";
 
 interface ConstraintAwareProgramScreenProps {
@@ -18,6 +19,7 @@ export function ConstraintAwareProgramScreen({
   return (
     <div className="space-y-5">
       {activeProgram ? <ProgramConstraintsCard program={activeProgram} /> : null}
+      <PersonalProgramSignalsCard />
       <ProgramScreen setActiveTab={setActiveTab} />
     </div>
   );
