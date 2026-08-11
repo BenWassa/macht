@@ -1,5 +1,5 @@
-import { CalendarDays, CheckCircle2, Clock3, Dumbbell, Play, Trophy } from "lucide-react";
-import { useMemo } from "react";
+import { CalendarDays, CheckCircle2, Clock3, Dumbbell, Play } from "lucide-react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { getExerciseById } from "@/domain/exerciseLibrary";
 import { finalizeMesocycleState } from "@/domain/habit/cycleState";
@@ -8,19 +8,21 @@ import {
   findMissedSessionRecovery,
 } from "@/domain/habit/scheduleRecovery";
 import { getRunnableTemplate } from "@/domain/injuries";
-import { detectProgressRecords } from "@/domain/progress/exercises";
-import { normalizeProgressHistory } from "@/domain/progress/normalize";
 import { findNextPlannedSession } from "@/domain/training/activeSession";
 import { getNextTrainingTemplate } from "@/domain/trainingPlan";
 import { todayIso } from "@/lib/format";
 import type { TabId } from "@/App";
-import { HabitTodayPanel } from "@/screens/habit/HabitTodayPanel";
 import { useCustomExerciseStore } from "@/state/useCustomExerciseStore";
-import { useExecutionHistoryStore } from "@/state/useExecutionHistoryStore";
 import { useHistoryStore } from "@/state/useHistoryStore";
 import { useInjuryStore } from "@/state/useInjuryStore";
 import { useProgramStore } from "@/state/useProgramStore";
 import { useWorkoutStore } from "@/state/useWorkoutStore";
+
+const TodayInsights = lazy(() =>
+  import("@/screens/today/TodayInsights").then((module) => ({
+    default: module.TodayInsights,
+  })),
+);
 
 interface HomeScreenProps {
   setActiveTab: (tab: TabId) => void;
@@ -29,9 +31,34 @@ interface HomeScreenProps {
 const phaseLabel = (phase?: "accumulation" | "deload") =>
   phase === "deload" ? "Deload" : "Build";
 
+type IdleWindow = Window & {
+  requestIdleCallback?: (
+    callback: () => void,
+    options?: { timeout: number },
+  ) => number;
+  cancelIdleCallback?: (handle: number) => void;
+};
+
+function useIdleInsights(): boolean {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const idleWindow = window as IdleWindow;
+    if (idleWindow.requestIdleCallback) {
+      const handle = idleWindow.requestIdleCallback(() => setReady(true), {
+        timeout: 2500,
+      });
+      return () => idleWindow.cancelIdleCallback?.(handle);
+    }
+    const handle = window.setTimeout(() => setReady(true), 800);
+    return () => window.clearTimeout(handle);
+  }, []);
+
+  return ready;
+}
+
 export function HomeScreen({ setActiveTab }: HomeScreenProps) {
   const legacySessions = useHistoryStore((state) => state.sessions);
-  const v2Workouts = useExecutionHistoryStore((state) => state.workouts);
   const customExercises = useCustomExerciseStore((state) => state.exercises);
   const injuries = useInjuryStore((state) => state.injuries);
   const programs = useProgramStore((state) => state.programs);
@@ -41,6 +68,7 @@ export function HomeScreen({ setActiveTab }: HomeScreenProps) {
   const workoutActive = useWorkoutStore((state) => state.workoutActive);
   const startTemplate = useWorkoutStore((state) => state.startTemplate);
   const startPlannedSession = useWorkoutStore((state) => state.startPlannedSession);
+  const showInsights = useIdleInsights();
   const today = todayIso();
   const activeProgram =
     programs.find((program) => program.id === activeProgramId) ?? programs[0];
@@ -58,15 +86,6 @@ export function HomeScreen({ setActiveTab }: HomeScreenProps) {
       : undefined;
   const legacyTemplate = getNextTrainingTemplate(legacySessions);
   const runnableLegacy = getRunnableTemplate(legacyTemplate, injuries);
-
-  const latestRecord = useMemo(() => {
-    const history = normalizeProgressHistory(
-      v2Workouts,
-      legacySessions,
-      customExercises,
-    );
-    return detectProgressRecords(history)[0];
-  }, [customExercises, legacySessions, v2Workouts]);
 
   const start = () => {
     if (workoutActive) {
@@ -220,24 +239,10 @@ export function HomeScreen({ setActiveTab }: HomeScreenProps) {
         </section>
       )}
 
-      <HabitTodayPanel />
-
-      {latestRecord ? (
-        <section className="surface-card p-4 sm:p-5">
-          <div className="flex items-start gap-3">
-            <Trophy className="mt-0.5 h-5 w-5 shrink-0 text-positive" aria-hidden="true" />
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-text">Recent performance record</p>
-              <p className="mt-1 truncate text-sm text-text-secondary">
-                {latestRecord.exerciseName} · {latestRecord.type === "e1rm" ? "estimated strength" : "top load"}
-              </p>
-              <p className="metric mt-1 text-xl font-bold text-positive">
-                {latestRecord.value.toFixed(latestRecord.type === "e1rm" ? 1 : 0)}
-              </p>
-              <p className="mt-1 text-xs text-text-muted">{latestRecord.date}</p>
-            </div>
-          </div>
-        </section>
+      {showInsights ? (
+        <Suspense fallback={null}>
+          <TodayInsights />
+        </Suspense>
       ) : null}
     </div>
   );
