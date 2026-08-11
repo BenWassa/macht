@@ -34,6 +34,7 @@ export type RecommendationReason =
   | "workload_limit_reached"
   | "mesocycle_progression"
   | "deload_week"
+  | "load_baseline_established"
   | "load_increment_available"
   | "load_increment_unavailable"
   | "insufficient_evidence"
