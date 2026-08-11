@@ -7,6 +7,7 @@ import { TrainingWeekCard } from "@/screens/today/TrainingWeekCard";
 import type { TabId } from "@/App";
 import { useHistoryStore } from "@/state/useHistoryStore";
 import { useInjuryStore } from "@/state/useInjuryStore";
+import { useProgramStore } from "@/state/useProgramStore";
 import { useWorkoutStore } from "@/state/useWorkoutStore";
 
 interface HomeScreenProps {
@@ -23,15 +24,25 @@ const dateLabel = () =>
 export function HomeScreen({ setActiveTab }: HomeScreenProps) {
   const sessions = useHistoryStore((state) => state.sessions);
   const injuries = useInjuryStore((state) => state.injuries);
+  const programs = useProgramStore((state) => state.programs);
+  const mesocycles = useProgramStore((state) => state.mesocycles);
+  const activeProgramId = useProgramStore((state) => state.activeProgramId);
   const workoutActive = useWorkoutStore((state) => state.workoutActive);
   const startTemplate = useWorkoutStore((state) => state.startTemplate);
   const nextTemplate = getNextTrainingTemplate(sessions);
   const runnable = getRunnableTemplate(nextTemplate, injuries);
   const adjusted = runnable.exercises.length < nextTemplate.exercises.length;
+  const activeProgram = programs.find((item) => item.id === activeProgramId);
+  const activeMesocycle = mesocycles.find(
+    (item) =>
+      item.id === activeProgram?.activeMesocycleId ||
+      (item.programId === activeProgram?.id && item.status === "active"),
+  );
   const model = buildTodayModel({
     sessions,
     legacyTemplate: runnable,
-    weeklyTarget: 3,
+    weeklyTarget: activeProgram?.sessionsPerWeek ?? 3,
+    activeMesocycle,
   });
 
   const openWorkout = () => {
