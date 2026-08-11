@@ -14,7 +14,7 @@ import { findNextPlannedSession } from "@/domain/training/activeSession";
 import { getNextTrainingTemplate } from "@/domain/trainingPlan";
 import { todayIso } from "@/lib/format";
 import type { TabId } from "@/App";
-import { HabitTodayPanelV2 } from "@/screens/habit/HabitTodayPanelV2";
+import { HabitTodayPanel } from "@/screens/habit/HabitTodayPanel";
 import { useCustomExerciseStore } from "@/state/useCustomExerciseStore";
 import { useExecutionHistoryStore } from "@/state/useExecutionHistoryStore";
 import { useHistoryStore } from "@/state/useHistoryStore";
@@ -220,7 +220,7 @@ export function HomeScreen({ setActiveTab }: HomeScreenProps) {
         </section>
       )}
 
-      <HabitTodayPanelV2 />
+      <HabitTodayPanel />
 
       {latestRecord ? (
         <section className="surface-card p-4 sm:p-5">
