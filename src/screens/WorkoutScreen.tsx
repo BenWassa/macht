@@ -10,6 +10,7 @@ import { vibrate } from "@/lib/haptics";
 import { ExerciseTabs } from "@/screens/workout/ExerciseTabs";
 import { WorkoutActionsBar } from "@/screens/workout/WorkoutActionsBar";
 import { InjuryConflictBanner } from "@/screens/workout/InjuryConflictBanner";
+import { PlannedWorkoutExecution } from "@/screens/workout/PlannedWorkoutExecution";
 import { WorkoutSetTable } from "@/screens/workout/WorkoutSetTable";
 import { useCustomExerciseStore } from "@/state/useCustomExerciseStore";
 import { useInjuryStore } from "@/state/useInjuryStore";
@@ -19,7 +20,10 @@ import { useWorkoutStore } from "@/state/useWorkoutStore";
 
 interface WorkoutScreenProps {
   onFinish: () => void;
-  onSetCompleted: (options: { advanceAfterRest: boolean }) => void;
+  onSetCompleted: (options: {
+    advanceAfterRest: boolean;
+    restSeconds?: number;
+  }) => void;
   onStartWarmup: () => void;
 }
 
@@ -41,21 +45,29 @@ export function WorkoutScreen({
 
   if (!workout.workoutActive) {
     return (
-      <div className="animate-fadeIn">
-        <div className="mb-10">
-          <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-neutral-500">
-            Active workout
-          </p>
-          <h1 className="font-mono text-xl font-bold uppercase tracking-tight">
-            Session
+      <div className="animate-rise-in space-y-5">
+        <header>
+          <p className="text-sm font-medium text-text-muted">Session</p>
+          <h1 className="mt-1 text-3xl font-bold tracking-[-0.04em] text-text">
+            No workout active
           </h1>
-        </div>
-        <div className="border border-dashed border-edge bg-well p-8 text-center">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-neutral-500">
-            No session active. Go to Plans to start.
-          </p>
+        </header>
+        <div className="surface-card p-6 text-sm text-text-muted">
+          Start today&apos;s planned workout from Today or choose a legacy plan from Program.
         </div>
       </div>
+    );
+  }
+
+  if (workout.activeV2Workout) {
+    return (
+      <PlannedWorkoutExecution
+        onFinish={onFinish}
+        onSetCompleted={onSetCompleted}
+        onStartWarmup={onStartWarmup}
+        wakeLockActive={wakeLockEnabled}
+        onToggleWakeLock={() => setWakeLockEnabled((value) => !value)}
+      />
     );
   }
 
