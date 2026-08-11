@@ -5,16 +5,13 @@ import { toLegacySessionLog, v2WorkoutSummary } from "@/domain/execution/legacyB
 import { completeWorkout } from "@/domain/execution/plannedWorkout";
 import type { WorkoutSession } from "@/domain/execution/types";
 import type { SessionWorkload } from "@/domain/feedback/types";
-import { getExerciseConflict } from "@/domain/injuries";
 import { buildPersonalTrainingModel } from "@/domain/personalization/model";
-import { computeExerciseE1rm } from "@/domain/sessionStats";
 import type { SessionLog } from "@/domain/types";
 import { useModalA11y } from "@/hooks/useModalA11y";
 import { formatTime, todayIso } from "@/lib/format";
 import { useCustomExerciseStore } from "@/state/useCustomExerciseStore";
 import { useExecutionHistoryStore } from "@/state/useExecutionHistoryStore";
 import { useHistoryStore } from "@/state/useHistoryStore";
-import { useInjuryStore } from "@/state/useInjuryStore";
 import { useProgramStore } from "@/state/useProgramStore";
 import { useProgressionStore } from "@/state/useProgressionStore";
 import { useSettingsStore } from "@/state/useSettingsStore";
@@ -74,8 +71,8 @@ export function FinishSessionModal({
   onClose,
   onSaved,
 }: FinishSessionModalProps) {
-  const sessions = useHistoryStore((state) => state.sessions);
-  const addSession = useHistoryStore((state) => state.addSession);
+  const legacySessions = useHistoryStore((state) => state.sessions);
+  const v2History = useExecutionHistoryStore((state) => state.workouts);
   const addV2Workout = useExecutionHistoryStore((state) => state.addWorkout);
   const programs = useProgramStore((state) => state.programs);
   const mesocycles = useProgramStore((state) => state.mesocycles);
@@ -87,12 +84,14 @@ export function FinishSessionModal({
   const addDecisions = useProgressionStore((state) => state.addDecisions);
   const customExercises = useCustomExerciseStore((state) => state.exercises);
   const units = useSettingsStore((state) => state.units);
-  const injuries = useInjuryStore((state) => state.injuries);
   const workout = useWorkoutStore();
   const containerRef = useModalA11y<HTMLDivElement>(onClose);
   const [workload, setWorkload] = useState<SessionWorkload | undefined>();
+  const active = workout.activeV2Workout;
 
-  const saveV2 = (active: WorkoutSession) => {
+  if (!active) return null;
+
+  const save = () => {
     const withFeedback: WorkoutSession = {
       ...active,
       sessionFeedback: workload
@@ -108,9 +107,13 @@ export function FinishSessionModal({
       new Date().toISOString(),
       workout.workoutDuration,
     );
-    const legacy = toLegacySessionLog(completed);
+    const legacyView = toLegacySessionLog(completed);
+    const previousHistory = [
+      ...v2History.map(toLegacySessionLog),
+      ...legacySessions,
+    ];
     const summary = v2WorkoutSummary(completed);
-    const personalRecords = countPrs(legacy, sessions);
+    const personalRecords = countPrs(legacyView, previousHistory);
     const targetsModified = v2TargetsModified(completed);
     let recommendationsApplied = 0;
     let personalizationsApplied = 0;
@@ -143,13 +146,12 @@ export function FinishSessionModal({
     }
 
     addV2Workout(completed);
-    addSession(legacy);
     if (completed.plannedSessionId) {
       completePlannedSession(completed.plannedSessionId);
     }
     workout.endSession();
     onSaved({
-      duration: legacy.duration,
+      duration: legacyView.duration,
       sets: summary.sets,
       volume: summary.volume,
       targetsModified,
@@ -159,117 +161,56 @@ export function FinishSessionModal({
     });
   };
 
-  const saveLegacy = () => {
-    const completedSets = workout.activeWorkoutList.flatMap((exerciseId) =>
-      (workout.workoutSets[exerciseId] ?? [])
-        .filter((set) => set.completed)
-        .map((set) => ({ exerciseId, set })),
-    );
-    const volume = completedSets.reduce(
-      (sum, item) => sum + item.set.weight * item.set.reps,
-      0,
-    );
-    const targetsModified = completedSets.some(({ exerciseId, set }) => {
-      const suggestion = workout.loadSuggestions[exerciseId];
-      return (
-        Boolean(suggestion) &&
-        (set.weight !== suggestion?.weight || set.reps !== suggestion?.repTarget)
-      );
-    });
-    const adapted =
-      workout.adaptedDuringSession ||
-      workout.activeWorkoutList.some(
-        (exerciseId) =>
-          getExerciseConflict(exerciseId, injuries)?.level === "avoid",
-      );
-    const exerciseSnapshots = workout.activeWorkoutList.map((exerciseId) => {
-      const sets = workout.workoutSets[exerciseId] ?? [];
-      const notes = workout.exerciseNotes[exerciseId];
-      return {
-        exerciseId,
-        sets,
-        e1rm: computeExerciseE1rm(exerciseId, sets),
-        ...(notes ? { notes } : {}),
-      };
-    });
-    const session: SessionLog = {
-      id: crypto.randomUUID(),
-      date: todayIso(),
-      template:
-        workout.workoutName + (workout.isMinimumSession ? " (min)" : ""),
-      duration: `${Math.floor(workout.workoutDuration / 60)}m`,
-      volume,
-      sets: completedSets.length,
-      adapted,
-      isMinimumSession: workout.isMinimumSession,
-      exerciseSnapshots,
-    };
-    const personalRecords = countPrs(session, sessions);
-    addSession(session);
-    workout.endSession();
-    onSaved({
-      duration: session.duration,
-      sets: session.sets,
-      volume: session.volume,
-      targetsModified,
-      personalRecords,
-      recommendationsApplied: 0,
-      personalizationsApplied: 0,
-    });
-  };
-
-  const save = () => {
-    if (workout.activeV2Workout) saveV2(workout.activeV2Workout);
-    else saveLegacy();
-  };
-
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 p-3 sm:items-center">
       <div
         ref={containerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="finish-session-dialog-title"
         className="surface-raised w-full max-w-sm space-y-5 p-5"
       >
         <div>
-          <h3 className="text-xl font-bold tracking-[-0.03em] text-text">
+          <h3
+            id="finish-session-dialog-title"
+            className="text-xl font-bold tracking-[-0.03em] text-text"
+          >
             Finish session
           </h3>
           <p className="mt-1 text-sm text-text-muted">
             {formatTime(workout.workoutDuration)} elapsed
-            {workout.isMinimumSession ? " · minimum session" : ""}
           </p>
         </div>
 
-        {workout.activeV2Workout ? (
-          <fieldset>
-            <legend className="text-sm font-semibold text-text-secondary">
-              How demanding was the session?
-            </legend>
-            <p className="mt-1 text-xs text-text-muted">
-              Optional. This helps future volume decisions.
-            </p>
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              {WORKLOAD_OPTIONS.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  aria-pressed={workload === option.value}
-                  onClick={() =>
-                    setWorkload((current) =>
-                      current === option.value ? undefined : option.value,
-                    )
-                  }
-                  className={`min-h-11 rounded-sm px-3 text-sm font-semibold transition ${
-                    workload === option.value
-                      ? "bg-signal-soft text-signal-strong"
-                      : "bg-surface-3 text-text-secondary"
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </fieldset>
-        ) : null}
+        <fieldset>
+          <legend className="text-sm font-semibold text-text-secondary">
+            How demanding was the session?
+          </legend>
+          <p className="mt-1 text-xs text-text-muted">
+            Optional. This helps future volume decisions.
+          </p>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            {WORKLOAD_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                aria-pressed={workload === option.value}
+                onClick={() =>
+                  setWorkload((current) =>
+                    current === option.value ? undefined : option.value,
+                  )
+                }
+                className={`min-h-11 rounded-sm px-3 text-sm font-semibold transition ${
+                  workload === option.value
+                    ? "bg-signal-soft text-signal-strong"
+                    : "bg-surface-3 text-text-secondary"
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </fieldset>
 
         <div className="flex gap-2">
           <Button variant="secondary" onClick={onClose} className="flex-1">

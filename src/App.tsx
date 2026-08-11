@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { BottomNav } from "@/components/BottomNav";
 import { DemoModeBanner } from "@/components/DemoModeBanner";
 import { RestTimerBanner } from "@/components/RestTimerBanner";
@@ -6,7 +7,6 @@ import { useSessionClock } from "@/hooks/useSessionClock";
 import { useSessionTimers } from "@/hooks/useSessionTimers";
 import { formatTime, formatWorkoutName } from "@/lib/format";
 import { FinishSessionModal } from "@/modals/FinishSessionModal";
-import { FreePlayScreen } from "@/screens/FreePlayScreen";
 import { HomeScreen } from "@/screens/HomeScreen";
 import { ProfileScreen } from "@/screens/profile";
 import { ProgramScreen } from "@/screens/program/ProgramScreen";
@@ -16,7 +16,6 @@ import { useSettingsStore } from "@/state/useSettingsStore";
 import { useToastStore } from "@/state/useToastStore";
 import { useUiStore } from "@/state/useUiStore";
 import { useWorkoutStore } from "@/state/useWorkoutStore";
-import { useState } from "react";
 
 export type { TabId } from "@/state/useUiStore";
 
@@ -73,12 +72,7 @@ export default function App() {
 
       <main className="mx-auto w-full max-w-2xl flex-1 overflow-y-auto px-4 py-6 pb-32 sm:px-5">
         {activeTab === "home" && <HomeScreen setActiveTab={setActiveTab} />}
-        {activeTab === "freeplay" && (
-          <FreePlayScreen setActiveTab={setActiveTab} />
-        )}
-        {activeTab === "templates" && (
-          <ProgramScreen setActiveTab={setActiveTab} />
-        )}
+        {activeTab === "templates" && <ProgramScreen />}
         {activeTab === "workout" && (
           <WorkoutScreen
             onFinish={() => setShowFinishModal(true)}
@@ -133,9 +127,13 @@ export default function App() {
               summary.personalRecords > 0
                 ? `${summary.personalRecords} new PR${summary.personalRecords === 1 ? "" : "s"} · `
                 : "";
+            const personalizedReceipt =
+              summary.personalizationsApplied > 0
+                ? ` ${summary.personalizationsApplied} recommendation${summary.personalizationsApplied === 1 ? "" : "s"} adjusted from established training history.`
+                : "";
             const adaptiveReceipt =
               summary.recommendationsApplied > 0
-                ? `${summary.recommendationsApplied} next prescription${summary.recommendationsApplied === 1 ? "" : "s"} evaluated and applied.`
+                ? `${summary.recommendationsApplied} next prescription${summary.recommendationsApplied === 1 ? "" : "s"} evaluated and applied.${personalizedReceipt}`
                 : summary.targetsModified
                   ? "Logged changes saved for future programming."
                   : "Performance saved for future programming.";
