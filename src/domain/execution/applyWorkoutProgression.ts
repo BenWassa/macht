@@ -117,6 +117,7 @@ export function applyWorkoutProgression({
       performance,
       musclePriority: priorityFor(source.prescription, program),
       availableLoadIncrement,
+      recovery: performance.feedback?.recovery,
       stimulus: performance.feedback?.stimulus,
       workload: workout.sessionFeedback?.workload,
       sessionDurationMinutes:
