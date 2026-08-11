@@ -133,11 +133,14 @@ export default function App() {
               summary.personalRecords > 0
                 ? `${summary.personalRecords} new PR${summary.personalRecords === 1 ? "" : "s"} · `
                 : "";
-            const targetReceipt = summary.targetsModified
-              ? "Logged changes will inform the next recommendation."
-              : "Performance saved for the next recommendation.";
+            const adaptiveReceipt =
+              summary.recommendationsApplied > 0
+                ? `${summary.recommendationsApplied} next prescription${summary.recommendationsApplied === 1 ? "" : "s"} evaluated and applied.`
+                : summary.targetsModified
+                  ? "Logged changes saved for future programming."
+                  : "Performance saved for future programming.";
             showToast(
-              `${prReceipt}Session saved · ${summary.duration} · ${summary.sets} sets · ${summary.volume.toLocaleString()} ${units} · ${targetReceipt}`,
+              `${prReceipt}Session saved · ${summary.duration} · ${summary.sets} sets · ${summary.volume.toLocaleString()} ${units} · ${adaptiveReceipt}`,
             );
             setActiveTab("home");
           }}
