@@ -1,19 +1,20 @@
 # Macht Reboot — Execution Tracker
 
-This file is the live implementation checklist for PR #12. Update it as work lands so the reboot stays aligned with `MACHT_PRODUCT_REBOOT_PLAN.md`.
+This file is the live implementation checklist for draft PR #13. Update it as work lands so the reboot stays aligned with `MACHT_PRODUCT_REBOOT_PLAN.md`.
 
 ## Current focus
 
-**Phase 2 — Progression engine v2**
+**Phase 3 — Program and mesocycle system**
 
-Phase 0 is complete. Phase 1 implementation is complete and awaiting a fresh branch CI run before its validation gate is closed.
+Phases 0–2 are implemented. The full implementation head has passed lint, tests, and TypeScript/build.
 
 ## Validation status
 
-- Baseline PR run: lint ✅, TypeScript/build ✅, bundle-size gate ❌ due to pre-existing bundle at 405.4 KB raw / 124.8 KB gz versus 400 / 120 budget.
-- CI now includes `npm test`.
-- CI now targets `agent/**` pushes in addition to `main` and pull requests.
-- GitHub App content writes are currently not creating new Actions runs automatically, so Phase 1 gate remains open pending an independently triggered branch run.
+- Fresh PR #13 CI: lint ✅, tests ✅, TypeScript/build ✅.
+- Bundle-size gate ❌ due to pre-existing runtime bundle at roughly 405 KB raw / 125 KB gz versus the stale 400 / 120 budget.
+- Lighthouse is skipped after the bundle-size failure.
+- The new foundation/progression code is additive and does not increase the shipped runtime bundle while unused.
+- CI includes `npm test` and targets `agent/**` pushes, `main`, and pull requests.
 
 ## Phase 0 — Reboot contract
 
@@ -45,21 +46,29 @@ Phase 0 is complete. Phase 1 implementation is complete and awaiting a fresh bra
 
 ### Gate
 
-- [ ] Historical load, reps, effort, date, exercise identity, and duration survive migration under a fresh test run.
-- [ ] Raw stored records can reconstruct a workout under a fresh test/build run.
+- [x] Historical load, reps, effort, date, exercise identity, and duration survive migration under test.
+- [x] Raw stored records can reconstruct a workout under test/build validation.
 - [x] Prescriptions belong to program slots rather than exercise IDs.
 
 ## Phase 2 — Progression engine v2
 
-- [ ] Rep progression.
-- [ ] Load progression using available increments.
-- [ ] Effort-target handling.
-- [ ] Mesocycle-aware effort progression.
-- [ ] Volume recommendations.
-- [ ] Recovery/stimulus inputs.
-- [ ] Conservative maintain behavior under uncertainty.
-- [ ] Persist recommendation reasons and confidence-ready evidence.
-- [ ] Comprehensive domain tests.
+- [x] Rep progression.
+- [x] Load progression using available increments.
+- [x] Effort-target handling.
+- [x] Mesocycle-aware effort progression.
+- [x] Volume recommendations.
+- [x] Recovery/stimulus inputs.
+- [x] Conservative maintain behavior under uncertainty.
+- [x] Persist recommendation reasons and confidence-ready evidence.
+- [x] Comprehensive domain tests.
+
+### Gate
+
+- [x] Lint passes.
+- [x] Full test suite passes.
+- [x] TypeScript/build passes.
+- [x] Every automated progression decision exposes persisted reasons/evidence.
+- [x] Competing signals prioritize deload/fatigue protection before progression.
 
 ## Phase 3 — Program and mesocycle system
 
