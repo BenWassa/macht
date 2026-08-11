@@ -1,9 +1,9 @@
 import { getRunnableTemplate } from "@/domain/injuries";
+import { buildTodayModel } from "@/domain/today";
 import { getNextTrainingTemplate } from "@/domain/trainingPlan";
-import { ActivityHistory } from "@/screens/home/ActivityHistory";
-import { ConsistencyChart } from "@/screens/home/ConsistencyChart";
-import { NextSessionBar } from "@/screens/home/NextSessionBar";
-import { StrengthHero } from "@/screens/home/StrengthHero";
+import { RecentProgressCard } from "@/screens/today/RecentProgressCard";
+import { TodaySessionCard } from "@/screens/today/TodaySessionCard";
+import { TrainingWeekCard } from "@/screens/today/TrainingWeekCard";
 import type { TabId } from "@/App";
 import { useHistoryStore } from "@/state/useHistoryStore";
 import { useInjuryStore } from "@/state/useInjuryStore";
@@ -13,41 +13,52 @@ interface HomeScreenProps {
   setActiveTab: (tab: TabId) => void;
 }
 
+const dateLabel = () =>
+  new Intl.DateTimeFormat(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  }).format(new Date());
+
 export function HomeScreen({ setActiveTab }: HomeScreenProps) {
   const sessions = useHistoryStore((state) => state.sessions);
   const injuries = useInjuryStore((state) => state.injuries);
+  const workoutActive = useWorkoutStore((state) => state.workoutActive);
   const startTemplate = useWorkoutStore((state) => state.startTemplate);
   const nextTemplate = getNextTrainingTemplate(sessions);
   const runnable = getRunnableTemplate(nextTemplate, injuries);
-  const adapted = runnable.exercises.length < nextTemplate.exercises.length;
+  const adjusted = runnable.exercises.length < nextTemplate.exercises.length;
+  const model = buildTodayModel({
+    sessions,
+    legacyTemplate: runnable,
+    weeklyTarget: 3,
+  });
 
-  const start = () => {
-    startTemplate(runnable);
+  const openWorkout = () => {
+    if (!workoutActive) startTemplate(runnable);
     setActiveTab("workout");
   };
 
   return (
-    <div className="animate-fadeIn">
-      <div className="mb-8">
-        <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-neutral-500">
-          Strength log
-        </p>
-        <h1 className="font-mono text-xl font-bold uppercase tracking-tight">
-          Console
+    <div className="animate-rise-in space-y-5">
+      <header className="pb-1">
+        <p className="text-sm font-medium text-text-muted">{dateLabel()}</p>
+        <h1 className="mt-1 text-3xl font-bold tracking-[-0.04em] text-text">
+          Today
         </h1>
-      </div>
+      </header>
 
-      <StrengthHero setActiveTab={setActiveTab} />
-
-      <NextSessionBar
-        template={runnable}
-        adapted={adapted}
-        onStart={start}
-        setActiveTab={setActiveTab}
+      <TodaySessionCard
+        model={model}
+        adjusted={adjusted}
+        actionLabel={workoutActive ? "Resume workout" : "Start workout"}
+        onStart={openWorkout}
       />
 
-      <ConsistencyChart sessions={sessions} />
-      <ActivityHistory sessions={sessions} onStart={start} />
+      <div className="grid gap-5 sm:grid-cols-2">
+        <TrainingWeekCard model={model} />
+        <RecentProgressCard highlight={model.recentProgress} />
+      </div>
     </div>
   );
 }
