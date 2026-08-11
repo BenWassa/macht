@@ -34,12 +34,14 @@ export type RecommendationReason =
   | "workload_limit_reached"
   | "mesocycle_progression"
   | "deload_week"
+  | "load_increment_available"
+  | "load_increment_unavailable"
   | "insufficient_evidence"
   | "user_override";
 
 export interface ProgressionEvidence {
   previousLoad?: number;
-  previousReps?: number;
+  previousRepTarget?: number;
   previousEffort?: {
     scale: EffortScale;
     value: number;
@@ -48,6 +50,10 @@ export interface ProgressionEvidence {
     scale: EffortScale;
     value: number;
   };
+  completedWorkingSets?: number;
+  plannedWorkingSets?: number;
+  minimumCompletedReps?: number;
+  maximumCompletedReps?: number;
   repTargetAchieved?: boolean;
   performanceTrend?: number;
   recovery?: RecoveryState;
@@ -61,10 +67,15 @@ export interface ProgressionEvidence {
 
 export interface PrescriptionDelta {
   loadDelta?: number;
-  repMinDelta?: number;
-  repMaxDelta?: number;
+  nextLoad?: number;
+  repTargetDelta?: number;
+  nextRepTarget?: number;
   setCountDelta?: number;
-  targetEffortDelta?: number;
+  nextSetCount?: number;
+  nextTargetEffort?: {
+    scale: EffortScale;
+    value: number;
+  };
   replacementExerciseId?: ExerciseId;
 }
 
