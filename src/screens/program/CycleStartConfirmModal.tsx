@@ -16,8 +16,17 @@ export function CycleStartConfirmModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 p-3 sm:items-center">
-      <div ref={containerRef} className="surface-raised w-full max-w-sm p-5">
-        <h3 className="text-xl font-bold tracking-[-0.03em] text-text">
+      <div
+        ref={containerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cycle-confirm-dialog-title"
+        className="surface-raised w-full max-w-sm p-5"
+      >
+        <h3
+          id="cycle-confirm-dialog-title"
+          className="text-xl font-bold tracking-[-0.03em] text-text"
+        >
           Start a new cycle?
         </h3>
         <p className="mt-2 text-sm leading-6 text-text-secondary">
