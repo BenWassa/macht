@@ -1,12 +1,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
-import {
-  completeWorkout,
-} from "@/domain/execution/plannedWorkout";
-import {
-  toLegacySessionLog,
-  v2WorkoutSummary,
-} from "@/domain/execution/legacyBridge";
+import { applyWorkoutProgression } from "@/domain/execution/applyWorkoutProgression";
+import { toLegacySessionLog, v2WorkoutSummary } from "@/domain/execution/legacyBridge";
+import { completeWorkout } from "@/domain/execution/plannedWorkout";
 import type { WorkoutSession } from "@/domain/execution/types";
 import type { SessionWorkload } from "@/domain/feedback/types";
 import { getExerciseConflict } from "@/domain/injuries";
@@ -18,6 +14,8 @@ import { useExecutionHistoryStore } from "@/state/useExecutionHistoryStore";
 import { useHistoryStore } from "@/state/useHistoryStore";
 import { useInjuryStore } from "@/state/useInjuryStore";
 import { useProgramStore } from "@/state/useProgramStore";
+import { useProgressionStore } from "@/state/useProgressionStore";
+import { useSettingsStore } from "@/state/useSettingsStore";
 import { useWorkoutStore } from "@/state/useWorkoutStore";
 
 interface SavedSummary {
@@ -26,6 +24,7 @@ interface SavedSummary {
   volume: number;
   targetsModified: boolean;
   personalRecords: number;
+  recommendationsApplied: number;
 }
 
 interface FinishSessionModalProps {
@@ -51,13 +50,14 @@ const countPrs = (session: SessionLog, history: SessionLog[]): number =>
           .map((prior) => prior.e1rm ?? 0),
       ),
     );
-    return snapshot.e1rm > previousBest;
+    return previousBest > 0 && snapshot.e1rm > previousBest;
   }).length;
 
 const v2TargetsModified = (workout: WorkoutSession): boolean =>
   workout.exercisePerformances.some((exercise) =>
     exercise.sets.some((set) => {
-      if (!set.completed || !set.prescription) return false;
+      if (!set.completed) return false;
+      if (!set.prescription) return true;
       return (
         (set.prescription.targetLoad != null &&
           set.actualLoad !== set.prescription.targetLoad) ||
@@ -74,9 +74,14 @@ export function FinishSessionModal({
   const sessions = useHistoryStore((state) => state.sessions);
   const addSession = useHistoryStore((state) => state.addSession);
   const addV2Workout = useExecutionHistoryStore((state) => state.addWorkout);
+  const programs = useProgramStore((state) => state.programs);
+  const mesocycles = useProgramStore((state) => state.mesocycles);
+  const upsertMesocycle = useProgramStore((state) => state.upsertMesocycle);
   const completePlannedSession = useProgramStore(
     (state) => state.completePlannedSession,
   );
+  const addDecisions = useProgressionStore((state) => state.addDecisions);
+  const units = useSettingsStore((state) => state.units);
   const injuries = useInjuryStore((state) => state.injuries);
   const workout = useWorkoutStore();
   const containerRef = useModalA11y<HTMLDivElement>(onClose);
@@ -102,6 +107,23 @@ export function FinishSessionModal({
     const summary = v2WorkoutSummary(completed);
     const personalRecords = countPrs(legacy, sessions);
     const targetsModified = v2TargetsModified(completed);
+    let recommendationsApplied = 0;
+
+    const program = programs.find((item) => item.id === completed.programId);
+    const mesocycle = mesocycles.find((item) => item.id === completed.mesocycleId);
+    if (program && mesocycle) {
+      const progression = applyWorkoutProgression({
+        workout: completed,
+        program,
+        mesocycle,
+        availableLoadIncrement: units === "kgs" ? 1.25 : 2.5,
+      });
+      recommendationsApplied = progression.decisions.length;
+      if (progression.decisions.length) {
+        addDecisions(progression.decisions);
+        upsertMesocycle(progression.mesocycle);
+      }
+    }
 
     addV2Workout(completed);
     addSession(legacy);
@@ -115,6 +137,7 @@ export function FinishSessionModal({
       volume: summary.volume,
       targetsModified,
       personalRecords,
+      recommendationsApplied,
     });
   };
 
@@ -172,6 +195,7 @@ export function FinishSessionModal({
       volume: session.volume,
       targetsModified,
       personalRecords,
+      recommendationsApplied: 0,
     });
   };
 
@@ -182,7 +206,10 @@ export function FinishSessionModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 p-3 sm:items-center">
-      <div ref={containerRef} className="surface-raised w-full max-w-sm space-y-5 p-5">
+      <div
+        ref={containerRef}
+        className="surface-raised w-full max-w-sm space-y-5 p-5"
+      >
         <div>
           <h3 className="text-xl font-bold tracking-[-0.03em] text-text">
             Finish session
