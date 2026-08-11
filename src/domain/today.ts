@@ -1,5 +1,6 @@
 import { getExerciseById } from "@/domain/exerciseLibrary";
-import type { Mesocycle, PlannedSession } from "@/domain/training/types";
+import { findNextPlannedSession } from "@/domain/training/activeSession";
+import type { Mesocycle } from "@/domain/training/types";
 import type { SessionLog, TemplatePlan } from "@/domain/types";
 
 export interface TodayProgressHighlight {
@@ -96,19 +97,6 @@ function latestProgressHighlight(
   return best;
 }
 
-function activePlannedSession(
-  mesocycle: Mesocycle,
-): { session: PlannedSession; weekIndex: number } | null {
-  for (const week of mesocycle.weeks) {
-    const session = week.sessions.find(
-      (candidate) =>
-        candidate.status === "planned" || candidate.status === "moved",
-    );
-    if (session) return { session, weekIndex: week.index };
-  }
-  return null;
-}
-
 export interface BuildTodayModelInput {
   sessions: SessionLog[];
   legacyTemplate: TemplatePlan;
@@ -128,12 +116,9 @@ export function buildTodayModel({
   const completedThisWeek = sessions.filter(
     (session) => session.date >= start && session.date <= end,
   ).length;
-  const planned = activeMesocycle ? activePlannedSession(activeMesocycle) : null;
+  const planned = findNextPlannedSession(activeMesocycle);
 
   if (planned && activeMesocycle) {
-    const week = activeMesocycle.weeks.find(
-      (item) => item.index === planned.weekIndex,
-    );
     const exerciseIds = planned.session.prescriptions.map(
       (item) => item.exerciseId,
     );
@@ -154,10 +139,10 @@ export function buildTodayModel({
       weeklyTarget,
       program: {
         label: activeMesocycle.name ?? `Mesocycle ${activeMesocycle.index}`,
-        detail: `Week ${planned.weekIndex} of ${activeMesocycle.weeks.length}`,
-        phase: week?.phase,
+        detail: `Week ${planned.week.index} of ${activeMesocycle.weeks.length}`,
+        phase: planned.week.phase,
         progress: {
-          current: planned.weekIndex,
+          current: planned.week.index,
           total: activeMesocycle.weeks.length,
         },
       },
