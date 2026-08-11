@@ -1,78 +1,107 @@
+import type { ReactNode } from "react";
 import { APP_VERSION } from "@/lib/appMeta";
 import { useSettingsStore } from "@/state/useSettingsStore";
-import type { ReactNode } from "react";
+
+interface ChoiceButtonProps {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+}
+
+function ChoiceButton({ active, label, onClick }: ChoiceButtonProps) {
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={onClick}
+      className={`min-h-11 rounded-sm px-3 text-sm font-semibold transition ${
+        active
+          ? "bg-signal-soft text-signal-strong"
+          : "text-text-muted hover:bg-surface-3 hover:text-text-secondary"
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
 
 export function SettingsPanel() {
   const settings = useSettingsStore();
 
   return (
-    <div className="space-y-4">
-      <h2 className="font-mono text-[10px] uppercase tracking-wider text-neutral-400">
-        Settings
-      </h2>
-      <div className="divide-y divide-[#1a1a1a] border border-[#1a1a1a] bg-[#0c0c0c]">
-        <SettingRow title="Units" subtitle="Weight display">
+    <div>
+      <SettingRow title="Units" subtitle="Weight display">
+        <div role="group" aria-label="Weight units" className="flex gap-1">
           {(["lbs", "kgs"] as const).map((unit) => (
-            <button
+            <ChoiceButton
               key={unit}
+              active={settings.units === unit}
+              label={unit.toUpperCase()}
               onClick={() => settings.setUnits(unit)}
-              className={`px-3 py-1 text-xs transition ${settings.units === unit ? "bg-blue-600 font-bold text-white" : "text-neutral-500 hover:text-neutral-300"}`}
-            >
-              {unit.toUpperCase()}
-            </button>
+            />
           ))}
-        </SettingRow>
-        <SettingRow title="Default rest" subtitle="Auto-starts after each set">
-          {[60, 90, 120, 150].map((seconds) => (
-            <button
-              key={seconds}
-              onClick={() => settings.setDefaultRest(seconds)}
-              className={`px-2.5 py-1 text-xs transition ${settings.defaultRest === seconds ? "bg-blue-600 font-bold text-white" : "text-neutral-500 hover:text-neutral-300"}`}
-            >
-              {seconds}s
-            </button>
-          ))}
-        </SettingRow>
-        <SettingRow
-          title="Effort scale"
-          subtitle="How you log perceived effort"
+        </div>
+      </SettingRow>
+
+      <SettingRow title="Default rest" subtitle="Auto-starts after a completed set">
+        <div
+          role="group"
+          aria-label="Default rest duration"
+          className="flex flex-wrap justify-end gap-1"
         >
+          {[60, 90, 120, 150].map((seconds) => (
+            <ChoiceButton
+              key={seconds}
+              active={settings.defaultRest === seconds}
+              label={`${seconds}s`}
+              onClick={() => settings.setDefaultRest(seconds)}
+            />
+          ))}
+        </div>
+      </SettingRow>
+
+      <SettingRow title="Effort scale" subtitle="How perceived effort is logged">
+        <div role="group" aria-label="Effort scale" className="flex gap-1">
           {(["RPE", "RIR"] as const).map((mode) => (
-            <button
+            <ChoiceButton
               key={mode}
+              active={settings.rpeMode === mode}
+              label={mode}
               onClick={() => settings.setRpeMode(mode)}
-              className={`px-3 py-1 text-xs transition ${settings.rpeMode === mode ? "bg-blue-600 font-bold text-white" : "text-neutral-500 hover:text-neutral-300"}`}
-            >
-              {mode}
-            </button>
+            />
           ))}
-        </SettingRow>
-        <SettingRow title="Haptics" subtitle="Vibrate on set complete">
-          {([true, false] as const).map((val) => (
-            <button
-              key={String(val)}
-              onClick={() => settings.setHaptics(val)}
-              className={`px-3 py-1 text-xs transition ${settings.haptics === val ? "bg-blue-600 font-bold text-white" : "text-neutral-500 hover:text-neutral-300"}`}
-            >
-              {val ? "ON" : "OFF"}
-            </button>
+        </div>
+      </SettingRow>
+
+      <SettingRow title="Haptics" subtitle="Vibrate on set completion">
+        <div role="group" aria-label="Haptics" className="flex gap-1">
+          {([true, false] as const).map((value) => (
+            <ChoiceButton
+              key={String(value)}
+              active={settings.haptics === value}
+              label={value ? "On" : "Off"}
+              onClick={() => settings.setHaptics(value)}
+            />
           ))}
-        </SettingRow>
-        <SettingRow title="Rest sound" subtitle="Triple beep at timer zero">
-          {([false, true] as const).map((val) => (
-            <button
-              key={String(val)}
-              onClick={() => settings.setAudioCue(val)}
-              className={`px-3 py-1 text-xs transition ${settings.audioCue === val ? "bg-blue-600 font-bold text-white" : "text-neutral-500 hover:text-neutral-300"}`}
-            >
-              {val ? "ON" : "OFF"}
-            </button>
+        </div>
+      </SettingRow>
+
+      <SettingRow title="Rest sound" subtitle="Audio cue when the timer reaches zero">
+        <div role="group" aria-label="Rest timer sound" className="flex gap-1">
+          {([false, true] as const).map((value) => (
+            <ChoiceButton
+              key={String(value)}
+              active={settings.audioCue === value}
+              label={value ? "On" : "Off"}
+              onClick={() => settings.setAudioCue(value)}
+            />
           ))}
-        </SettingRow>
-        <InfoRow title="App version" subtitle="Installed build">
-          v{APP_VERSION}
-        </InfoRow>
-      </div>
+        </div>
+      </SettingRow>
+
+      <InfoRow title="App version" subtitle="Installed build">
+        v{APP_VERSION}
+      </InfoRow>
     </div>
   );
 }
@@ -87,18 +116,12 @@ function SettingRow({
   children: ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 p-4">
-      <div>
-        <span className="block text-xs font-bold uppercase tracking-tight">
-          {title}
-        </span>
-        <span className="font-mono text-[10px] text-neutral-500">
-          {subtitle}
-        </span>
+    <div className="flex flex-col gap-3 border-b border-divider p-4 last:border-b-0 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+      <div className="shrink-0">
+        <span className="block text-sm font-bold text-text">{title}</span>
+        <span className="mt-1 block text-xs text-text-muted">{subtitle}</span>
       </div>
-      <div className="flex border border-[#1a1a1a] bg-black p-0.5 font-mono">
-        {children}
-      </div>
+      <div>{children}</div>
     </div>
   );
 }
@@ -113,18 +136,12 @@ function InfoRow({
   children: ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 p-4">
+    <div className="flex items-center justify-between gap-4 border-b border-divider p-4 last:border-b-0 sm:p-5">
       <div>
-        <span className="block text-xs font-bold uppercase tracking-tight">
-          {title}
-        </span>
-        <span className="font-mono text-[10px] text-neutral-500">
-          {subtitle}
-        </span>
+        <span className="block text-sm font-bold text-text">{title}</span>
+        <span className="mt-1 block text-xs text-text-muted">{subtitle}</span>
       </div>
-      <span className="font-mono text-xs font-bold text-neutral-300">
-        {children}
-      </span>
+      <span className="metric text-sm font-bold text-text-secondary">{children}</span>
     </div>
   );
 }
