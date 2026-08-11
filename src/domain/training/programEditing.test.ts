@@ -90,16 +90,17 @@ describe("programEditing", () => {
       "tricep_pushdown",
       "Triceps",
     );
-    const last = added.sessionTemplates[0].exerciseSlots.at(-1)!;
+    const addedSlots = added.sessionTemplates[0].exerciseSlots;
+    const last = addedSlots[addedSlots.length - 1];
     expect(last).toMatchObject({
       id: "custom-slot",
       exerciseId: "tricep_pushdown",
-      order: added.sessionTemplates[0].exerciseSlots.length,
+      order: addedSlots.length,
       targetMuscleIds: ["arms"],
       baseSetCount: 2,
     });
 
-    const removed = removeProgramSlot(added, template.id, customSlot(added));
+    const removed = removeProgramSlot(added, template.id, "custom-slot");
     expect(removed.sessionTemplates[0].exerciseSlots.map((slot) => slot.order)).toEqual(
       removed.sessionTemplates[0].exerciseSlots.map((_, index) => index + 1),
     );
@@ -132,9 +133,3 @@ describe("programEditing", () => {
     ).not.toContain("bench_press");
   });
 });
-
-function customSlot(source: ReturnType<typeof program>): string {
-  return source.sessionTemplates[0].exerciseSlots.find(
-    (slot) => slot.id === "custom-slot",
-  )?.id ?? "custom-slot";
-}
