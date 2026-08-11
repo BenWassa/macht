@@ -33,8 +33,11 @@ export function PreviousPerformanceStrip({
             <span className="metric font-semibold text-text">
               {set.load} {units} × {set.reps}
             </span>
-            {set.effort != null ? (
-              <span className="ml-2 text-xs text-text-muted">@ {set.effort}</span>
+            {set.effort ? (
+              <span className="ml-2 text-xs text-text-muted">
+                @ {set.effort.value}
+                {set.effort.scale ? ` ${set.effort.scale}` : ""}
+              </span>
             ) : null}
           </div>
         ))}
