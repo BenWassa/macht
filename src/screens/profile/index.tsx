@@ -1,5 +1,6 @@
 import { TrainingConstraintsManager } from "@/screens/constraints/TrainingConstraintsManager";
 import { BackupPanel } from "./BackupPanel";
+import { CustomExercisesPanel } from "./CustomExercisesPanel";
 import { DangerZone } from "./DangerZone";
 import { PersonalTrainingModelCard } from "./PersonalTrainingModelCard";
 import { SettingsPanel } from "./SettingsPanel";
@@ -20,6 +21,7 @@ export function ProfileScreen() {
 
       <PersonalTrainingModelCard />
       <TrainingConstraintsManager />
+      <CustomExercisesPanel />
 
       <details className="surface-card group overflow-hidden">
         <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between px-4 text-sm font-semibold text-text-secondary sm:px-5">
