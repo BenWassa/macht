@@ -90,6 +90,9 @@ describe("program and mesocycle generation", () => {
     expect(result.weeks[1].targetEffort?.value).toBe(2.5);
     expect(result.weeks[3].sessions[0].prescriptions[0].plannedSetCount).toBe(2);
     expect(result.weeks[0].sessions[0].prescriptions[0].programExerciseSlotId).toBe("press-slot");
+    expect(
+      result.weeks[0].sessions[0].prescriptions[0].allowedSubstitutionExerciseIds,
+    ).toEqual(["machine-press", "db-press"]);
   });
 
   it("rejects duplicate slot ids across session templates", () => {
