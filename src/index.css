@@ -16,6 +16,7 @@
   --color-signal: #f06a4b;
   --color-signal-strong: #ff7958;
   --color-signal-soft: #3b211b;
+  --color-on-signal: #17120f;
   --color-positive: #63c59c;
   --color-positive-soft: #17352b;
   --color-caution: #d8aa52;
@@ -59,6 +60,10 @@
   color: var(--color-text);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+  --space-control: 0.75rem;
+  --space-group: 1rem;
+  --space-section: 1.5rem;
+  --space-screen: 1.25rem;
   --shadow-card: 0 1px 0 rgb(255 255 255 / 0.025), 0 12px 32px rgb(0 0 0 / 0.2);
   --shadow-raised: 0 1px 0 rgb(255 255 255 / 0.04), 0 18px 42px rgb(0 0 0 / 0.28);
   --chart-performance: var(--color-signal);
