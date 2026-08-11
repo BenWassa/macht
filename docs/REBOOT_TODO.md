@@ -4,41 +4,50 @@ This file is the live implementation checklist for PR #12. Update it as work lan
 
 ## Current focus
 
-**Phase 0 — Reboot contract**, followed immediately by the Phase 1 domain schema.
+**Phase 2 — Progression engine v2**
+
+Phase 0 is complete. Phase 1 implementation is complete and awaiting a fresh branch CI run before its validation gate is closed.
+
+## Validation status
+
+- Baseline PR run: lint ✅, TypeScript/build ✅, bundle-size gate ❌ due to pre-existing bundle at 405.4 KB raw / 124.8 KB gz versus 400 / 120 budget.
+- CI now includes `npm test`.
+- CI now targets `agent/**` pushes in addition to `main` and pull requests.
+- GitHub App content writes are currently not creating new Actions runs automatically, so Phase 1 gate remains open pending an independently triggered branch run.
 
 ## Phase 0 — Reboot contract
 
-- [ ] Replace `PRODUCT.md` with the adaptive-training product contract.
-- [ ] Add the v3 PRD.
-- [ ] Define the core user loops and information architecture.
-- [ ] Replace `DESIGN.md` with the new visual-system brief.
-- [ ] Explicitly supersede injury-first positioning and the brutalist visual doctrine.
+- [x] Replace `PRODUCT.md` with the adaptive-training product contract.
+- [x] Add the v3 PRD.
+- [x] Define the core user loops and information architecture.
+- [x] Replace `DESIGN.md` with the new visual-system brief.
+- [x] Explicitly supersede injury-first positioning and the brutalist visual doctrine.
 
 ### Gate
 
-- [ ] Product purpose is unambiguous.
-- [ ] Major surfaces are defined.
-- [ ] Today → Workout → Feedback → Progression is documented end to end.
-- [ ] Program → Mesocycle → Week → Session → Prescription hierarchy is locked.
+- [x] Product purpose is unambiguous.
+- [x] Major surfaces are defined.
+- [x] Today → Workout → Feedback → Progression is documented end to end.
+- [x] Program → Mesocycle → Week → Session → Prescription hierarchy is locked.
 
 ## Phase 1 — Data model and migration
 
-- [ ] Define Program, Mesocycle, Week, PlannedSession, ExercisePrescription, and SetPrescription.
-- [ ] Define WorkoutSession, ExercisePerformance, and SetPerformance.
-- [ ] Separate prescribed values from actual values.
-- [ ] Define Muscle and MusclePriority.
-- [ ] Define RecoveryObservation and ExerciseFeedback.
-- [ ] Define ProgressionDecision and RecommendationReason.
-- [ ] Add schema v2 envelope/versioning.
-- [ ] Build v1 → v2 history migration.
-- [ ] Add migration fixtures/tests.
-- [ ] Add backup/rollback protection.
+- [x] Define Program, Mesocycle, Week, PlannedSession, ExercisePrescription, and SetPrescription.
+- [x] Define WorkoutSession, ExercisePerformance, and SetPerformance.
+- [x] Separate prescribed values from actual values.
+- [x] Define Muscle and MusclePriority.
+- [x] Define RecoveryObservation and ExerciseFeedback.
+- [x] Define ProgressionDecision and RecommendationReason.
+- [x] Add schema v2 envelope/versioning.
+- [x] Build v1 → v2 history migration.
+- [x] Add migration fixtures/tests.
+- [x] Add backup/rollback protection.
 
 ### Gate
 
-- [ ] Historical load, reps, effort, date, exercise identity, and duration survive migration.
-- [ ] Raw stored records can reconstruct a workout.
-- [ ] Prescriptions belong to program slots rather than exercise IDs.
+- [ ] Historical load, reps, effort, date, exercise identity, and duration survive migration under a fresh test run.
+- [ ] Raw stored records can reconstruct a workout under a fresh test/build run.
+- [x] Prescriptions belong to program slots rather than exercise IDs.
 
 ## Phase 2 — Progression engine v2
 
@@ -134,8 +143,9 @@ This file is the live implementation checklist for PR #12. Update it as work lan
 
 - [ ] Remove dead legacy code and obsolete docs.
 - [ ] Update README and PWA manifest.
-- [ ] Run tests in CI.
-- [ ] Migration fixtures.
+- [x] Run tests in CI configuration.
+- [x] Migration fixtures.
+- [ ] Resolve stale bundle-size budget or reduce bundle below the current gate.
 - [ ] Offline audit.
 - [ ] Accessibility audit.
 - [ ] Export/import audit.
