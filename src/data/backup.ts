@@ -2,6 +2,7 @@ import { constraintsFromLegacyInjuries } from "@/domain/constraints/legacy";
 import type { TrainingConstraint } from "@/domain/constraints/types";
 import type { WorkoutSession } from "@/domain/execution/types";
 import type { ProgressionDecision } from "@/domain/progression/types";
+import type { ProgramId } from "@/domain/shared/ids";
 import type { Mesocycle, Program } from "@/domain/training/types";
 import type {
   CustomExercise,
@@ -26,6 +27,7 @@ export interface MachtBackupV2 {
   workouts: WorkoutSession[];
   programs: Program[];
   mesocycles: Mesocycle[];
+  activeProgramId?: ProgramId;
   progressionDecisions: ProgressionDecision[];
   trainingConstraints: TrainingConstraint[];
   settings: Settings;
@@ -37,6 +39,7 @@ export interface BackupV2Input {
   workouts: WorkoutSession[];
   programs: Program[];
   mesocycles: Mesocycle[];
+  activeProgramId?: ProgramId;
   progressionDecisions: ProgressionDecision[];
   trainingConstraints: TrainingConstraint[];
   settings: Settings;
@@ -50,6 +53,7 @@ export interface RestorableBackup {
   workouts: WorkoutSession[];
   programs: Program[];
   mesocycles: Mesocycle[];
+  activeProgramId?: ProgramId;
   progressionDecisions: ProgressionDecision[];
   trainingConstraints: TrainingConstraint[];
   settings: Settings;
@@ -74,6 +78,7 @@ export function createBackupV2(input: BackupV2Input): MachtBackupV2 {
     workouts: input.workouts,
     programs: input.programs,
     mesocycles: input.mesocycles,
+    activeProgramId: input.activeProgramId,
     progressionDecisions: input.progressionDecisions,
     trainingConstraints: input.trainingConstraints,
     settings: input.settings,
@@ -104,6 +109,7 @@ export function parseBackup(value: unknown): RestorableBackup {
       workouts: backup.workouts,
       programs: backup.programs,
       mesocycles: backup.mesocycles,
+      activeProgramId: backup.activeProgramId,
       progressionDecisions: backup.progressionDecisions,
       trainingConstraints: backup.trainingConstraints,
       settings: backup.settings,
@@ -127,6 +133,7 @@ export function parseBackup(value: unknown): RestorableBackup {
       workouts: [],
       programs: [],
       mesocycles: [],
+      activeProgramId: undefined,
       progressionDecisions: [],
       trainingConstraints: constraintsFromLegacyInjuries(backup.injuries),
       settings: backup.settings,
