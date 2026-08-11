@@ -20,6 +20,7 @@ import { useProgramStore } from "@/state/useProgramStore";
 import { useToastStore } from "@/state/useToastStore";
 import { useWorkoutStore } from "@/state/useWorkoutStore";
 import { ActiveMesocycleCard } from "./ActiveMesocycleCard";
+import { CycleStartConfirmModal } from "./CycleStartConfirmModal";
 import { LegacyProgramFallback } from "./LegacyProgramFallback";
 import { MusclePriorityPicker } from "./MusclePriorityPicker";
 import { ProgramActionsCard } from "./ProgramActionsCard";
@@ -52,6 +53,7 @@ export function ProgramScreen({ setActiveTab }: ProgramScreenProps) {
   );
   const [accumulationWeeks, setAccumulationWeeks] = useState(4);
   const [includesDeload, setIncludesDeload] = useState(true);
+  const [confirmCycleRestart, setConfirmCycleRestart] = useState(false);
   const exercises = useMemo(
     () =>
       getAllExercises(customExercises).sort((a, b) => a.name.localeCompare(b.name)),
@@ -61,6 +63,13 @@ export function ProgramScreen({ setActiveTab }: ProgramScreenProps) {
     (item) =>
       item.id === storedProgram?.activeMesocycleId ||
       (item.programId === storedProgram?.id && item.status === "active"),
+  );
+  const activeCycleHasRemainingSessions = Boolean(
+    activeMesocycle?.weeks.some((week) =>
+      week.sessions.some(
+        (session) => session.status === "planned" || session.status === "moved",
+      ),
+    ),
   );
 
   const persistDraft = (notify = true): Program | null => {
@@ -81,7 +90,7 @@ export function ProgramScreen({ setActiveTab }: ProgramScreenProps) {
     return updated;
   };
 
-  const startCycle = () => {
+  const activateCycle = () => {
     if (workoutActive) return;
     const saved = persistDraft(false);
     if (!saved) return;
@@ -103,6 +112,15 @@ export function ProgramScreen({ setActiveTab }: ProgramScreenProps) {
     setActiveProgram(result.program.id);
     setDraft(result.program);
     showToast(`Cycle ${result.mesocycle.index} activated · Today is ready`);
+  };
+
+  const requestCycleStart = () => {
+    if (workoutActive) return;
+    if (activeCycleHasRemainingSessions) {
+      setConfirmCycleRestart(true);
+      return;
+    }
+    activateCycle();
   };
 
   const rebuildSchedule = (sessionsPerWeek: 2 | 3 | 4 | 5 | 6) => {
@@ -221,10 +239,18 @@ export function ProgramScreen({ setActiveTab }: ProgramScreenProps) {
         onAccumulationWeeksChange={setAccumulationWeeks}
         onIncludesDeloadChange={setIncludesDeload}
         onSave={() => persistDraft()}
-        onStartCycle={startCycle}
+        onStartCycle={requestCycleStart}
       />
 
       <LegacyProgramFallback setActiveTab={setActiveTab} />
+
+      {confirmCycleRestart && activeMesocycle ? (
+        <CycleStartConfirmModal
+          currentCycleName={activeMesocycle.name ?? `Cycle ${activeMesocycle.index}`}
+          onConfirm={activateCycle}
+          onClose={() => setConfirmCycleRestart(false)}
+        />
+      ) : null}
     </div>
   );
 }
