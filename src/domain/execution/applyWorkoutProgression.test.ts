@@ -124,8 +124,8 @@ const workout = (
   name: "Upper 1",
   date: "2026-08-11",
   startedAt: "2026-08-11T00:00:00Z",
-  finishedAt: "2026-08-11T01:00:00Z",
-  durationSeconds: 3600,
+  finishedAt: "2026-08-11T00:50:00Z",
+  durationSeconds: 3000,
   state: "completed",
   exercisePerformances: [performance("rx-a-1")],
   adaptedDuringSession: false,
@@ -170,7 +170,7 @@ const lowStimulusRecoveredPerformance = () =>
   performance("rx-a-1", [9, 9, 9], {
     id: "feedback-1",
     exerciseId: "incline_db_press",
-    recordedAt: "2026-08-11T00:55:00Z",
+    recordedAt: "2026-08-11T00:45:00Z",
     recovery: "recovered",
     stimulus: "low",
   });
