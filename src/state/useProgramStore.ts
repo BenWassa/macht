@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { ProgramId } from "@/domain/shared/ids";
+import type { PlannedSessionId, ProgramId } from "@/domain/shared/ids";
 import type { Mesocycle, Program } from "@/domain/training/types";
 import { demoStorageKey } from "@/lib/demoMode";
 
@@ -11,8 +11,35 @@ interface ProgramState {
   upsertProgram: (program: Program) => void;
   upsertMesocycle: (mesocycle: Mesocycle) => void;
   setActiveProgram: (programId?: ProgramId) => void;
+  completePlannedSession: (plannedSessionId: PlannedSessionId) => void;
   hydrateProgramData: (programs: Program[], mesocycles: Mesocycle[]) => void;
 }
+
+const completeSession = (
+  mesocycle: Mesocycle,
+  plannedSessionId: PlannedSessionId,
+): Mesocycle => {
+  let changed = false;
+  const weeks = mesocycle.weeks.map((week) => ({
+    ...week,
+    sessions: week.sessions.map((session) => {
+      if (session.id !== plannedSessionId) return session;
+      changed = true;
+      return { ...session, status: "completed" as const };
+    }),
+  }));
+  if (!changed) return mesocycle;
+  const allResolved = weeks.every((week) =>
+    week.sessions.every(
+      (session) => session.status === "completed" || session.status === "skipped",
+    ),
+  );
+  return {
+    ...mesocycle,
+    weeks,
+    status: allResolved ? "completed" : mesocycle.status,
+  };
+};
 
 export const useProgramStore = create<ProgramState>()(
   persist(
@@ -37,6 +64,12 @@ export const useProgramStore = create<ProgramState>()(
             : [...state.mesocycles, mesocycle],
         })),
       setActiveProgram: (activeProgramId) => set({ activeProgramId }),
+      completePlannedSession: (plannedSessionId) =>
+        set((state) => ({
+          mesocycles: state.mesocycles.map((mesocycle) =>
+            completeSession(mesocycle, plannedSessionId),
+          ),
+        })),
       hydrateProgramData: (programs, mesocycles) =>
         set({ programs, mesocycles }),
     }),
