@@ -7,8 +7,9 @@ import type { WorkoutSession } from "@/domain/execution/types";
 import type { SessionWorkload } from "@/domain/feedback/types";
 import { getExerciseConflict } from "@/domain/injuries";
 import { buildPersonalTrainingModel } from "@/domain/personalization/model";
+import { normalizeProgressHistory } from "@/domain/progress/normalize";
 import { computeExerciseE1rm } from "@/domain/sessionStats";
-import type { SessionLog } from "@/domain/types";
+import type { CustomExercise, SessionLog } from "@/domain/types";
 import { useModalA11y } from "@/hooks/useModalA11y";
 import { formatTime, todayIso } from "@/lib/format";
 import { useCustomExerciseStore } from "@/state/useCustomExerciseStore";
@@ -42,7 +43,7 @@ const WORKLOAD_OPTIONS: Array<{ value: SessionWorkload; label: string }> = [
   { value: "too_much", label: "Too much" },
 ];
 
-const countPrs = (session: SessionLog, history: SessionLog[]): number =>
+const countLegacyPrs = (session: SessionLog, history: SessionLog[]): number =>
   (session.exerciseSnapshots ?? []).filter((snapshot) => {
     if (!snapshot.e1rm) return false;
     const previousBest = Math.max(
@@ -55,6 +56,29 @@ const countPrs = (session: SessionLog, history: SessionLog[]): number =>
     );
     return previousBest > 0 && snapshot.e1rm > previousBest;
   }).length;
+
+const countV2Prs = (
+  completed: WorkoutSession,
+  v2History: WorkoutSession[],
+  legacyHistory: SessionLog[],
+  customExercises: CustomExercise[],
+): number => {
+  const prior = normalizeProgressHistory(v2History, legacyHistory, customExercises);
+  const current = normalizeProgressHistory([completed], [], customExercises)[0];
+  if (!current) return 0;
+  return current.exercises.filter((exercise) => {
+    if (exercise.bestE1rm == null) return false;
+    const previousBest = Math.max(
+      0,
+      ...prior.flatMap((workout) =>
+        workout.exercises
+          .filter((event) => event.exerciseId === exercise.exerciseId)
+          .map((event) => event.bestE1rm ?? 0),
+      ),
+    );
+    return previousBest > 0 && exercise.bestE1rm > previousBest;
+  }).length;
+};
 
 const v2TargetsModified = (workout: WorkoutSession): boolean =>
   workout.exercisePerformances.some((exercise) =>
@@ -76,6 +100,7 @@ export function FinishSessionModal({
 }: FinishSessionModalProps) {
   const sessions = useHistoryStore((state) => state.sessions);
   const addSession = useHistoryStore((state) => state.addSession);
+  const v2Workouts = useExecutionHistoryStore((state) => state.workouts);
   const addV2Workout = useExecutionHistoryStore((state) => state.addWorkout);
   const programs = useProgramStore((state) => state.programs);
   const mesocycles = useProgramStore((state) => state.mesocycles);
@@ -108,9 +133,14 @@ export function FinishSessionModal({
       new Date().toISOString(),
       workout.workoutDuration,
     );
-    const legacy = toLegacySessionLog(completed);
+    const legacySummary = toLegacySessionLog(completed);
     const summary = v2WorkoutSummary(completed);
-    const personalRecords = countPrs(legacy, sessions);
+    const personalRecords = countV2Prs(
+      completed,
+      v2Workouts,
+      sessions,
+      customExercises,
+    );
     const targetsModified = v2TargetsModified(completed);
     let recommendationsApplied = 0;
     let personalizationsApplied = 0;
@@ -143,13 +173,12 @@ export function FinishSessionModal({
     }
 
     addV2Workout(completed);
-    addSession(legacy);
     if (completed.plannedSessionId) {
       completePlannedSession(completed.plannedSessionId);
     }
     workout.endSession();
     onSaved({
-      duration: legacy.duration,
+      duration: legacySummary.duration,
       sets: summary.sets,
       volume: summary.volume,
       targetsModified,
@@ -204,7 +233,7 @@ export function FinishSessionModal({
       isMinimumSession: workout.isMinimumSession,
       exerciseSnapshots,
     };
-    const personalRecords = countPrs(session, sessions);
+    const personalRecords = countLegacyPrs(session, sessions);
     addSession(session);
     workout.endSession();
     onSaved({
