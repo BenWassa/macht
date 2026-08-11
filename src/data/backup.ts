@@ -83,7 +83,7 @@ const hasStringIds = (value: unknown): boolean =>
     (item) => typeof item.id === "string" && item.id.length > 0,
   );
 
-const validateV2 = (value: Record<string, unknown>): value is MachtBackupV2 =>
+const validateV2 = (value: Record<string, unknown>): boolean =>
   value.version === MACHT_BACKUP_VERSION &&
   typeof value.exportedAt === "string" &&
   hasStringIds(value.programs) &&
@@ -97,9 +97,7 @@ const validateV2 = (value: Record<string, unknown>): value is MachtBackupV2 =>
   hasStringIds(value.legacyHistory) &&
   hasStringIds(value.legacyInjuries);
 
-const validateV1 = (
-  value: Record<string, unknown>,
-): value is LegacyMachtBackupV1 =>
+const validateV1 = (value: Record<string, unknown>): boolean =>
   value.version === 1 &&
   typeof value.exportedAt === "string" &&
   hasStringIds(value.history) &&
@@ -145,10 +143,18 @@ export function parseMachtBackupText(text: string): ParsedBackup {
     return { ok: false, error: "Backup root must be an object." };
   }
   if (parsed.version === MACHT_BACKUP_VERSION && validateV2(parsed)) {
-    return { ok: true, sourceVersion: 2, payload: payloadFromV2(parsed) };
+    return {
+      ok: true,
+      sourceVersion: 2,
+      payload: payloadFromV2(parsed as unknown as MachtBackupV2),
+    };
   }
   if (parsed.version === 1 && validateV1(parsed)) {
-    return { ok: true, sourceVersion: 1, payload: payloadFromV1(parsed) };
+    return {
+      ok: true,
+      sourceVersion: 1,
+      payload: payloadFromV1(parsed as unknown as LegacyMachtBackupV1),
+    };
   }
   if (parsed.version !== 1 && parsed.version !== MACHT_BACKUP_VERSION) {
     return { ok: false, error: "Unsupported Macht backup version." };
