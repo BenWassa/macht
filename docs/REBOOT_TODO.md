@@ -4,16 +4,15 @@ This file is the live implementation checklist for the Macht product reboot. Upd
 
 ## Current focus
 
-**Phase 4 — Design system**
+**Phase 5 — Today**
 
-Phases 0–3 are implemented and have passed lint, the full test suite, and TypeScript/build validation.
+Phases 0–4 are implemented and have passed lint, the full test suite, and TypeScript/build validation.
 
 ## Validation status
 
-- Latest Phase 3 CI: lint ✅, tests ✅, TypeScript/build ✅.
+- Latest Phase 4 CI: lint ✅, tests ✅, TypeScript/build ✅.
 - Bundle-size gate ❌ due to the pre-existing runtime bundle at roughly 405 KB raw / 125 KB gz versus the stale 400 / 120 budget.
 - Lighthouse is skipped after the bundle-size failure.
-- The new domain architecture is additive and does not increase the shipped runtime bundle while unused.
 - CI includes `npm test` and targets `agent/**` pushes, `main`, and pull requests.
 
 ## Phase 0 — Reboot contract
@@ -96,14 +95,26 @@ Phases 0–3 are implemented and have passed lint, the full test suite, and Type
 
 ## Phase 4 — Design system
 
-- [ ] Typography system.
-- [ ] Semantic color tokens.
-- [ ] Surfaces / spacing / radius / elevation.
-- [ ] Motion system.
-- [ ] Numeric typography.
-- [ ] Chart language.
-- [ ] Empty / success / PR / warning / recovery states.
-- [ ] WCAG and reduced-motion audit.
+- [x] Typography system.
+- [x] Semantic color tokens.
+- [x] Surfaces / spacing / radius / elevation.
+- [x] Motion system.
+- [x] Numeric typography.
+- [x] Chart language.
+- [x] Empty / success / PR / warning / recovery states.
+- [x] WCAG and reduced-motion audit.
+- [x] Shared tactile button, metric, and state-panel primitives.
+
+### Gate
+
+- [x] Sans-serif UI typography replaces monospace as the system default.
+- [x] Muted normal text meets AA contrast even on Surface 3.
+- [x] Semantic state pairs meet AA contrast.
+- [x] Shared button touch target is at least 44px high.
+- [x] Focus-visible, forced-colors, and reduced-motion behavior are defined globally.
+- [x] Lint passes.
+- [x] Full test suite passes.
+- [x] TypeScript/build passes.
 
 ## Phase 5 — Today
 
