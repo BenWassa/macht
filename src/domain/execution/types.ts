@@ -3,6 +3,7 @@ import type {
   ExerciseId,
   ExercisePerformanceId,
   ExercisePrescriptionId,
+  IsoDate,
   IsoDateTime,
   MesocycleId,
   PlannedSessionId,
@@ -65,7 +66,8 @@ export interface WorkoutSession {
   mesocycleId?: MesocycleId;
   weekId?: WeekId;
   name: string;
-  startedAt: IsoDateTime;
+  date: IsoDate;
+  startedAt?: IsoDateTime;
   finishedAt?: IsoDateTime;
   durationSeconds?: number;
   state: WorkoutCompletionState;
