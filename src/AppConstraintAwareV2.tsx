@@ -133,9 +133,13 @@ export default function AppConstraintAwareV2() {
               summary.personalRecords > 0
                 ? `${summary.personalRecords} new PR${summary.personalRecords === 1 ? "" : "s"} · `
                 : "";
+            const personalizedReceipt =
+              summary.personalizationsApplied > 0
+                ? ` ${summary.personalizationsApplied} recommendation${summary.personalizationsApplied === 1 ? "" : "s"} adjusted from established training history.`
+                : "";
             const adaptiveReceipt =
               summary.recommendationsApplied > 0
-                ? `${summary.recommendationsApplied} next prescription${summary.recommendationsApplied === 1 ? "" : "s"} evaluated and applied.`
+                ? `${summary.recommendationsApplied} next prescription${summary.recommendationsApplied === 1 ? "" : "s"} evaluated and applied.${personalizedReceipt}`
                 : summary.targetsModified
                   ? "Logged changes saved for future programming."
                   : "Performance saved for future programming.";
