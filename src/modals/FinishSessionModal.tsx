@@ -256,10 +256,16 @@ export function FinishSessionModal({
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 p-3 sm:items-center">
       <div
         ref={containerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="finish-session-title"
         className="surface-raised w-full max-w-sm space-y-5 p-5"
       >
         <div>
-          <h3 className="text-xl font-bold tracking-[-0.03em] text-text">
+          <h3
+            id="finish-session-title"
+            className="text-xl font-bold tracking-[-0.03em] text-text"
+          >
             Finish session
           </h3>
           <p className="mt-1 text-sm text-text-muted">
