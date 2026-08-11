@@ -18,6 +18,8 @@ const confidenceClass: Record<PersonalizationConfidence, string> = {
   established: "bg-positive-soft text-positive",
 };
 
+const decisionLabel = (value: string) => value.replace(/_/g, " ");
+
 function EvidenceBadge({
   confidence,
   count,
@@ -52,13 +54,21 @@ export function PersonalTrainingModelCard() {
 
   const exerciseSignals = [...model.exerciseResponses]
     .sort((a, b) => {
-      const rank = { established: 2, emerging: 1, insufficient: 0 };
+      const rank: Record<PersonalizationConfidence, number> = {
+        established: 2,
+        emerging: 1,
+        insufficient: 0,
+      };
       return rank[b.confidence] - rank[a.confidence] || b.evidenceCount - a.evidenceCount;
     })
     .slice(0, 4);
   const volumeSignals = [...model.muscleVolumeResponses]
     .sort((a, b) => {
-      const rank = { established: 2, emerging: 1, insufficient: 0 };
+      const rank: Record<PersonalizationConfidence, number> = {
+        established: 2,
+        emerging: 1,
+        insufficient: 0,
+      };
       return rank[b.confidence] - rank[a.confidence] || b.evidenceCount - a.evidenceCount;
     })
     .slice(0, 4);
@@ -171,7 +181,7 @@ export function PersonalTrainingModelCard() {
           {adjustedDecisions.map((decision) => (
             <article key={decision.id} className="rounded-md bg-signal-soft p-3">
               <div className="text-xs font-semibold text-signal-strong">
-                Base: {decision.personalization?.baseDecision.replaceAll("_", " ")} → Applied: {decision.decision.replaceAll("_", " ")}
+                Base: {decisionLabel(decision.personalization?.baseDecision ?? "maintain")} → Applied: {decisionLabel(decision.decision)}
               </div>
               <p className="mt-1 text-xs leading-5 text-text-secondary">
                 {decision.personalization?.explanation}
