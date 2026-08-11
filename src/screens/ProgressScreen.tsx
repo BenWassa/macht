@@ -1,76 +1,125 @@
-import { deriveE1rmHistory } from "@/domain/e1rm";
-import { PROGRESS_LIFTS, getExerciseById } from "@/domain/exercises";
-import { getExerciseConflict } from "@/domain/injuries";
-import {
-  monthlyGainPct,
-  progressionStreak,
-  projectedE1rm,
-} from "@/domain/progressionStats";
-import { LiftCard } from "@/screens/progress/LiftCard";
+import { useMemo, useState } from "react";
+import { buildConsistencyWeeks, plannedSessionCoverage } from "@/domain/progress/consistency";
+import { buildMesocycleSummaries } from "@/domain/progress/cycles";
+import { buildExerciseBests, detectProgressRecords } from "@/domain/progress/exercises";
+import { buildMuscleProgress } from "@/domain/progress/muscles";
+import { normalizeProgressHistory } from "@/domain/progress/normalize";
+import { buildExerciseResponseHistory } from "@/domain/progress/responses";
+import { todayIso } from "@/lib/format";
+import { ExerciseProgressView } from "@/screens/progress/ExerciseProgressView";
+import { MuscleProgressView } from "@/screens/progress/MuscleProgressView";
+import { ProgressOverview } from "@/screens/progress/ProgressOverview";
+import { ProgressTabs, type ProgressTab } from "@/screens/progress/ProgressTabs";
+import { RecordsProgressView } from "@/screens/progress/RecordsProgressView";
 import { useCustomExerciseStore } from "@/state/useCustomExerciseStore";
+import { useExecutionHistoryStore } from "@/state/useExecutionHistoryStore";
 import { useHistoryStore } from "@/state/useHistoryStore";
-import { useInjuryStore } from "@/state/useInjuryStore";
+import { useProgramStore } from "@/state/useProgramStore";
+import { useProgressionStore } from "@/state/useProgressionStore";
 import { useSettingsStore } from "@/state/useSettingsStore";
 
 export function ProgressScreen() {
-  const sessions = useHistoryStore((state) => state.sessions);
-  const injuries = useInjuryStore((state) => state.injuries);
-  const settings = useSettingsStore();
+  const [tab, setTab] = useState<ProgressTab>("overview");
+  const v2Workouts = useExecutionHistoryStore((state) => state.workouts);
+  const legacySessions = useHistoryStore((state) => state.sessions);
   const customExercises = useCustomExerciseStore((state) => state.exercises);
+  const programs = useProgramStore((state) => state.programs);
+  const mesocycles = useProgramStore((state) => state.mesocycles);
+  const activeProgramId = useProgramStore((state) => state.activeProgramId);
+  const decisions = useProgressionStore((state) => state.decisions);
+  const units = useSettingsStore((state) => state.units);
+  const today = todayIso();
+  const activeProgram =
+    programs.find((program) => program.id === activeProgramId) ?? programs[0];
 
-  if (sessions.length === 0) {
-    return (
-      <div className="space-y-6 animate-fadeIn">
-        <div>
-          <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-neutral-500">
-            Progression
-          </p>
-          <h1 className="font-mono text-xl font-bold uppercase tracking-tight">
-            Strength progress
-          </h1>
-        </div>
-        <div className="border border-dashed border-[#1a1a1a] bg-black p-6">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-neutral-500">
-            Log sessions to begin tracking progression.
-          </p>
-          <p className="mt-3 font-mono text-[10px] leading-relaxed text-neutral-700">
-            Each lift card shows estimated 1RM over time, calculated from your
-            logged weight and reps using the Brzycki formula. Two sessions on a
-            lift are enough to start the chart.
-          </p>
-        </div>
-      </div>
+  const model = useMemo(() => {
+    const workouts = normalizeProgressHistory(
+      v2Workouts,
+      legacySessions,
+      customExercises,
     );
-  }
+    const records = detectProgressRecords(workouts);
+    const bests = buildExerciseBests(workouts);
+    const weeks = buildConsistencyWeeks(
+      workouts,
+      today,
+      8,
+      activeProgram?.sessionsPerWeek,
+    );
+    const muscles = buildMuscleProgress(
+      workouts,
+      today,
+      28,
+      activeProgram?.musclePriorities ?? {},
+    );
+    const scopedCycles = activeProgram
+      ? mesocycles.filter((cycle) => cycle.programId === activeProgram.id)
+      : mesocycles;
+    const cycles = buildMesocycleSummaries(scopedCycles, workouts, records);
+    const responses = buildExerciseResponseHistory(decisions, customExercises);
+    return {
+      workouts,
+      records,
+      bests,
+      weeks,
+      coverage: plannedSessionCoverage(weeks),
+      muscles,
+      cycles,
+      responses,
+    };
+  }, [
+    activeProgram,
+    customExercises,
+    decisions,
+    legacySessions,
+    mesocycles,
+    today,
+    v2Workouts,
+  ]);
 
   return (
-    <div className="space-y-8 animate-fadeIn">
-      <div>
-        <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-neutral-500">
-          Progression
-        </p>
-        <h1 className="font-mono text-xl font-bold uppercase tracking-tight">
-          Strength progress
+    <div className="animate-rise-in space-y-5">
+      <header>
+        <p className="text-sm font-medium text-text-muted">Progress</p>
+        <h1 className="mt-1 text-3xl font-bold tracking-[-0.04em] text-text">
+          Training response
         </h1>
-      </div>
-      <div className="space-y-6">
-        {PROGRESS_LIFTS.map((exerciseId) => (
-          <LiftCard
-            key={exerciseId}
-            exercise={getExerciseById(exerciseId)}
-            values={deriveE1rmHistory(sessions, exerciseId)}
-            conflict={getExerciseConflict(exerciseId, injuries)}
-            units={settings.units}
-            streak={progressionStreak(exerciseId, sessions)}
-            monthPct={monthlyGainPct(exerciseId, sessions)}
-            projected={projectedE1rm(
-              exerciseId,
-              sessions,
-              settings,
-              customExercises,
-            )}
+        <p className="mt-2 max-w-xl text-sm leading-6 text-text-secondary">
+          Performance, training exposure, records, and adaptive programming response from your own completed sessions.
+        </p>
+      </header>
+
+      <ProgressTabs active={tab} onChange={setTab} />
+
+      <div role="tabpanel" aria-label={`${tab} progress`}>
+        {tab === "overview" ? (
+          <ProgressOverview
+            workouts={model.workouts}
+            weeks={model.weeks}
+            plannedCoverage={model.coverage}
+            records={model.records}
+            cycles={model.cycles}
+            units={units}
           />
-        ))}
+        ) : null}
+        {tab === "exercises" ? (
+          <ExerciseProgressView
+            workouts={model.workouts}
+            exercises={model.bests}
+            responses={model.responses}
+            units={units}
+          />
+        ) : null}
+        {tab === "muscles" ? (
+          <MuscleProgressView muscles={model.muscles} />
+        ) : null}
+        {tab === "records" ? (
+          <RecordsProgressView
+            bests={model.bests}
+            records={model.records}
+            units={units}
+          />
+        ) : null}
       </div>
     </div>
   );

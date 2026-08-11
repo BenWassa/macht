@@ -5,20 +5,24 @@ import { Toast } from "@/components/Toast";
 import { useSessionClock } from "@/hooks/useSessionClock";
 import { useSessionTimers } from "@/hooks/useSessionTimers";
 import { formatTime, formatWorkoutName } from "@/lib/format";
-import { FinishSessionModal } from "@/modals/FinishSessionModal";
-import { FreePlayScreen } from "@/screens/FreePlayScreen";
 import { HomeScreen } from "@/screens/HomeScreen";
-import { ProfileScreen } from "@/screens/profile";
-import { ProgramScreen } from "@/screens/program/ProgramScreen";
-import { ProgressScreen } from "@/screens/ProgressScreen";
-import { WorkoutScreen } from "@/screens/WorkoutScreen";
 import { useSettingsStore } from "@/state/useSettingsStore";
 import { useToastStore } from "@/state/useToastStore";
 import { useUiStore } from "@/state/useUiStore";
 import { useWorkoutStore } from "@/state/useWorkoutStore";
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
+
+const DeferredAppSurface = lazy(() => import("./DeferredAppSurface"));
 
 export type { TabId } from "@/state/useUiStore";
+
+function RouteFallback() {
+  return (
+    <div role="status" className="surface-card p-5 text-sm text-text-muted">
+      Loading training view…
+    </div>
+  );
+}
 
 export default function App() {
   const activeTab = useUiStore((state) => state.activeTab);
@@ -34,6 +38,37 @@ export default function App() {
   const isWorkoutScreen = activeTab === "workout" && workoutActive;
 
   useSessionClock();
+
+  const handleSaved = (summary: {
+    duration: string;
+    sets: number;
+    volume: number;
+    targetsModified: boolean;
+    personalRecords: number;
+    recommendationsApplied: number;
+    personalizationsApplied: number;
+  }) => {
+    setShowFinishModal(false);
+    clear();
+    const prReceipt =
+      summary.personalRecords > 0
+        ? `${summary.personalRecords} new PR${summary.personalRecords === 1 ? "" : "s"} · `
+        : "";
+    const personalizedReceipt =
+      summary.personalizationsApplied > 0
+        ? ` ${summary.personalizationsApplied} recommendation${summary.personalizationsApplied === 1 ? "" : "s"} adjusted from established training history.`
+        : "";
+    const adaptiveReceipt =
+      summary.recommendationsApplied > 0
+        ? `${summary.recommendationsApplied} next prescription${summary.recommendationsApplied === 1 ? "" : "s"} evaluated and applied.${personalizedReceipt}`
+        : summary.targetsModified
+          ? "Logged changes saved for future programming."
+          : "Performance saved for future programming.";
+    showToast(
+      `${prReceipt}Session saved · ${summary.duration} · ${summary.sets} sets · ${summary.volume.toLocaleString()} ${units} · ${adaptiveReceipt}`,
+    );
+    setActiveTab("home");
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-bg text-text selection:bg-signal-soft selection:text-text">
@@ -72,22 +107,22 @@ export default function App() {
       <DemoModeBanner />
 
       <main className="mx-auto w-full max-w-2xl flex-1 overflow-y-auto px-4 py-6 pb-32 sm:px-5">
-        {activeTab === "home" && <HomeScreen setActiveTab={setActiveTab} />}
-        {activeTab === "freeplay" && (
-          <FreePlayScreen setActiveTab={setActiveTab} />
+        {activeTab === "home" ? (
+          <HomeScreen setActiveTab={setActiveTab} />
+        ) : (
+          <Suspense fallback={<RouteFallback />}>
+            <DeferredAppSurface
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              showFinishModal={showFinishModal}
+              onOpenFinish={() => setShowFinishModal(true)}
+              onCloseFinish={() => setShowFinishModal(false)}
+              onSaved={handleSaved}
+              onSetCompleted={startRest}
+              onStartWarmup={startWarmup}
+            />
+          </Suspense>
         )}
-        {activeTab === "templates" && (
-          <ProgramScreen setActiveTab={setActiveTab} />
-        )}
-        {activeTab === "workout" && (
-          <WorkoutScreen
-            onFinish={() => setShowFinishModal(true)}
-            onSetCompleted={startRest}
-            onStartWarmup={startWarmup}
-          />
-        )}
-        {activeTab === "progress" && <ProgressScreen />}
-        {activeTab === "profile" && <ProfileScreen />}
       </main>
 
       {restTimer.visible ? (
@@ -122,30 +157,6 @@ export default function App() {
         setActiveTab={setActiveTab}
         workoutActive={workoutActive}
       />
-
-      {showFinishModal ? (
-        <FinishSessionModal
-          onClose={() => setShowFinishModal(false)}
-          onSaved={(summary) => {
-            setShowFinishModal(false);
-            clear();
-            const prReceipt =
-              summary.personalRecords > 0
-                ? `${summary.personalRecords} new PR${summary.personalRecords === 1 ? "" : "s"} · `
-                : "";
-            const adaptiveReceipt =
-              summary.recommendationsApplied > 0
-                ? `${summary.recommendationsApplied} next prescription${summary.recommendationsApplied === 1 ? "" : "s"} evaluated and applied.`
-                : summary.targetsModified
-                  ? "Logged changes saved for future programming."
-                  : "Performance saved for future programming.";
-            showToast(
-              `${prReceipt}Session saved · ${summary.duration} · ${summary.sets} sets · ${summary.volume.toLocaleString()} ${units} · ${adaptiveReceipt}`,
-            );
-            setActiveTab("home");
-          }}
-        />
-      ) : null}
     </div>
   );
 }

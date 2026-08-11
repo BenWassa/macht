@@ -13,7 +13,7 @@ const MUSCLE_ALIASES: Array<{ pattern: RegExp; muscleId: MuscleId }> = [
   { pattern: /lat|back|row/i, muscleId: "back" },
   { pattern: /shoulder|delt|rotator|scap/i, muscleId: "shoulders" },
   { pattern: /bicep|tricep|arm/i, muscleId: "arms" },
-  { pattern: /quad|leg/i, muscleId: "quads" },
+  { pattern: /quad/i, muscleId: "quads" },
   { pattern: /hamstring/i, muscleId: "hamstrings" },
   { pattern: /glute/i, muscleId: "glutes" },
   { pattern: /calf|calves/i, muscleId: "calves" },
