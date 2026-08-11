@@ -8,9 +8,9 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 
 const variants: Record<ButtonVariant, string> = {
   primary:
-    "bg-signal text-[var(--color-on-signal)] hover:bg-signal-strong shadow-card",
+    "bg-signal text-[var(--color-on-signal)] hover:bg-signal-strong shadow-[var(--shadow-card)]",
   secondary:
-    "bg-surface-2 text-text hover:bg-surface-3 shadow-card",
+    "bg-surface-2 text-text hover:bg-surface-3 shadow-[var(--shadow-card)]",
   ghost:
     "bg-transparent text-text-secondary hover:bg-surface-1 hover:text-text",
   destructive:
@@ -26,7 +26,7 @@ export function Button({
   return (
     <button
       type={type}
-      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-semibold transition duration-150 ease-out active:translate-y-px active:scale-[0.99] disabled:pointer-events-none disabled:opacity-45 ${variants[variant]} ${className}`.trim()}
+      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-semibold transition duration-150 ease-out active:translate-y-px active:scale-[0.99] disabled:pointer-events-none disabled:opacity-50 ${variants[variant]} ${className}`.trim()}
       {...props}
     />
   );
