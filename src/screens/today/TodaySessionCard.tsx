@@ -6,12 +6,14 @@ interface TodaySessionCardProps {
   model: TodayModel;
   onStart: () => void;
   adjusted?: boolean;
+  actionLabel?: string;
 }
 
 export function TodaySessionCard({
   model,
   onStart,
   adjusted = false,
+  actionLabel = "Start workout",
 }: TodaySessionCardProps) {
   return (
     <section className="surface-raised overflow-hidden p-5 sm:p-6">
@@ -71,7 +73,7 @@ export function TodaySessionCard({
 
       <Button onClick={onStart} className="mt-6 w-full py-3.5 text-base">
         <Play className="h-4 w-4 fill-current" aria-hidden="true" />
-        Start workout
+        {actionLabel}
       </Button>
     </section>
   );
