@@ -63,7 +63,9 @@ function estimatedDuration(template: TemplatePlan, sessions: SessionLog[]): numb
   return Math.round(matching.reduce((sum, value) => sum + value, 0) / matching.length);
 }
 
-function latestProgressHighlight(sessions: SessionLog[]): TodayProgressHighlight | undefined {
+function latestProgressHighlight(
+  sessions: SessionLog[],
+): TodayProgressHighlight | undefined {
   const history = new Map<string, number[]>();
   [...sessions]
     .sort((a, b) => a.date.localeCompare(b.date))
@@ -79,8 +81,8 @@ function latestProgressHighlight(sessions: SessionLog[]): TodayProgressHighlight
   let best: TodayProgressHighlight | undefined;
   history.forEach((values, exerciseId) => {
     if (values.length < 2) return;
-    const previous = values.at(-2) ?? 0;
-    const current = values.at(-1) ?? 0;
+    const previous = values[values.length - 2] ?? 0;
+    const current = values[values.length - 1] ?? 0;
     const delta = current - previous;
     if (delta <= 0 || (best && delta <= best.delta)) return;
     best = {
@@ -94,9 +96,14 @@ function latestProgressHighlight(sessions: SessionLog[]): TodayProgressHighlight
   return best;
 }
 
-function activePlannedSession(mesocycle: Mesocycle): { session: PlannedSession; weekIndex: number } | null {
+function activePlannedSession(
+  mesocycle: Mesocycle,
+): { session: PlannedSession; weekIndex: number } | null {
   for (const week of mesocycle.weeks) {
-    const session = week.sessions.find((candidate) => candidate.status === "planned" || candidate.status === "moved");
+    const session = week.sessions.find(
+      (candidate) =>
+        candidate.status === "planned" || candidate.status === "moved",
+    );
     if (session) return { session, weekIndex: week.index };
   }
   return null;
@@ -124,13 +131,23 @@ export function buildTodayModel({
   const planned = activeMesocycle ? activePlannedSession(activeMesocycle) : null;
 
   if (planned && activeMesocycle) {
-    const week = activeMesocycle.weeks.find((item) => item.index === planned.weekIndex);
-    const exerciseIds = planned.session.prescriptions.map((item) => item.exerciseId);
+    const week = activeMesocycle.weeks.find(
+      (item) => item.index === planned.weekIndex,
+    );
+    const exerciseIds = planned.session.prescriptions.map(
+      (item) => item.exerciseId,
+    );
     const exercises = exerciseIds.map((id) => getExerciseById(id));
     return {
       sessionName: planned.session.name,
-      exerciseNames: exercises.map((item, index) => item?.name ?? exerciseIds[index]),
-      targetAreas: [...new Set(exercises.flatMap((item) => (item?.target ? [item.target] : [])))],
+      exerciseNames: exercises.map(
+        (item, index) => item?.name ?? exerciseIds[index],
+      ),
+      targetAreas: [
+        ...new Set(
+          exercises.flatMap((item) => (item?.target ? [item.target] : [])),
+        ),
+      ],
       exerciseCount: exerciseIds.length,
       estimatedDurationMinutes: planned.session.targetDurationMinutes,
       completedThisWeek,
@@ -139,7 +156,10 @@ export function buildTodayModel({
         label: activeMesocycle.name ?? `Mesocycle ${activeMesocycle.index}`,
         detail: `Week ${planned.weekIndex} of ${activeMesocycle.weeks.length}`,
         phase: week?.phase,
-        progress: { current: planned.weekIndex, total: activeMesocycle.weeks.length },
+        progress: {
+          current: planned.weekIndex,
+          total: activeMesocycle.weeks.length,
+        },
       },
       recentProgress: latestProgressHighlight(sessions),
     };
@@ -148,8 +168,14 @@ export function buildTodayModel({
   const exercises = legacyTemplate.exercises.map((id) => getExerciseById(id));
   return {
     sessionName: legacyTemplate.name,
-    exerciseNames: exercises.map((item, index) => item?.name ?? legacyTemplate.exercises[index]),
-    targetAreas: [...new Set(exercises.flatMap((item) => (item?.target ? [item.target] : [])))],
+    exerciseNames: exercises.map(
+      (item, index) => item?.name ?? legacyTemplate.exercises[index],
+    ),
+    targetAreas: [
+      ...new Set(
+        exercises.flatMap((item) => (item?.target ? [item.target] : [])),
+      ),
+    ],
     exerciseCount: legacyTemplate.exercises.length,
     estimatedDurationMinutes: estimatedDuration(legacyTemplate, sessions),
     completedThisWeek,
