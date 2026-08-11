@@ -52,6 +52,10 @@ const exerciseSnapshot = (
     : undefined,
   recommendedLoad: prescription.recommendedLoad,
   restSeconds: prescription.restSeconds,
+  substitutionFamilyId: prescription.substitutionFamilyId,
+  allowedSubstitutionExerciseIds: prescription.allowedSubstitutionExerciseIds
+    ? [...prescription.allowedSubstitutionExerciseIds]
+    : undefined,
   source: prescription.source,
   progressionDecisionId: prescription.progressionDecisionId,
 });
