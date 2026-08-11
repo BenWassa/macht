@@ -1,64 +1,72 @@
 import { useState } from "react";
+import { Button } from "@/components/ui/Button";
+import { useCustomExerciseStore } from "@/state/useCustomExerciseStore";
+import { useExecutionHistoryStore } from "@/state/useExecutionHistoryStore";
 import { useHistoryStore } from "@/state/useHistoryStore";
 import { useInjuryStore } from "@/state/useInjuryStore";
+import { useProgramStore } from "@/state/useProgramStore";
+import { useProgressionStore } from "@/state/useProgressionStore";
+import { useTrainingConstraintStore } from "@/state/useTrainingConstraintStore";
+import { useWorkoutStore } from "@/state/useWorkoutStore";
 
 type ConfirmStep = "idle" | "confirming";
 
 export function DangerZone() {
-  const clearSessions = useHistoryStore((state) => state.clearSessions);
-  const clearAllInjuries = useInjuryStore((state) => state.clearAllInjuries);
+  const workoutActive = useWorkoutStore((state) => state.workoutActive);
   const [step, setStep] = useState<ConfirmStep>("idle");
 
-  function handleClearAll() {
-    clearSessions();
-    clearAllInjuries();
+  const clearTrainingData = () => {
+    if (workoutActive) return;
+    useProgramStore.getState().hydrateProgramData([], []);
+    useProgramStore.getState().setActiveProgram(undefined);
+    useExecutionHistoryStore.getState().hydrateWorkouts([]);
+    useProgressionStore.getState().hydrateDecisions([]);
+    useTrainingConstraintStore.getState().hydrateConstraints([]);
+    useCustomExerciseStore.getState().hydrateExercises([]);
+    useHistoryStore.getState().hydrateHistory([]);
+    useInjuryStore.getState().hydrateInjuries([]);
     setStep("idle");
-  }
+  };
 
   return (
-    <div className="space-y-3">
-      <h2 className="font-mono text-[10px] uppercase tracking-wider text-neutral-400">
-        Danger zone
-      </h2>
-      <div className="border border-red-900/40 bg-[#0c0c0c] p-4">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <span className="block text-xs font-bold uppercase tracking-tight text-neutral-200">
-              Clear all data
-            </span>
-            <span className="font-mono text-[10px] text-neutral-500">
-              Permanently delete all sessions and injuries
-            </span>
-          </div>
-
-          {step === "idle" ? (
-            <button
-              onClick={() => setStep("confirming")}
-              className="border border-red-900/60 bg-black px-3 py-1 font-mono text-[10px] uppercase text-red-500 transition hover:border-red-700 hover:text-red-400 active:bg-red-950"
-            >
-              Clear all
-            </button>
-          ) : (
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-[10px] uppercase text-red-400">
-                Are you sure?
-              </span>
-              <button
-                onClick={() => setStep("idle")}
-                className="border border-[#222] bg-black px-3 py-1 font-mono text-[10px] uppercase text-neutral-400 transition hover:text-neutral-200"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleClearAll}
-                className="border border-red-700 bg-red-900/30 px-3 py-1 font-mono text-[10px] uppercase text-red-400 transition hover:bg-red-900/60 hover:text-red-300"
-              >
-                Yes, delete
-              </button>
-            </div>
-          )}
+    <section className="rounded-md bg-negative-soft p-4">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="max-w-md">
+          <h2 className="text-sm font-bold text-negative">Clear training data</h2>
+          <p className="mt-1 text-xs leading-5 text-text-secondary">
+            Permanently removes saved programs, cycles, completed workouts, adaptive
+            decisions, constraints, custom exercises, and retained legacy training history.
+            App settings are kept.
+          </p>
+          {workoutActive ? (
+            <p className="mt-2 text-xs font-semibold text-caution">
+              Finish the active session before clearing local training data.
+            </p>
+          ) : null}
         </div>
+
+        {step === "idle" ? (
+          <Button
+            variant="destructive"
+            disabled={workoutActive}
+            onClick={() => setStep("confirming")}
+          >
+            Clear data
+          </Button>
+        ) : (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold text-negative">
+              Delete all training data?
+            </span>
+            <Button variant="secondary" onClick={() => setStep("idle")}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={clearTrainingData}>
+              Yes, delete
+            </Button>
+          </div>
+        )}
       </div>
-    </div>
+    </section>
   );
 }
