@@ -39,9 +39,6 @@ function validateTemplate(
   if (template.exerciseSlots.length === 0) {
     issues.push(`${path}: at least one exercise slot is required`);
   }
-  if (!unique(template.exerciseSlots.map((slot) => slot.id))) {
-    issues.push(`${path}: exercise slot ids must be unique`);
-  }
   template.exerciseSlots.forEach((slot, slotIndex) => {
     issues.push(...validateSlot(slot, `${path}.exerciseSlots[${slotIndex}]`));
   });
@@ -59,6 +56,12 @@ export function validateProgram(program: Program): string[] {
   }
   if (!unique(program.sessionTemplates.map((template) => template.id))) {
     issues.push("session template ids must be unique");
+  }
+  const slotIds = program.sessionTemplates.flatMap((template) =>
+    template.exerciseSlots.map((slot) => slot.id),
+  );
+  if (!unique(slotIds)) {
+    issues.push("exercise slot ids must be unique across the program");
   }
   if (program.preferredWeekdays) {
     const days = program.preferredWeekdays;
