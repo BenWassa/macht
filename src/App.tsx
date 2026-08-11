@@ -9,9 +9,9 @@ import { FinishSessionModal } from "@/modals/FinishSessionModal";
 import { FreePlayScreen } from "@/screens/FreePlayScreen";
 import { HomeScreen } from "@/screens/HomeScreen";
 import { ProfileScreen } from "@/screens/profile";
-import { ProgramScreen } from "@/screens/program/ProgramScreen";
+import { ConstraintAwareProgramScreen } from "@/screens/program/ConstraintAwareProgramScreen";
 import { ProgressScreen } from "@/screens/ProgressScreen";
-import { WorkoutScreen } from "@/screens/WorkoutScreen";
+import { ConstraintAwareWorkoutScreen } from "@/screens/workout/ConstraintAwareWorkoutScreen";
 import { useSettingsStore } from "@/state/useSettingsStore";
 import { useToastStore } from "@/state/useToastStore";
 import { useUiStore } from "@/state/useUiStore";
@@ -77,10 +77,10 @@ export default function App() {
           <FreePlayScreen setActiveTab={setActiveTab} />
         )}
         {activeTab === "templates" && (
-          <ProgramScreen setActiveTab={setActiveTab} />
+          <ConstraintAwareProgramScreen setActiveTab={setActiveTab} />
         )}
         {activeTab === "workout" && (
-          <WorkoutScreen
+          <ConstraintAwareWorkoutScreen
             onFinish={() => setShowFinishModal(true)}
             onSetCompleted={startRest}
             onStartWarmup={startWarmup}
@@ -133,9 +133,13 @@ export default function App() {
               summary.personalRecords > 0
                 ? `${summary.personalRecords} new PR${summary.personalRecords === 1 ? "" : "s"} · `
                 : "";
+            const personalizedReceipt =
+              summary.personalizationsApplied > 0
+                ? ` ${summary.personalizationsApplied} recommendation${summary.personalizationsApplied === 1 ? "" : "s"} adjusted from established training history.`
+                : "";
             const adaptiveReceipt =
               summary.recommendationsApplied > 0
-                ? `${summary.recommendationsApplied} next prescription${summary.recommendationsApplied === 1 ? "" : "s"} evaluated and applied.`
+                ? `${summary.recommendationsApplied} next prescription${summary.recommendationsApplied === 1 ? "" : "s"} evaluated and applied.${personalizedReceipt}`
                 : summary.targetsModified
                   ? "Logged changes saved for future programming."
                   : "Performance saved for future programming.";
