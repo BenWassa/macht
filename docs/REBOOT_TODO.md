@@ -4,15 +4,14 @@ This file is the live implementation checklist for the Macht product reboot. Upd
 
 ## Current focus
 
-**Phase 5 — Today**
+**Phase 6 — Workout execution**
 
-Phases 0–4 are implemented and have passed lint, the full test suite, and TypeScript/build validation.
+Phases 0–5 are implemented. The latest Phase 5 code head passed the complete CI pipeline: lint, tests, TypeScript/build, bundle-size budget, and Lighthouse.
 
 ## Validation status
 
-- Latest Phase 4 CI: lint ✅, tests ✅, TypeScript/build ✅.
-- Bundle-size gate ❌ due to the pre-existing runtime bundle at roughly 405 KB raw / 125 KB gz versus the stale 400 / 120 budget.
-- Lighthouse is skipped after the bundle-size failure.
+- Latest Phase 5 CI: lint ✅, tests ✅, TypeScript/build ✅, bundle size ✅, Lighthouse ✅.
+- Replacing the old Home dashboard removed enough shipped UI code to bring the runtime bundle back under budget.
 - CI includes `npm test` and targets `agent/**` pushes, `main`, and pull requests.
 
 ## Phase 0 — Reboot contract
@@ -63,11 +62,9 @@ Phases 0–4 are implemented and have passed lint, the full test suite, and Type
 
 ### Gate
 
-- [x] Lint passes.
-- [x] Full test suite passes.
-- [x] TypeScript/build passes.
 - [x] Every automated progression decision exposes persisted reasons/evidence.
 - [x] Competing signals prioritize deload/fatigue protection before progression.
+- [x] Lint, tests, and TypeScript/build pass.
 
 ## Phase 3 — Program and mesocycle system
 
@@ -89,9 +86,7 @@ Phases 0–4 are implemented and have passed lint, the full test suite, and Type
 - [x] Session-time budgets preserve higher-priority work first.
 - [x] Missed-session repair preserves session order.
 - [x] Equipment-aware substitutions are filterable and user overrides propagate intentionally.
-- [x] Lint passes.
-- [x] Full test suite passes.
-- [x] TypeScript/build passes.
+- [x] Lint, tests, and TypeScript/build pass.
 
 ## Phase 4 — Design system
 
@@ -112,21 +107,32 @@ Phases 0–4 are implemented and have passed lint, the full test suite, and Type
 - [x] Semantic state pairs meet AA contrast.
 - [x] Shared button touch target is at least 44px high.
 - [x] Focus-visible, forced-colors, and reduced-motion behavior are defined globally.
-- [x] Lint passes.
-- [x] Full test suite passes.
-- [x] TypeScript/build passes.
+- [x] Lint, tests, and TypeScript/build pass.
 
 ## Phase 5 — Today
 
-- [ ] Primary Today surface.
-- [ ] Dominant Start Workout action.
-- [ ] Planned session preview and duration.
-- [ ] Mesocycle/week state.
-- [ ] Weekly adherence.
-- [ ] Recent meaningful progress.
+- [x] Primary Today surface.
+- [x] Dominant Start Workout / Resume Workout action.
+- [x] Planned session exercise preview and duration.
+- [x] Active program / mesocycle / week state with safe legacy fallback.
+- [x] Weekly adherence.
+- [x] Recent meaningful progress.
+- [x] Persisted v2 program context available to Today.
+- [x] Navigation aligned to TODAY / PROGRAM / SESSION / PROGRESS / YOU.
+- [x] Remove StrengthHero / ActivityHistory / ConsistencyChart from the Home render path.
+
+### Gate
+
+- [x] Opening a new UI state lands on Today.
+- [x] An active workout shows Resume Workout and cannot be overwritten from Today.
+- [x] Today view-model behavior is unit tested independently of React.
+- [x] The runtime bundle is back within the configured budget.
+- [x] Lint, full tests, TypeScript/build, bundle-size check, and Lighthouse pass.
 
 ## Phase 6 — Workout
 
+- [ ] Execute a v2 PlannedSession / ExercisePrescription directly in the workout store.
+- [ ] Preserve prescription snapshots separately from actual set performance.
 - [ ] Exercise-focused execution surface.
 - [ ] Prescription + previous performance together.
 - [ ] Fast numeric entry.
@@ -136,6 +142,7 @@ Phases 0–4 are implemented and have passed lint, the full test suite, and Type
 - [ ] Effort capture.
 - [ ] Minimal feedback capture.
 - [ ] Progress cues and restrained PR celebration.
+- [ ] Prevent accidental navigation from destroying an active session.
 
 ## Phase 7 — Progress
 
@@ -178,7 +185,7 @@ Phases 0–4 are implemented and have passed lint, the full test suite, and Type
 - [ ] Update README and PWA manifest.
 - [x] Run tests in CI configuration.
 - [x] Migration fixtures.
-- [ ] Resolve stale bundle-size budget or reduce bundle below the current gate.
+- [x] Resolve the stale bundle-size budget or reduce the runtime below the current gate.
 - [ ] Offline audit.
 - [ ] Accessibility audit.
 - [ ] Export/import audit.
