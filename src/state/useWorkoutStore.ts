@@ -54,53 +54,58 @@ export const useWorkoutStore = create<WorkoutState>()(
         }),
       startTemplate: (template = DEFAULT_TEMPLATE, deloadWeights = {}) => {
         const loadSuggestions = suggestForTemplate(template);
-        set({
-          workoutActive: true,
-          workoutName: template.name,
-          workoutDuration: 0,
-          startedAt: Date.now(),
-          activeWorkoutList: template.exercises,
-          workoutSets: buildWorkoutSets(
-            template.exercises,
+        set((state) => {
+          if (state.workoutActive) return {};
+          return {
+            workoutActive: true,
+            workoutName: template.name,
+            workoutDuration: 0,
+            startedAt: Date.now(),
+            activeWorkoutList: template.exercises,
+            workoutSets: buildWorkoutSets(
+              template.exercises,
+              deloadWeights,
+              customExercises(),
+              loadSuggestions,
+            ),
+            activeV2Workout: null,
+            selectedExIndex: 0,
+            selectedSetIndex: 0,
+            isMinimumSession: Boolean(template.isMinimumSession),
+            adaptedDuringSession: false,
             deloadWeights,
-            customExercises(),
             loadSuggestions,
-          ),
-          activeV2Workout: null,
-          selectedExIndex: 0,
-          selectedSetIndex: 0,
-          isMinimumSession: Boolean(template.isMinimumSession),
-          adaptedDuringSession: false,
-          deloadWeights,
-          loadSuggestions,
+          };
         });
       },
-      startPlannedSession: (plannedSession, context) => {
-        const startedAt = new Date().toISOString();
-        const activeV2Workout = createPlannedWorkout({
-          plannedSession,
-          context,
-          startedAt,
-        });
-        set({
-          workoutActive: true,
-          workoutName: plannedSession.name,
-          workoutDuration: 0,
-          startedAt: Date.now(),
-          activeWorkoutList: activeV2Workout.exercisePerformances.map(
-            (exercise) => exercise.exerciseId,
-          ),
-          workoutSets: {},
-          activeV2Workout,
-          selectedExIndex: 0,
-          selectedSetIndex: 0,
-          isMinimumSession: false,
-          adaptedDuringSession: false,
-          deloadWeights: {},
-          loadSuggestions: {},
-          exerciseNotes: {},
-        });
-      },
+      startPlannedSession: (plannedSession, context) =>
+        set((state) => {
+          if (state.workoutActive) return {};
+          const startedAt = new Date().toISOString();
+          const activeV2Workout = createPlannedWorkout({
+            plannedSession,
+            context,
+            startedAt,
+          });
+          return {
+            workoutActive: true,
+            workoutName: plannedSession.name,
+            workoutDuration: 0,
+            startedAt: Date.now(),
+            activeWorkoutList: activeV2Workout.exercisePerformances.map(
+              (exercise) => exercise.exerciseId,
+            ),
+            workoutSets: {},
+            activeV2Workout,
+            selectedExIndex: 0,
+            selectedSetIndex: 0,
+            isMinimumSession: false,
+            adaptedDuringSession: false,
+            deloadWeights: {},
+            loadSuggestions: {},
+            exerciseNotes: {},
+          };
+        }),
       endSession: () =>
         set({
           workoutActive: false,
