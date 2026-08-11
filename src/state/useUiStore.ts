@@ -20,7 +20,7 @@ interface UiState {
 export const useUiStore = create<UiState>()(
   persist(
     (set) => ({
-      activeTab: "workout",
+      activeTab: "home",
       progressionHintSeen: false,
       setActiveTab: (activeTab) => set({ activeTab }),
       dismissProgressionHint: () => set({ progressionHintSeen: true }),
