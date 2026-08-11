@@ -19,6 +19,7 @@ import {
   toggleSetCompletion,
   updateWorkoutSet,
 } from "@/state/workoutMutations";
+import { migratePersistedActiveWorkout } from "@/state/workoutPersistence";
 import {
   customExercises,
   suggestFor,
@@ -244,6 +245,13 @@ export const useWorkoutStore = create<WorkoutState>()(
       appendSet: (exerciseId) =>
         set((state) => appendWorkoutSet(state, exerciseId, customExercises())),
     }),
-    { name: demoStorageKey("macht_workout") },
+    {
+      name: demoStorageKey("macht_workout"),
+      version: 2,
+      migrate: (persisted) =>
+        migratePersistedActiveWorkout(
+          persisted as Parameters<typeof migratePersistedActiveWorkout>[0],
+        ),
+    },
   ),
 );
