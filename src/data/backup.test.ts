@@ -17,6 +17,7 @@ describe("Macht backup", () => {
       workouts: [],
       programs: [],
       mesocycles: [],
+      activeProgramId: "program-1",
       progressionDecisions: [],
       trainingConstraints: [
         {
@@ -42,6 +43,7 @@ describe("Macht backup", () => {
       workouts: [],
       programs: [],
       mesocycles: [],
+      activeProgramId: "program-1",
       progressionDecisions: [],
       trainingConstraints: backup.trainingConstraints,
       settings,
@@ -73,6 +75,7 @@ describe("Macht backup", () => {
     const restored = parseBackup(legacy);
     expect(restored.sourceVersion).toBe(1);
     expect(restored.workouts).toEqual([]);
+    expect(restored.activeProgramId).toBeUndefined();
     expect(restored.trainingConstraints[0]).toMatchObject({
       id: "legacy:legacy-shoulder",
       label: "Shoulder limitation",
