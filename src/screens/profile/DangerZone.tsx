@@ -1,64 +1,102 @@
+import { Trash2 } from "lucide-react";
 import { useState } from "react";
+import { useCustomExerciseStore } from "@/state/useCustomExerciseStore";
+import { useExecutionHistoryStore } from "@/state/useExecutionHistoryStore";
 import { useHistoryStore } from "@/state/useHistoryStore";
 import { useInjuryStore } from "@/state/useInjuryStore";
+import { useProgramStore } from "@/state/useProgramStore";
+import { useProgressionStore } from "@/state/useProgressionStore";
+import { useSettingsStore } from "@/state/useSettingsStore";
+import { useTrainingConstraintStore } from "@/state/useTrainingConstraintStore";
+import { useWorkoutStore } from "@/state/useWorkoutStore";
 
 type ConfirmStep = "idle" | "confirming";
 
 export function DangerZone() {
-  const clearSessions = useHistoryStore((state) => state.clearSessions);
+  const clearLegacySessions = useHistoryStore((state) => state.clearSessions);
+  const clearV2Workouts = useExecutionHistoryStore((state) => state.clearWorkouts);
+  const hydrateProgramData = useProgramStore((state) => state.hydrateProgramData);
+  const setActiveProgram = useProgramStore((state) => state.setActiveProgram);
+  const hydrateDecisions = useProgressionStore((state) => state.hydrateDecisions);
+  const hydrateConstraints = useTrainingConstraintStore(
+    (state) => state.hydrateConstraints,
+  );
+  const hydrateCustomExercises = useCustomExerciseStore(
+    (state) => state.hydrateExercises,
+  );
+  const hydrateSettings = useSettingsStore((state) => state.hydrateSettings);
   const clearAllInjuries = useInjuryStore((state) => state.clearAllInjuries);
+  const endSession = useWorkoutStore((state) => state.endSession);
   const [step, setStep] = useState<ConfirmStep>("idle");
 
   function handleClearAll() {
-    clearSessions();
+    endSession();
+    clearLegacySessions();
+    clearV2Workouts();
+    hydrateProgramData([], []);
+    setActiveProgram(undefined);
+    hydrateDecisions([]);
+    hydrateConstraints([]);
+    hydrateCustomExercises([]);
     clearAllInjuries();
+    hydrateSettings({
+      units: "lbs",
+      defaultRest: 90,
+      rpeMode: "RPE",
+      haptics: true,
+      audioCue: false,
+    });
     setStep("idle");
   }
 
   return (
-    <div className="space-y-3">
-      <h2 className="font-mono text-[10px] uppercase tracking-wider text-neutral-400">
-        Danger zone
-      </h2>
-      <div className="border border-red-900/40 bg-[#0c0c0c] p-4">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <span className="block text-xs font-bold uppercase tracking-tight text-neutral-200">
-              Clear all data
-            </span>
-            <span className="font-mono text-[10px] text-neutral-500">
-              Permanently delete all sessions and injuries
-            </span>
-          </div>
-
-          {step === "idle" ? (
-            <button
-              onClick={() => setStep("confirming")}
-              className="border border-red-900/60 bg-black px-3 py-1 font-mono text-[10px] uppercase text-red-500 transition hover:border-red-700 hover:text-red-400 active:bg-red-950"
-            >
-              Clear all
-            </button>
-          ) : (
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-[10px] uppercase text-red-400">
-                Are you sure?
-              </span>
-              <button
-                onClick={() => setStep("idle")}
-                className="border border-[#222] bg-black px-3 py-1 font-mono text-[10px] uppercase text-neutral-400 transition hover:text-neutral-200"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleClearAll}
-                className="border border-red-700 bg-red-900/30 px-3 py-1 font-mono text-[10px] uppercase text-red-400 transition hover:bg-red-900/60 hover:text-red-300"
-              >
-                Yes, delete
-              </button>
-            </div>
-          )}
-        </div>
+    <section className="surface-card overflow-hidden border border-negative/20">
+      <div className="border-b border-negative/15 px-4 py-3 sm:px-5">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-negative">
+          Danger zone
+        </p>
       </div>
-    </div>
+      <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <div>
+          <h2 className="text-sm font-bold text-text">Clear all local data</h2>
+          <p className="mt-1 max-w-md text-xs leading-5 text-text-muted">
+            Permanently remove workouts, legacy history, Programs, cycles, adaptive decisions,
+            constraints, custom exercises, and legacy injury data from this device. Settings
+            return to defaults.
+          </p>
+        </div>
+
+        {step === "idle" ? (
+          <button
+            type="button"
+            onClick={() => setStep("confirming")}
+            className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-md bg-negative-soft px-4 text-sm font-semibold text-negative transition hover:brightness-110"
+          >
+            <Trash2 className="h-4 w-4" aria-hidden="true" />
+            Clear all
+          </button>
+        ) : (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="mr-1 text-xs font-semibold text-negative">
+              Confirm deletion
+            </span>
+            <button
+              type="button"
+              onClick={() => setStep("idle")}
+              className="min-h-11 rounded-md bg-surface-2 px-4 text-sm font-semibold text-text-secondary"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleClearAll}
+              className="min-h-11 rounded-md bg-negative px-4 text-sm font-bold text-bg"
+            >
+              Delete everything
+            </button>
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
