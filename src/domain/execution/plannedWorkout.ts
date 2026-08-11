@@ -181,10 +181,10 @@ export function updateExerciseFeedback(
       return {
         ...exercise,
         feedback: {
+          ...exercise.feedback,
           id: exercise.feedback?.id ?? crypto.randomUUID(),
           exerciseId: exercise.exerciseId,
           recordedAt,
-          ...exercise.feedback,
           ...patch,
         },
       };
