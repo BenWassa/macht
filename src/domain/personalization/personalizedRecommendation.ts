@@ -43,8 +43,9 @@ export function personalizeProgressionDecision(
     return { baseDecision, finalDecision: baseDecision };
   }
 
-  const { setCountDelta: _setDelta, nextSetCount: _nextSetCount, ...safeDelta } =
-    baseDecision.delta;
+  const safeDelta = { ...baseDecision.delta };
+  delete safeDelta.setCountDelta;
+  delete safeDelta.nextSetCount;
   const adjustment: PersonalizationAdjustment = {
     kind: "suppress_volume_increase",
     explanation: `The base engine proposed another set, but repeated established fatigue or workload-limit observations have occurred at this exposure for ${guards.map((profile) => profile.muscleId).join(", ")}. The set count is held while the rest of the prescription can continue to progress normally.`,
