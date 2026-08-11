@@ -8,6 +8,7 @@ export function useRestTimer(defaultRest: number) {
 
   const endsAtRef = useRef<number>(0);
   const remainingRef = useRef<number>(defaultRest);
+  const activeDurationRef = useRef<number>(defaultRest);
   const firedRef = useRef<boolean>(false);
 
   useEffect(() => {
@@ -29,11 +30,13 @@ export function useRestTimer(defaultRest: number) {
     return () => window.clearInterval(interval);
   }, [running]);
 
-  const start = () => {
-    endsAtRef.current = performance.now() + defaultRest * 1000;
-    remainingRef.current = defaultRest;
+  const start = (durationSeconds = defaultRest) => {
+    const duration = Math.max(0, durationSeconds);
+    activeDurationRef.current = duration;
+    endsAtRef.current = performance.now() + duration * 1000;
+    remainingRef.current = duration;
     firedRef.current = false;
-    setSeconds(defaultRest);
+    setSeconds(duration);
     setRunning(true);
     setVisible(true);
   };
@@ -58,19 +61,19 @@ export function useRestTimer(defaultRest: number) {
           Math.ceil((endsAtRef.current - performance.now()) / 1000),
         );
         return false;
-      } else {
-        endsAtRef.current = performance.now() + remainingRef.current * 1000;
-        firedRef.current = false;
-        return true;
       }
+      endsAtRef.current = performance.now() + remainingRef.current * 1000;
+      firedRef.current = false;
+      return true;
     });
   };
 
   const reset = () => {
-    endsAtRef.current = performance.now() + defaultRest * 1000;
-    remainingRef.current = defaultRest;
+    const duration = activeDurationRef.current;
+    endsAtRef.current = performance.now() + duration * 1000;
+    remainingRef.current = duration;
     firedRef.current = false;
-    setSeconds(defaultRest);
+    setSeconds(duration);
     setRunning(false);
   };
 
