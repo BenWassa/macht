@@ -3,7 +3,7 @@ import { persist } from "zustand/middleware";
 import type { ExerciseInjury } from "@/domain/types";
 import { INITIAL_INJURIES } from "@/data/mockData";
 import { todayIso } from "@/lib/format";
-import { demoStorageKey } from "@/lib/demoMode";
+import { IS_DEMO_MODE, demoStorageKey } from "@/lib/demoMode";
 
 interface InjuryState {
   injuries: ExerciseInjury[];
@@ -15,10 +15,13 @@ interface InjuryState {
   hydrateInjuries: (injuries: ExerciseInjury[]) => void;
 }
 
+const defaultInjuries = (): ExerciseInjury[] =>
+  IS_DEMO_MODE ? [...INITIAL_INJURIES] : [];
+
 export const useInjuryStore = create<InjuryState>()(
   persist(
     (set, get) => ({
-      injuries: INITIAL_INJURIES,
+      injuries: defaultInjuries(),
       addInjury: (injury) =>
         set((state) => ({
           injuries: [
@@ -51,20 +54,12 @@ export const useInjuryStore = create<InjuryState>()(
     }),
     {
       name: demoStorageKey("macht_injuries"),
-      version: 2,
+      version: 3,
       migrate: (persisted) => {
         const state = persisted as Partial<InjuryState>;
-        const injuries = state.injuries ?? INITIAL_INJURIES;
-        const hasCurrent = injuries.some(
-          (injury) => injury.id === "labrum_left_anteroinferior",
-        );
-        if (hasCurrent) return state;
         return {
           ...state,
-          injuries: [
-            ...injuries.filter((injury) => injury.id !== "labrum_left"),
-            ...INITIAL_INJURIES,
-          ],
+          injuries: state.injuries ?? defaultInjuries(),
         };
       },
     },
