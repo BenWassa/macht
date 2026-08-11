@@ -56,11 +56,16 @@ export function PlannedSubstitutionModal({
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 p-3 sm:items-center">
       <div
         ref={containerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="substitution-title"
         className="surface-raised flex max-h-[82vh] w-full max-w-md flex-col overflow-hidden"
       >
         <header className="flex items-start justify-between gap-4 border-b border-divider p-4">
           <div>
-            <h3 className="text-lg font-bold text-text">Swap exercise</h3>
+            <h3 id="substitution-title" className="text-lg font-bold text-text">
+              Swap exercise
+            </h3>
             <p className="mt-1 text-sm text-text-muted">
               Current · {current?.name ?? currentExerciseId}
             </p>
