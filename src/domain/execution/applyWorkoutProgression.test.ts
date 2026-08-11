@@ -197,6 +197,28 @@ describe("applyWorkoutProgression", () => {
     });
   });
 
+  it("keeps a one-session substitution out of the original slot progression", () => {
+    const substituted = {
+      ...performance("rx-a-1"),
+      exerciseId: "machine_press",
+      substitutedFromExerciseId: "incline_db_press",
+    };
+    const result = applyWorkoutProgression({
+      workout: workout({
+        exercisePerformances: [substituted],
+        adaptedDuringSession: true,
+      }),
+      program,
+      mesocycle: mesocycle(),
+      availableLoadIncrement: 2.5,
+      decisionId: () => "unused-substitution",
+    });
+
+    expect(result.decisions).toEqual([]);
+    expect(nextPrescription(result, "slot-a").targetRep).toBe(10);
+    expect(nextPrescription(result, "slot-a").source).toBe("program_initial");
+  });
+
   it("records no decision when the completed slot has no future occurrence", () => {
     const result = applyWorkoutProgression({
       workout: workout(),
