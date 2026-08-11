@@ -1,557 +1,577 @@
-# Design System
+# Macht Design System v3
 
-**Project:** Macht  
-**Version:** 1.0  
-**Stack:** React + Vite + TypeScript + Tailwind CSS (web prototype); NativeWind for Tier 2 native
+**Direction:** Premium athletic instrumentation  
+**Primary platform:** mobile-first PWA  
+**Accessibility target:** WCAG 2.2 AA where applicable
 
----
+This document supersedes the previous brutalist / monospace-everywhere design doctrine.
 
-## Aesthetic direction
+## 1. Design thesis
 
-Brutalist functional. Pure black backgrounds, off-white text, monospace type throughout, zero border radius, single accent color (blue). Information density is high. Decoration is zero. Numbers are the protagonist: large, bold, immediate. Labels are subdued: small, tracked, muted.
+Macht should feel like a serious performance instrument that happens to be satisfying to use.
 
-The look is disciplined. The copy is plain. These are not in tension — they reinforce each other.
+The interface combines:
 
----
+- clear athletic energy
+- excellent numerical legibility
+- strong hierarchy
+- tactile controls
+- restrained motion
+- high-information views when analysis requires them
+- calm, spacious execution views during training
 
-## Colors
+The visual system should make training feel active and consequential without using generic neon fitness aesthetics, macho imagery, or motivational clutter.
 
-Color strategy: **Restrained.** Tinted near-black surfaces, one blue accent used only for primary actions and active states. Emerald for completion. Red and yellow exclusively for injury/conflict states.
+## 2. Experience principles
 
-### Surface palette
+### Immediate hierarchy
 
-| Token          | Value     | Role                               |
-| -------------- | --------- | ---------------------------------- |
-| `--c-bg`       | `#060606` | Page background                    |
-| `--c-surface`  | `#0c0c0c` | Cards, modals, headers             |
-| `--c-elevated` | `#121212` | Button backgrounds, inset controls |
-| `--c-inset`    | `#070707` | Nested panels (stepper inner)      |
-| `--c-empty`    | `#080808` | Dashed empty state background      |
+Every screen has one obvious first read.
 
-### Border palette
+Examples:
 
-| Token           | Value     | Role                            |
-| --------------- | --------- | ------------------------------- |
-| `--c-border`    | `#1a1a1a` | Standard card/section border    |
-| `--c-border-md` | `#222222` | Button borders, control borders |
-| `--c-border-sm` | `#171717` | Inner/nested borders            |
-| `--c-border-hl` | `#2d2d2d` | Hover state border              |
+- Today → the planned session and Start Workout
+- Workout → current exercise and current set
+- Program → current mesocycle/week
+- Progress → selected trend and its interpretation
 
-### Text palette
+### Numbers with context
 
-| Token              | Value     | Role                             |
-| ------------------ | --------- | -------------------------------- |
-| `--c-text-primary` | `#f0f0f0` | Body copy, values                |
-| `--c-text-high`    | `#e5e5e5` | Headings (neutral-200)           |
-| `--c-text-mid`     | `#d4d4d4` | Secondary values (neutral-300)   |
-| `--c-text-low`     | `#a3a3a3` | Muted text (neutral-400)         |
-| `--c-text-muted`   | `#737373` | Labels, timestamps (neutral-500) |
-| `--c-text-faint`   | `#525252` | Very subdued (neutral-600)       |
+Large numbers earn their scale when they answer a useful question.
 
-### Accent: Blue (primary action, active state)
+A number should usually be paired with one of:
 
-| Token             | Value                  | Role                                |
-| ----------------- | ---------------------- | ----------------------------------- |
-| `--c-blue`        | `#2563eb`              | Primary button, active selection bg |
-| `--c-blue-hover`  | `#1d4ed8`              | Hover state                         |
-| `--c-blue-tint`   | `rgba(37,99,235,0.15)` | Active set row background           |
-| `--c-blue-border` | `#1e3a8a`              | Subtle blue border                  |
-| `--c-blue-text`   | `#60a5fa`              | Active labels (blue-400)            |
-| `--c-blue-label`  | `#3b82f6`              | Session indicator (blue-500)        |
+- target
+- previous value
+- delta
+- time window
+- unit
+- recommendation
 
-### Accent: Emerald (completion, done state)
+### Quiet secondary chrome
 
-| Token               | Value     | Role                       |
-| ------------------- | --------- | -------------------------- |
-| `--c-emerald`       | `#059669` | Completed set bg           |
-| `--c-emerald-hover` | `#047857` | Hover                      |
-| `--c-emerald-dot`   | `#10b981` | Live session indicator dot |
-| `--c-emerald-text`  | `#34d399` | Delta values (emerald-400) |
+Navigation, labels, borders, and metadata should support the task rather than compete with it.
 
-### Accent: Red (injury / avoid)
+### Tactile interaction
 
-| Token              | Value                 | Role                              |
-| ------------------ | --------------------- | --------------------------------- |
-| `--c-red-bg`       | `rgba(69,10,10,0.20)` | Injury conflict banner background |
-| `--c-red-badge-bg` | `#450a0a`             | Avoid badge background            |
-| `--c-red-border`   | `#7f1d1d`             | Avoid badge/banner border         |
-| `--c-red-text`     | `#f87171`             | Avoid text (red-400)              |
+Buttons and completion controls should feel physical through:
 
-### Accent: Yellow (caution severity)
+- clear pressed states
+- subtle scale/position motion
+- haptic feedback where supported
+- immediate visual acknowledgement
 
-| Token               | Value                | Role                                           |
-| ------------------- | -------------------- | ---------------------------------------------- |
-| `--c-yellow-bg`     | `rgba(66,32,6,0.10)` | Warning banner background                      |
-| `--c-yellow-badge`  | `#422006`            | Caution badge background                       |
-| `--c-yellow-border` | `#713f12`            | Caution border                                 |
-| `--c-yellow-accent` | `#854d0e`            | Warning banner left accent (yellow-600 border) |
-| `--c-yellow-text`   | `#eab308`            | Caution text (yellow-500)                      |
+### Progressive disclosure
 
-### Plate colors (barbell visualizer)
+Workout execution stays sparse. Analysis screens may become denser as the user asks for detail.
 
-Fixed — match international plate color conventions.
+## 3. Visual character
 
-| Weight (lbs) | Background | Text   |
-| ------------ | ---------- | ------ |
-| 45           | `#dc2626`  | `#fff` |
-| 35           | `#2563eb`  | `#fff` |
-| 25           | `#ca8a04`  | `#000` |
-| 10           | `#16a34a`  | `#fff` |
-| 5            | `#737373`  | `#fff` |
+Keywords:
 
----
+**precise · athletic · warm · engineered · confident · legible**
 
-## File Structure Conventions
+Avoid:
 
-- **150 code-line limit** per file (enforced by ESLint `max-lines`); **120 lines** for state stores.
-- **Promote to a folder** when a file needs more than one private sub-component, or when a planned addition would breach the limit. Pattern: `screens/profile/index.tsx` + `screens/profile/SettingsPanel.tsx`.
-- **Folder naming**: lowercase concept noun (`profile/`, `workout/`). Sub-component files: PascalCase by responsibility (`InjuryManager`, not `ProfileInjuries`).
-- **Only `index.tsx` is importable from outside the folder.** Sub-components are private to the folder.
-- **No barrel files** in `src/state/`, `src/screens/`, `src/components/`. Direct imports only. A barrel in `src/domain/` is acceptable only when a single consumer needs 3+ domain type imports.
+- pure-black voids everywhere
+- monospace paragraphs
+- tiny uppercase labels as the dominant language
+- endless 1px bordered boxes
+- generic dark-blue gradient cards
+- excessive glow
+- faux-metal textures
+- bodybuilding imagery
+- gamified confetti
+- crowded metric dashboards
 
-| 2.5 | `#3a3a3a` | `#a3a3a3` |
+## 4. Color system
 
----
+The initial theme is dark-first because it performs well in gym environments. Light mode can be added once the core system is stable.
 
-## Typography
+### Core surfaces
 
-**Rule: monospace everywhere, always.** No secondary font family. All copy — headings, labels, body, numbers — uses the same monospace stack. Hierarchy is achieved through size, weight, tracking, and color, not font switching.
+| Token | Value | Role |
+| --- | --- | --- |
+| `--color-bg` | `#111210` | App background |
+| `--color-surface-1` | `#181917` | Primary cards / navigation |
+| `--color-surface-2` | `#20211E` | Raised controls / active panels |
+| `--color-surface-3` | `#292A26` | Stronger selected/elevated state |
+| `--color-inset` | `#0C0D0C` | Numeric fields / deeply inset areas |
+
+These are warm graphite surfaces rather than blue-black surfaces.
+
+### Text
+
+| Token | Value | Role |
+| --- | --- | --- |
+| `--color-text` | `#F3F1E9` | Primary text |
+| `--color-text-secondary` | `#B9B7AF` | Supporting text |
+| `--color-text-muted` | `#85847E` | Metadata |
+| `--color-text-disabled` | `#5D5D58` | Disabled content |
+
+### Primary signal
+
+| Token | Value | Role |
+| --- | --- | --- |
+| `--color-signal` | `#F06A4B` | Primary action / active training state |
+| `--color-signal-strong` | `#FF7958` | Hover/high emphasis |
+| `--color-signal-soft` | `#3B211B` | Tinted signal surface |
+
+The signal color is warm vermilion. It should appear where the app asks the user to act or where live training deserves emphasis.
+
+### Semantic colors
+
+| Token | Value | Role |
+| --- | --- | --- |
+| `--color-positive` | `#63C59C` | completed / recovered / positive trend |
+| `--color-caution` | `#D8AA52` | fatigue / attention needed |
+| `--color-negative` | `#E07171` | destructive / significant problem |
+| `--color-info` | `#7E9EE8` | explanation / neutral information |
+
+Color must never be the only status carrier.
+
+## 5. Typography
+
+### UI family
+
+Use a high-quality sans-serif stack for almost all interface copy.
+
+Initial implementation:
 
 ```css
---font-mono:
-  "JetBrains Mono", "Fira Mono", ui-monospace, "Cascadia Code", monospace;
+font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+  "Segoe UI", sans-serif;
 ```
 
-Tailwind config overrides both `mono` and `sans` to the same stack so utility classes are consistent.
+The app must remain visually coherent when Inter is unavailable.
+
+### Display / metric typography
+
+Large metrics use the same family with:
+
+- heavier weight
+- tighter tracking
+- tabular numerals
+- clear units at reduced scale
+
+```css
+font-variant-numeric: tabular-nums;
+```
+
+### Monospace
+
+Monospace is reserved for rare technical content such as exported identifiers or debug tooling. It is no longer the default UI voice.
 
 ### Type scale
 
-| Role            | Size              | Weight                 | Tracking            | Color            | Case  |
-| --------------- | ----------------- | ---------------------- | ------------------- | ---------------- | ----- |
-| Screen title    | `text-xl` (20px)  | `font-bold`            | `tracking-tight`    | `#f0f0f0`        | UPPER |
-| Card heading    | `text-sm` (14px)  | `font-bold`            | `tracking-tight`    | neutral-200      | UPPER |
-| Body / value    | `text-xs` (12px)  | `font-bold` or default | —                   | neutral-300      | Mixed |
-| Label           | `text-[10px]`     | `font-bold`            | `tracking-wider`    | neutral-400      | UPPER |
-| Meta label      | `text-[9px]`      | `font-bold`            | `tracking-widest`   | neutral-500      | UPPER |
-| Badge           | `text-[8px]`      | `font-bold`            | `tracking-wider`    | varies by status | UPPER |
-| Stepper readout | `text-2xl` (24px) | `font-black`           | `tracking-tight`    | `#fff`           | —     |
-| Nav label       | `text-[8px]`      | default                | `tracking-widest`   | active/inactive  | UPPER |
-| Brand header    | `text-[11px]`     | `font-extrabold`       | `tracking-[0.28em]` | neutral-200      | UPPER |
+| Role | Suggested size | Weight |
+| --- | --- | --- |
+| Display metric | 40–56px | 650–750 |
+| Screen title | 28–32px | 650–750 |
+| Card title | 18–20px | 600–700 |
+| Body | 15–17px | 400–500 |
+| Control | 15–17px | 550–650 |
+| Metadata | 12–14px | 450–550 |
 
-### Tracking reference
+Tiny 9–10px copy should be exceptional.
 
-| Value               | Context                      |
-| ------------------- | ---------------------------- |
-| `tracking-[0.28em]` | Brand header only            |
-| `tracking-widest`   | Meta labels, nav, badge text |
-| `tracking-wider`    | Section labels               |
-| `tracking-tight`    | Headings                     |
-| (none)              | Body text, values            |
+## 6. Spacing
 
----
+Use a 4px base grid.
 
-## Spacing and layout
+Primary spacing steps:
 
-**Page container:** `max-w-2xl mx-auto px-4 py-6 pb-36`
-`pb-36` accounts for fixed bottom nav (h-16) plus rest timer banner when visible.
-
-| Context                | Value                              |
-| ---------------------- | ---------------------------------- |
-| Between major sections | `space-y-8`                        |
-| Within a section       | `space-y-4` or `space-y-3`         |
-| Within a card          | `p-4 space-y-4` or `p-5 space-y-4` |
-| Inset panels           | `p-3`                              |
-| Modals                 | `p-6 space-y-4`                    |
-
-**Border radius:** `rounded-none` everywhere. Zero exceptions, except toggle thumbs which use `rounded-full`.
-
-**Dividers:**
-
-| Pattern                                 | Use                      |
-| --------------------------------------- | ------------------------ |
-| `border-b border-[#1a1a1a]`             | Standard section divider |
-| `divide-y divide-[#1a1a1a]`             | List item dividers       |
-| `border border-dashed border-[#1a1a1a]` | Empty state outline      |
-
----
-
-## Components
-
-### Card
-
-```tsx
-<div className="bg-[#0c0c0c] border border-[#1a1a1a] p-4 space-y-4">
+```text
+4 · 8 · 12 · 16 · 20 · 24 · 32 · 40 · 48
 ```
 
-### Inset panel
+Execution screens should favor 16–24px separation between major interaction groups.
 
-```tsx
-<div className="bg-[#070707] border border-[#171717] p-3">
+## 7. Shape
+
+The old zero-radius rule is removed.
+
+Suggested radii:
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `--radius-sm` | 8px | compact controls |
+| `--radius-md` | 14px | cards / inputs |
+| `--radius-lg` | 20px | hero/session surfaces |
+| `--radius-pill` | 999px | chips / compact statuses |
+
+Roundedness should communicate touchability rather than softness.
+
+## 8. Borders and elevation
+
+Avoid enclosing every region in a border.
+
+Hierarchy can come from:
+
+- surface change
+- spacing
+- typography
+- subtle shadow
+- divider lines only where necessary
+
+Suggested border:
+
+```text
+1px rgba(243, 241, 233, 0.08)
 ```
 
-### Screen header
+Suggested raised shadow:
 
-```tsx
-<div>
-  <p className="text-[9px] text-neutral-500 tracking-widest uppercase font-mono mb-1">
-    Strength log
-  </p>
-  <h1 className="text-xl font-bold tracking-tight uppercase font-mono">
-    Screen title
-  </h1>
-</div>
+```text
+0 8px 30px rgba(0, 0, 0, 0.24)
 ```
 
-### Section label
+## 9. Motion
 
-```tsx
-<h2 className="text-[10px] font-mono uppercase tracking-wider text-neutral-400">
-  Section name
-</h2>
+Motion communicates state change.
+
+### Timing
+
+- tap/press: 90–140ms
+- normal transition: 160–240ms
+- significant panel transition: 240–320ms
+
+### Easing
+
+Use responsive ease-out or spring motion for direct manipulation.
+
+### Good uses
+
+- set completion
+- current-set transition
+- expanding an explanation
+- changing mesocycle week
+- PR acknowledgement
+- chart reveal after range change
+
+### Avoid
+
+- ambient pulsing everywhere
+- looping decorative motion
+- long page-entry animations
+- motion that blocks input
+
+`prefers-reduced-motion` must continue to disable nonessential movement.
+
+## 10. Haptics
+
+Where available:
+
+- set complete → short light pulse
+- workout complete → distinct short pattern
+- destructive confirmation → no celebratory haptic
+- PR → brief stronger acknowledgement
+
+Haptics should remain supplemental.
+
+## 11. Navigation
+
+Primary navigation:
+
+```text
+TODAY | PROGRAM | PROGRESS | LIBRARY | YOU
 ```
 
-### Inline label
+Use icons plus labels. Five items are acceptable because each represents a stable product surface.
 
-```tsx
-<span className="text-[9px] font-mono text-neutral-500 uppercase tracking-widest block">
-  Label
-</span>
+### Active workout
+
+During an active workout:
+
+- general bottom navigation recedes
+- a compact escape/back-to-session affordance remains available
+- current session state is persistent
+- accidental navigation cannot lose data
+
+## 12. Today composition
+
+Today should have one dominant surface.
+
+### Session hero
+
+Contains:
+
+- session name
+- current mesocycle/week
+- muscles/focus
+- exercise count / working sets
+- estimated duration
+- primary Start Workout button
+
+Below the hero:
+
+1. weekly adherence strip
+2. one recent meaningful progress signal
+3. next-session context
+
+Avoid a dashboard grid of equally weighted metrics.
+
+## 13. Workout composition
+
+The workout screen should feel calmer than the rest of the app.
+
+### Header
+
+Compact:
+
+- session title
+- elapsed time
+- exercise position
+- finish/menu affordance
+
+### Exercise identity
+
+Prominent exercise name with secondary target-muscle / substitution information.
+
+### Prescription band
+
+A compact band communicates:
+
+```text
+TARGET        LAST TIME
+32.5 kg       30 kg
+8–12 @ 2 RIR  11, 10, 9 @ ~2
 ```
 
-### Badges
+### Set cards
 
-```tsx
-{
-  /* Caution */
-}
-<span className="text-[8px] bg-yellow-950 text-yellow-500 px-1 border border-yellow-900 font-mono tracking-wider">
-  Adapted
-</span>;
+Each set is a large touchable row/card rather than a spreadsheet cell grid.
 
-{
-  /* Avoid */
-}
-<span className="text-[8px] bg-red-950 border border-red-900 text-red-400 px-1.5 font-mono uppercase font-bold">
-  Avoid
-</span>;
+Recommended fields:
 
-{
-  /* Injury-adapted template */
-}
-<span className="text-[9px] border border-blue-500/50 text-blue-400 font-mono px-1.5 py-0.5 uppercase tracking-widest">
-  Injury-adapted
-</span>;
+```text
+SET 2
+[ 32.5 kg ]   [ 10 reps ]   [ 2 RIR ]   [ ✓ ]
 ```
 
-### Primary button
+The current set receives stronger elevation/signal treatment. Completed sets collapse visually while remaining inspectable.
 
-```tsx
-<button className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-mono uppercase tracking-widest text-xs px-4 py-2.5 rounded-none font-bold transition">
-  Start session
-</button>
+### Rest state
+
+Rest timing can occupy a compact sticky region without blocking exercise navigation.
+
+## 14. Program composition
+
+Primary visual object: the mesocycle timeline.
+
+Suggested hierarchy:
+
+```text
+Mesocycle 2
+Week 3 of 5 · Build
+
+W1  W2  [W3]  W4  D
+
+Mon Upper A
+Wed Lower A
+Fri Upper B
+Sat Lower B
 ```
 
-### Secondary button
+Muscle priority and volume information should be available one level deeper.
 
-```tsx
-<button className="bg-[#121212] hover:bg-[#1a1a1a] border border-[#222] text-neutral-300 font-mono text-[10px] uppercase tracking-widest py-3 transition rounded-none">
-  Edit
-</button>
+## 15. Progress composition
+
+Progress must support comparison over time without becoming a spreadsheet.
+
+### Overview
+
+- training consistency trend
+- active exercise improvements
+- recent records
+- mesocycle state/comparison
+
+### Exercise detail
+
+- performance chart
+- selectable metric
+- recent prescriptions versus actuals
+- PR timeline
+- recommendation history
+
+### Muscle detail
+
+- priority
+- direct-set trend
+- exercise contribution
+- recovery observations
+
+### Records
+
+Use a clean chronological/list structure with filters.
+
+## 16. Charts
+
+Charts should use:
+
+- minimal grid lines
+- direct labels where possible
+- tabular numeric tooltips
+- clear selected range
+- semantic color sparingly
+
+Avoid decorative area gradients that obscure values.
+
+Recommended ranges:
+
+```text
+4W · 12W · 26W · 1Y · ALL
 ```
 
-### Ghost / destructive button
+## 17. Components
 
-```tsx
-<button className="bg-transparent hover:bg-neutral-900 border border-[#222] text-neutral-400 font-mono text-[10px] uppercase py-3 font-bold transition rounded-none">
-  Cancel
-</button>
+### PrimaryButton
+
+- signal fill
+- high-contrast text
+- 48px+ touch height
+- clear pressed state
+
+### SecondaryButton
+
+- surface-2 fill
+- subtle border or tonal separation
+
+### NumericField
+
+- large tabular number
+- unit visibly attached
+- easy select-all/edit behavior
+- increment controls optional and secondary
+
+### StatusChip
+
+Small semantic label such as:
+
+- `RECOVERED`
+- `DELOAD`
+- `PR`
+- `MOVED`
+
+Chips should be used sparingly.
+
+### RecommendationCard
+
+Contains:
+
+- concise recommendation
+- delta
+- one-sentence reason
+- `Why?` disclosure for evidence
+
+### ProgressRing / radial graphics
+
+Use only where a circular representation carries real meaning. Avoid decorative rings around arbitrary metrics.
+
+## 18. Feedback states
+
+### Set completed
+
+- immediate visual collapse/change
+- short haptic
+- rest timer begins
+- undo available
+
+### Personal record
+
+Use a restrained high-quality acknowledgement:
+
+- brief signal/positive accent motion
+- `REP PR` / `LOAD PR` label
+- exact record
+- return focus to workout quickly
+
+### Workout completed
+
+Summary should emphasize:
+
+- session completed
+- duration
+- meaningful records
+- important recommendation changes
+
+Avoid grading the workout with arbitrary scores.
+
+### Recovery / fatigue
+
+Use clear language such as:
+
+- `Recovered`
+- `Some fatigue remains`
+- `Still meaningfully fatigued`
+
+Avoid alarm styling for ordinary training fatigue.
+
+## 19. Empty states
+
+Empty states should explain the next useful action.
+
+Example:
+
+```text
+No exercise history yet
+Complete two sessions with this exercise to start a performance trend.
 ```
 
-### Ghost text link
+## 20. Copy system
 
-```tsx
-<button className="text-[9px] font-mono text-blue-400 hover:text-blue-300 border border-blue-900/40 px-2 py-1 bg-blue-950/15">
-  + Log injury
-</button>
+Voice:
+
+- concise
+- calm
+- specific
+- technically literate
+
+Preferred:
+
+```text
+Add 1 rep next time
+Hold load
+Recovery incomplete
+3 sets remaining
+Week 4 of 5
+Session moved to Saturday
 ```
 
-### Stepper control row
+Avoid:
 
-```tsx
-<div className="text-[9px] font-mono text-neutral-500 uppercase tracking-widest px-1">
-  Weight
-</div>
-<div className="flex items-center justify-between gap-2 pt-1.5">
-  <button className="w-12 h-10 bg-[#121212] hover:bg-[#1a1a1a] text-neutral-400 font-mono text-xs border border-[#222] transition flex items-center justify-center">
-    -10
-  </button>
-  <div className="flex-1 text-center">
-    <span className="text-2xl font-mono font-black text-white tracking-tight">80</span>
-    <span className="text-[10px] font-mono text-neutral-500 uppercase ml-1.5 font-bold">lbs</span>
-  </div>
-  <button className="w-12 h-10 bg-[#121212] hover:bg-[#1a1a1a] text-neutral-400 font-mono text-xs border border-[#222] transition flex items-center justify-center">
-    +10
-  </button>
-</div>
+```text
+Crush it!
+Beast mode
+No excuses
+You failed your streak
+AI Coach says...
 ```
 
-### Toggle
+## 21. Accessibility
 
-```tsx
-<button
-  className={`w-10 h-5 rounded-full border transition-colors relative
-    ${active ? "bg-blue-600 border-blue-500" : "bg-[#1a1a1a] border-[#333]"}`}
->
-  <span
-    className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform
-    ${active ? "translate-x-5" : "translate-x-0.5"}`}
-  />
-</button>
-```
+Required:
 
-`rounded-full` is the one exception to the zero-radius rule: toggle thumbs only.
+- visible `:focus-visible`
+- keyboard-operable controls
+- semantic labels for icon buttons
+- modal focus management
+- AA contrast for essential text
+- status text in addition to color
+- reduced-motion support
+- touch targets generally ≥44×44px
+- chart summaries available in text where the chart conveys important information
 
-### Segmented control
+## 22. Responsive behavior
 
-```tsx
-<div className="flex border border-[#1a1a1a] bg-black p-0.5 font-mono">
-  <button className="px-3 py-1 text-xs bg-blue-600 text-white font-bold">
-    LBS
-  </button>
-  <button className="px-3 py-1 text-xs text-neutral-500 hover:text-neutral-300">
-    KGS
-  </button>
-</div>
-```
+Primary optimization: phone widths 320–480px.
 
-### Selection states
+Tablet/desktop should expand spacing and analytical layouts without turning the app into desktop SaaS chrome.
 
-**Active exercise card:**
+Workout controls should retain reachable widths rather than stretching across the full desktop viewport.
 
-```
-bg-[#121212] border-blue-500 text-[#f0f0f0]
-```
+## 23. Implementation rule
 
-**Inactive:**
+Do not attempt to preserve the previous visual identity through incremental token changes.
 
-```
-bg-[#0c0c0c] border-[#1a1a1a] text-neutral-500
-```
-
-**Active set row:**
-
-```
-bg-blue-950/15 border-y border-blue-900/50
-```
-
-Plus absolute left accent: `absolute left-0 top-0 bottom-0 w-[2px] bg-blue-500`
-
-**Active RPE button:**
-
-```
-bg-blue-600 border-blue-500 text-white font-extrabold
-```
-
-### Warning / injury banner
-
-```tsx
-<div className="border-l-2 border-yellow-600 bg-yellow-950/10 p-3 flex items-start space-x-2">
-  <AlertTriangle className="h-4 w-4 text-yellow-600 shrink-0 mt-0.5" />
-  <div>
-    <span className="font-mono text-[9px] uppercase tracking-wider text-yellow-500 font-bold block">
-      Warning label
-    </span>
-    <p className="text-neutral-400 text-[11px] mt-0.5">Warning body copy.</p>
-  </div>
-</div>
-```
-
-### Injury conflict banner
-
-```tsx
-<div className="border border-red-900 bg-red-950/20 p-4">
-  <AlertTriangle className="h-4 w-4 text-red-500" />
-  <span className="font-mono text-[9px] uppercase tracking-widest text-red-400 font-bold block">
-    Injury conflict
-  </span>
-  <p className="text-neutral-400 text-[11px]">...</p>
-</div>
-```
-
-### Empty state
-
-```tsx
-<div className="border border-dashed border-[#1a1a1a] p-8 text-center bg-[#080808]">
-  <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-mono mb-4">
-    No sessions yet.
-  </p>
-  <button className="bg-[#121212] hover:bg-[#1a1a1a] border border-[#1a1a1a] px-4 py-2 text-[10px] font-mono uppercase tracking-widest text-neutral-300">
-    Start your first session
-  </button>
-</div>
-```
-
----
-
-## Status and feedback colors
-
-| State             | Background       | Border               | Text                           | Use                             |
-| ----------------- | ---------------- | -------------------- | ------------------------------ | ------------------------------- |
-| Active / primary  | `bg-blue-600`    | `border-blue-500`    | `text-white`                   | CTAs, active selections         |
-| Done / complete   | `bg-emerald-600` | `border-emerald-500` | `text-white`                   | Completed sets, saved session   |
-| Injury / avoid    | `bg-red-950`     | `border-red-900`     | `text-red-400`                 | Avoid badge, conflict banner    |
-| Caution / adapted | `bg-yellow-950`  | `border-yellow-900`  | `text-yellow-500`              | Adapted badge, caution severity |
-| Paused            | —                | —                    | `text-neutral-500`             | Paused e1RM, inactive           |
-| Live indicator    | —                | —                    | `bg-emerald-500 animate-pulse` | Active session dot              |
-| Brand pulse       | —                | —                    | `bg-blue-500 animate-pulse`    | Header indicator dot            |
-
----
-
-## Motion
-
-### Screen transition
-
-```css
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-.animate-fadeIn {
-  animation: fadeIn 0.15s ease-out forwards;
-}
-```
-
-Applied to every screen on tab switch.
-
-### Transitions
-
-| Class                         | Use                                        |
-| ----------------------------- | ------------------------------------------ |
-| `transition`                  | All interactive elements (colors, opacity) |
-| `transition-colors`           | Nav tabs, segmented controls               |
-| `transition-all duration-300` | Bar chart height changes                   |
-| `transition-transform`        | Toggle thumb                               |
-
-### Hover states
-
-All interactive elements: `hover:bg-[#1a1a1a]` (one step lighter than surface) or `hover:text-neutral-300` for text links.
-
-### Pulse animations
-
-- Brand dot in header: always pulsing
-- Session active dot in nav: while workout is active
-- Rest timer icon: while timer is running
-- Rest timer value: when countdown reaches zero
-
----
-
-## Icons
-
-**Library:** `lucide-react` only.
-
-| Context                  | Size                | Stroke      |
-| ------------------------ | ------------------- | ----------- |
-| Standard (cards, modals) | `h-4 w-4`           | default (2) |
-| Small (badges, inline)   | `h-3 w-3`           | default     |
-| Nav icons                | `h-[18px] w-[18px]` | default     |
-| Destructive (trash)      | `h-4 w-4`           | default     |
-
-**Color pattern:**
-
-| Color                           | Use                  |
-| ------------------------------- | -------------------- |
-| `text-neutral-500`              | Default / inactive   |
-| `text-neutral-400 → text-white` | Destructive hover    |
-| `text-blue-500`                 | Active nav tab       |
-| `text-yellow-600`               | Warning icon         |
-| `text-red-500`                  | Injury conflict icon |
-| `text-emerald-500`              | Completion icon      |
-
-**Alignment:** Always `flex items-center space-x-2` or `space-x-1.5`. No margin hacks.
-
----
-
-## Scrollbars
-
-Hidden throughout:
-
-```css
-.scrollbar-none {
-  scrollbar-width: none;
-}
-.scrollbar-none::-webkit-scrollbar {
-  display: none;
-}
-```
-
----
-
-## Voice and copy
-
-### Rules
-
-- Plain English. Write the simplest accurate thing.
-- Sentence case for body copy and descriptions.
-- ALL CAPS for: labels, nav tabs, badge text, section meta headers, button text.
-- Verb + noun for buttons: "Start session", "Save injury", "End session".
-- Numbers prominent: large, mono, first.
-- Matter-of-fact about injury state: "Injury conflict. Flagged: posterior labrum."
-- Empty states: factual, no pressure. "No sessions yet."
-
-### Never
-
-- No exclamation marks. Ever.
-- No sci-fi jargon: "telemetry", "pathology", "biomechanical", "protocol", "directive", "buffer", "volatile", "reconstitution", "execute", "vector".
-- No AI-coach language: "Crush it", "You got this", "Beast mode", "Great work".
-- No guilt mechanics: "streak broken", "you missed a day", "don't give up".
-- No overclaiming: "optimised", "compliant", "protocol", "system".
-- No passive voice for actions.
-
-### Copy reference
-
-| Context          | Use                    | Avoid                                |
-| ---------------- | ---------------------- | ------------------------------------ |
-| Start workout    | "Start session"        | "Execute template"                   |
-| Save session     | "Save session"         | "Write telemetry"                    |
-| Cancel           | "Cancel"               | "Abandon"                            |
-| Injury field     | "Injury name"          | "Pathology descriptor"               |
-| Tags field       | "Affected movements"   | "Biomechanical tag interaction"      |
-| Severity         | "Avoid" / "Caution"    | "Strict load disengagement"          |
-| Submit injury    | "Save injury"          | "Record directive"                   |
-| Injury conflict  | "Injury conflict"      | "Critical system conflict"           |
-| Substitute       | "Use this instead"     | "Swap movement at slot N"            |
-| Template adapted | "Injury-adapted"       | "Physio-shield compliant"            |
-| Tracking paused  | "Tracking paused"      | "Overload limiter arrested"          |
-| Backup           | "Backup"               | "Volatile reconstitution"            |
-| Nav: Home        | "HOME"                 | "TELEMETRY"                          |
-| Nav: Plans       | "PLANS"                | "SEQUENCES"                          |
-| Nav: Session     | "SESSION"              | "LOGGING"                            |
-| Nav: Progress    | "PROGRESS"             | "DELTAS"                             |
-| Nav: Self        | "SELF"                 | "BIOLOGY"                            |
-| Rest timer done  | "Done — load next set" | "Interval met"                       |
-| No injuries      | "No injuries logged"   | "No pathological parameters on file" |
-| Settings section | "Settings"             | "Hardware interface"                 |
-| Units setting    | "Units"                | "Load metric deca"                   |
-| Rest setting     | "Default rest"         | "Timer console trigger time"         |
-| RPE setting      | "Effort scale"         | "Intensity capturer"                 |
-
----
-
-## Accessibility
-
-WCAG target: AA (Sprint 5).
-
-Known gaps (Sprint 4 and earlier):
-
-- No `:focus-visible` outlines on interactive elements
-- No focus trap in modals
-- Plate visualizer lacks `aria-label`
-- `prefers-reduced-motion` not yet respected
-
-Color is never the sole differentiator for status: badges carry text labels alongside color. Modal: close on Escape key (pending).
+The old typography, zero-radius rule, border-heavy composition, and injury status hierarchy are legacy references. New screens should be designed against this document and the v3 PRD.
