@@ -68,7 +68,7 @@ describe("programEditing", () => {
       baseSetCount: 9,
       repMin: 12,
       repMax: 8,
-      targetEffort: { scale: "RIR", value: 2 },
+      targetEffort: { scale: "RIR", value: 12 },
       restSeconds: 900,
     });
     const result = updated.sessionTemplates[0].exerciseSlots[0];
@@ -76,8 +76,22 @@ describe("programEditing", () => {
     expect(result.baseSetCount).toBe(6);
     expect(result.repRange).toEqual({ min: 12, max: 12 });
     expect(result.startingRepTarget).toBe(12);
-    expect(result.targetEffort).toEqual({ scale: "RIR", value: 2 });
+    expect(result.targetEffort).toEqual({ scale: "RIR", value: 6 });
     expect(result.restSeconds).toBe(300);
+  });
+
+  it("bounds RPE targets independently from RIR targets", () => {
+    const source = program();
+    const template = source.sessionTemplates[0];
+    const slot = template.exerciseSlots[0];
+    const updated = updateProgramSlotTraining(source, template.id, slot.id, {
+      targetEffort: { scale: "RPE", value: 2 },
+    });
+
+    expect(updated.sessionTemplates[0].exerciseSlots[0].targetEffort).toEqual({
+      scale: "RPE",
+      value: 5,
+    });
   });
 
   it("adds and removes slots while preserving sequential order", () => {
