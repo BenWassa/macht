@@ -9,8 +9,8 @@ import { FinishSessionModal } from "@/modals/FinishSessionModal";
 import { FreePlayScreen } from "@/screens/FreePlayScreen";
 import { HomeScreen } from "@/screens/HomeScreen";
 import { ProfileScreen } from "@/screens/profile";
+import { ProgramScreen } from "@/screens/program/ProgramScreen";
 import { ProgressScreen } from "@/screens/ProgressScreen";
-import { TemplatesScreen } from "@/screens/TemplatesScreen";
 import { WorkoutScreen } from "@/screens/WorkoutScreen";
 import { useSettingsStore } from "@/state/useSettingsStore";
 import { useToastStore } from "@/state/useToastStore";
@@ -77,7 +77,7 @@ export default function App() {
           <FreePlayScreen setActiveTab={setActiveTab} />
         )}
         {activeTab === "templates" && (
-          <TemplatesScreen setActiveTab={setActiveTab} />
+          <ProgramScreen setActiveTab={setActiveTab} />
         )}
         {activeTab === "workout" && (
           <WorkoutScreen

@@ -4,15 +4,15 @@ This file is the live implementation checklist for the Macht product reboot. Upd
 
 ## Current focus
 
-**Phase 6.5 — Program surface integration**
+**Phase 7 — Progress**
 
-Phases 0–6 are implemented. The final Phase 6 code head passed the complete CI pipeline: lint, tests, TypeScript/build, bundle-size budget, and Lighthouse.
+Phases 0–6.5 are implemented. The final Phase 6.5 code head passed the complete CI pipeline: lint, tests, TypeScript/build, bundle-size budget, and Lighthouse.
 
 ## Validation status
 
-- Latest Phase 6 CI: lint ✅, tests ✅, TypeScript/build ✅, bundle size ✅, Lighthouse ✅.
-- V2 planned workouts now run through the persistent execution store and feed progression decisions back into future prescriptions.
-- The existing PROGRAM tab is still the legacy Templates screen; Phase 6.5 closes that user-facing integration gap before Progress work begins.
+- Latest Phase 6.5 CI: lint ✅, tests ✅, TypeScript/build ✅, bundle size ✅, Lighthouse ✅.
+- PROGRAM, TODAY, SESSION, and adaptive progression now share the same generated v2 Program / Mesocycle / PlannedSession source of truth.
+- Legacy templates remain available only as a collapsed fallback inside PROGRAM.
 - CI includes `npm test` and targets `agent/**` pushes, `main`, and pull requests.
 
 ## Phase 0 — Reboot contract
@@ -168,24 +168,27 @@ Phases 0–6 are implemented. The final Phase 6 code head passed the complete CI
 
 ## Phase 6.5 — Program surface integration
 
-- [ ] Replace the legacy injury-heavy Templates screen as the primary PROGRAM surface.
-- [ ] Create and activate a v2 Program from the UI without developer tooling.
-- [ ] Configure sustainable sessions/week and target session duration.
-- [ ] Configure Emphasize / Grow / Maintain muscle priorities.
-- [ ] Edit session exercise slots, set counts, rep ranges, effort targets, rest, and substitutions.
-- [ ] Generate and activate a mesocycle from the configured program.
-- [ ] Show active mesocycle, current week, planned sessions, and deload state.
-- [ ] Edit future programming without rewriting completed workout history.
-- [ ] Keep legacy templates available only as a migration/fallback path during the transition.
-- [ ] Use the v3 design system and generic training constraints rather than injury-first primary UI.
+- [x] Replace the legacy injury-heavy Templates screen as the primary PROGRAM surface.
+- [x] Create and activate a v2 Program from the UI without developer tooling.
+- [x] Configure sustainable sessions/week and target session duration.
+- [x] Configure Emphasize / Grow / Maintain muscle priorities.
+- [x] Edit session exercise slots, set counts, rep ranges, effort targets, rest, and substitutions.
+- [x] Generate and activate a mesocycle from the configured program.
+- [x] Show active mesocycle, current week, planned sessions, and deload state.
+- [x] Edit future programming without rewriting completed workout history.
+- [x] Keep legacy templates available only as a migration/fallback path during the transition.
+- [x] Use the v3 design system and generic programming language rather than injury-first primary UI.
+- [x] Establish the first working-load baseline from completed performance when a new Program starts without a known load.
+- [x] Confirm before archiving an unfinished active cycle.
 
 ### Gate
 
-- [ ] A normal new user can create and activate a v2 program entirely through PROGRAM.
-- [ ] PROGRAM → TODAY → SESSION uses one shared v2 program/mesocycle source of truth.
-- [ ] Program edits preserve completed history and cannot overwrite an active workout.
-- [ ] A generated plan exposes the same prescriptions the workout executor receives.
-- [ ] Lint, full tests, TypeScript/build, bundle-size check, and Lighthouse pass.
+- [x] A normal new user can create and activate a v2 program entirely through PROGRAM.
+- [x] PROGRAM → TODAY → SESSION uses one shared v2 program/mesocycle source of truth.
+- [x] Program edits preserve completed history and cannot overwrite an active workout.
+- [x] A generated plan exposes the same prescriptions the workout executor receives.
+- [x] Program → active cycle → Today → Workout → next-slot progression is covered by an integration test.
+- [x] Lint, full tests, TypeScript/build, bundle-size check, and Lighthouse pass.
 
 ## Phase 7 — Progress
 
@@ -196,6 +199,7 @@ Phases 0–6 are implemented. The final Phase 6 code head passed the complete CI
 - [ ] Muscle-level training views.
 - [ ] Mesocycle comparison.
 - [ ] Exercise response history.
+- [ ] De-duplicate Phase 6 v2/legacy dual-write history before analytics.
 
 ## Phase 8 — Habit and scheduling
 

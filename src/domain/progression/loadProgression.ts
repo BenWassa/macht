@@ -1,4 +1,7 @@
-import type { ExercisePerformance } from "@/domain/execution/types";
+import type {
+  ExercisePerformance,
+  SetPerformance,
+} from "@/domain/execution/types";
 import type { ExercisePrescription } from "@/domain/training/types";
 import type {
   PrescriptionDelta,
@@ -24,6 +27,41 @@ const currentLoad = (prescription: ExercisePrescription): number | undefined =>
   prescription.recommendedLoad ??
   prescription.sets.find((set) => set.targetLoad != null)?.targetLoad;
 
+const baselineSets = (performance: ExercisePerformance): SetPerformance[] => {
+  const prescribed = performance.sets.filter((set) => set.prescription);
+  return prescribed.length > 0 ? prescribed : performance.sets;
+};
+
+const actualLoadBaseline = (
+  performance: ExercisePerformance,
+): number | undefined => {
+  const loads = baselineSets(performance)
+    .filter((set) => set.completed && set.actualLoad != null && set.actualLoad > 0)
+    .map((set) => set.actualLoad!);
+  return loads.length ? Math.min(...loads) : undefined;
+};
+
+const withBaseline = (
+  prescription: ExercisePrescription,
+  performance: ExercisePerformance,
+): {
+  load: number | undefined;
+  reasons: RecommendationReason[];
+  delta: PrescriptionDelta;
+} => {
+  const prescribedLoad = currentLoad(prescription);
+  if (prescribedLoad != null) {
+    return { load: prescribedLoad, reasons: [], delta: {} };
+  }
+  const baseline = actualLoadBaseline(performance);
+  if (baseline == null) return { load: undefined, reasons: [], delta: {} };
+  return {
+    load: baseline,
+    reasons: ["load_baseline_established"],
+    delta: { nextLoad: baseline },
+  };
+};
+
 export function recommendRepLoadProgression({
   prescription,
   performance,
@@ -31,6 +69,7 @@ export function recommendRepLoadProgression({
   performanceTrend,
 }: RepLoadProgressionInput): RepLoadRecommendation {
   const summary = summarizePerformance(prescription, performance);
+  const baseline = withBaseline(prescription, performance);
   const trendReason: RecommendationReason[] =
     performanceTrend != null && performanceTrend > 0
       ? ["performance_improving"]
@@ -44,32 +83,32 @@ export function recommendRepLoadProgression({
   ) {
     return {
       decision: "maintain",
-      reasons: ["insufficient_evidence", ...trendReason],
-      delta: {},
+      reasons: ["insufficient_evidence", ...baseline.reasons, ...trendReason],
+      delta: baseline.delta,
     };
   }
 
   if (!summary.allSetsMeetRangeMinimum) {
     return {
       decision: "maintain",
-      reasons: ["rep_target_missed", ...trendReason],
-      delta: {},
+      reasons: ["rep_target_missed", ...baseline.reasons, ...trendReason],
+      delta: baseline.delta,
     };
   }
 
   if (summary.effortStatus === "too_hard") {
     return {
       decision: "maintain",
-      reasons: ["effort_too_high", ...trendReason],
-      delta: {},
+      reasons: ["effort_too_high", ...baseline.reasons, ...trendReason],
+      delta: baseline.delta,
     };
   }
 
   if (!summary.allSetsMeetTarget) {
     return {
       decision: "maintain",
-      reasons: ["insufficient_evidence", ...trendReason],
-      delta: {},
+      reasons: ["insufficient_evidence", ...baseline.reasons, ...trendReason],
+      delta: baseline.delta,
     };
   }
 
@@ -87,19 +126,24 @@ export function recommendRepLoadProgression({
     );
     return {
       decision: "add_rep",
-      reasons: ["rep_target_reached", ...effortReason, ...trendReason],
+      reasons: [
+        "rep_target_reached",
+        ...effortReason,
+        ...baseline.reasons,
+        ...trendReason,
+      ],
       delta: {
+        ...baseline.delta,
         repTargetDelta: nextRepTarget - summary.targetRep,
         nextRepTarget,
       },
     };
   }
 
-  const load = currentLoad(prescription);
   if (
     summary.allSetsReachRangeMaximum &&
     summary.effortStatus !== "unknown" &&
-    load != null &&
+    baseline.load != null &&
     availableLoadIncrement != null &&
     availableLoadIncrement > 0
   ) {
@@ -108,12 +152,13 @@ export function recommendRepLoadProgression({
       reasons: [
         "rep_target_reached",
         ...effortReason,
+        ...baseline.reasons,
         "load_increment_available",
         ...trendReason,
       ],
       delta: {
         loadDelta: availableLoadIncrement,
-        nextLoad: load + availableLoadIncrement,
+        nextLoad: baseline.load + availableLoadIncrement,
         nextRepTarget: prescription.repRange.min,
         repTargetDelta: prescription.repRange.min - summary.targetRep,
       },
@@ -124,12 +169,15 @@ export function recommendRepLoadProgression({
     decision: "maintain",
     reasons: [
       "rep_target_reached",
-      ...(summary.effortStatus === "unknown" ? ["insufficient_evidence" as const] : []),
+      ...baseline.reasons,
+      ...(summary.effortStatus === "unknown"
+        ? ["insufficient_evidence" as const]
+        : []),
       ...(availableLoadIncrement == null || availableLoadIncrement <= 0
         ? ["load_increment_unavailable" as const]
         : []),
       ...trendReason,
     ],
-    delta: {},
+    delta: baseline.delta,
   };
 }

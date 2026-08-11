@@ -1,0 +1,155 @@
+import { describe, expect, it } from "vitest";
+import type {
+  ExercisePerformance,
+  SetPerformance,
+} from "@/domain/execution/types";
+import type { ExercisePrescription } from "@/domain/training/types";
+import { recommendRepLoadProgression } from "./loadProgression";
+
+const prescription = (
+  patch: Partial<ExercisePrescription> = {},
+): ExercisePrescription => ({
+  id: "rx-1",
+  plannedSessionId: "session-1",
+  programExerciseSlotId: "slot-1",
+  exerciseId: "incline_db_press",
+  order: 1,
+  targetMuscleIds: ["chest"],
+  plannedSetCount: 3,
+  repRange: { min: 8, max: 12 },
+  targetRep: 10,
+  targetEffort: { scale: "RIR", value: 2 },
+  source: "program_initial",
+  sets: [0, 1, 2].map((index) => ({
+    id: `rx-set-${index}`,
+    exercisePrescriptionId: "rx-1",
+    index,
+    type: "working",
+    repRange: { min: 8, max: 12 },
+    targetReps: 10,
+    targetEffort: { scale: "RIR", value: 2 },
+  })),
+  ...patch,
+});
+
+const set = (
+  index: number,
+  reps: number,
+  load: number,
+  prescribed = true,
+): SetPerformance => ({
+  id: `perf-set-${index}`,
+  index,
+  completed: true,
+  actualLoad: load,
+  actualReps: reps,
+  actualEffort: { scale: "RIR", value: 2 },
+  ...(prescribed
+    ? {
+        prescription: {
+          setPrescriptionId: `rx-set-${index}`,
+          exercisePrescriptionId: "rx-1",
+          type: "working",
+          repRange: { min: 8, max: 12 },
+          targetReps: 10,
+          targetEffort: { scale: "RIR", value: 2 },
+        },
+      }
+    : {}),
+});
+
+const performance = (sets: SetPerformance[]): ExercisePerformance => ({
+  id: "performance-1",
+  exerciseId: "incline_db_press",
+  prescriptionId: "rx-1",
+  order: 1,
+  sets,
+});
+
+describe("first-session load baselines", () => {
+  it("carries the first completed load into the next prescription while adding a rep", () => {
+    const result = recommendRepLoadProgression({
+      prescription: prescription(),
+      performance: performance([
+        set(0, 10, 42.5),
+        set(1, 10, 42.5),
+        set(2, 10, 42.5),
+      ]),
+      availableLoadIncrement: 2.5,
+    });
+
+    expect(result.decision).toBe("add_rep");
+    expect(result.delta).toMatchObject({
+      nextLoad: 42.5,
+      nextRepTarget: 11,
+    });
+    expect(result.reasons).toContain("load_baseline_established");
+  });
+
+  it("uses the established baseline for the first load increase at the top of the range", () => {
+    const result = recommendRepLoadProgression({
+      prescription: prescription({ targetRep: 12 }),
+      performance: performance([
+        set(0, 12, 40),
+        set(1, 12, 40),
+        set(2, 12, 40),
+      ]),
+      availableLoadIncrement: 2.5,
+    });
+
+    expect(result.decision).toBe("add_load");
+    expect(result.delta).toMatchObject({
+      loadDelta: 2.5,
+      nextLoad: 42.5,
+      nextRepTarget: 8,
+    });
+  });
+
+  it("keeps the conservative completed load when first-session working sets vary", () => {
+    const result = recommendRepLoadProgression({
+      prescription: prescription(),
+      performance: performance([
+        set(0, 10, 45),
+        set(1, 10, 42.5),
+        set(2, 10, 42.5),
+      ]),
+      availableLoadIncrement: 2.5,
+    });
+
+    expect(result.delta.nextLoad).toBe(42.5);
+  });
+
+  it("ignores an unprescribed added set when establishing the program load baseline", () => {
+    const result = recommendRepLoadProgression({
+      prescription: prescription(),
+      performance: performance([
+        set(0, 10, 42.5),
+        set(1, 10, 42.5),
+        set(2, 10, 42.5),
+        set(3, 20, 10, false),
+      ]),
+      availableLoadIncrement: 2.5,
+    });
+
+    expect(result.delta.nextLoad).toBe(42.5);
+  });
+
+  it("still anchors the first load when harder-than-planned effort calls for a hold", () => {
+    const sets = [set(0, 10, 35), set(1, 10, 35), set(2, 10, 35)].map(
+      (item) => ({
+        ...item,
+        actualEffort: { scale: "RIR" as const, value: 0 },
+      }),
+    );
+    const result = recommendRepLoadProgression({
+      prescription: prescription(),
+      performance: performance(sets),
+      availableLoadIncrement: 2.5,
+    });
+
+    expect(result.decision).toBe("maintain");
+    expect(result.delta.nextLoad).toBe(35);
+    expect(result.reasons).toContain("effort_too_high");
+    expect(result.reasons).toContain("load_baseline_established");
+  });
+});
