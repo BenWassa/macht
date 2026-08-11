@@ -5,6 +5,7 @@ import {
   createPlannedWorkout,
   substituteExercisePerformance,
   toggleSetPerformance,
+  updateExerciseFeedback,
   updateExerciseNote,
   updateSetPerformance,
 } from "@/domain/execution/plannedWorkout";
@@ -145,6 +146,17 @@ export const useWorkoutStore = create<WorkoutState>()(
                 exercisePerformanceId,
                 setPerformanceId,
                 patch,
+              )
+            : null,
+        })),
+      updateV2ExerciseFeedback: (exercisePerformanceId, patch) =>
+        set((state) => ({
+          activeV2Workout: state.activeV2Workout
+            ? updateExerciseFeedback(
+                state.activeV2Workout,
+                exercisePerformanceId,
+                patch,
+                new Date().toISOString(),
               )
             : null,
         })),
