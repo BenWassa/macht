@@ -1,21 +1,14 @@
+import { AlertTriangle, ShieldAlert } from "lucide-react";
 import { useState } from "react";
-import { PlateVisualizer } from "@/components/PlateVisualizer";
-import { getExerciseConflict } from "@/domain/injuries";
-import { AddExerciseModal } from "@/modals/AddExerciseModal";
-import { getExercisePrescription } from "@/domain/prescriptions";
-import type { SetEntry } from "@/domain/types";
+import { effectiveTrainingConstraints } from "@/domain/constraints/effective";
+import { evaluateExerciseConstraints } from "@/domain/constraints/evaluate";
+import { getExerciseById } from "@/domain/exerciseLibrary";
 import { useWakeLock } from "@/hooks/useWakeLock";
 import { useWorkoutMediaSession } from "@/hooks/useWorkoutMediaSession";
-import { vibrate } from "@/lib/haptics";
-import { ExerciseTabs } from "@/screens/workout/ExerciseTabs";
-import { WorkoutActionsBar } from "@/screens/workout/WorkoutActionsBar";
-import { InjuryConflictBanner } from "@/screens/workout/InjuryConflictBanner";
 import { PlannedWorkoutExecution } from "@/screens/workout/PlannedWorkoutExecution";
-import { WorkoutSetTable } from "@/screens/workout/WorkoutSetTable";
 import { useCustomExerciseStore } from "@/state/useCustomExerciseStore";
 import { useInjuryStore } from "@/state/useInjuryStore";
-import { useSettingsStore } from "@/state/useSettingsStore";
-import { useToastStore } from "@/state/useToastStore";
+import { useTrainingConstraintStore } from "@/state/useTrainingConstraintStore";
 import { useWorkoutStore } from "@/state/useWorkoutStore";
 
 interface WorkoutScreenProps {
@@ -32,12 +25,10 @@ export function WorkoutScreen({
   onSetCompleted,
   onStartWarmup,
 }: WorkoutScreenProps) {
-  const settings = useSettingsStore();
-  const customExercises = useCustomExerciseStore((state) => state.exercises);
-  const injuries = useInjuryStore((state) => state.injuries);
   const workout = useWorkoutStore();
-  const showToast = useToastStore((state) => state.show);
-  const [showAddExercise, setShowAddExercise] = useState(false);
+  const userConstraints = useTrainingConstraintStore((state) => state.constraints);
+  const legacyInjuries = useInjuryStore((state) => state.injuries);
+  const customExercises = useCustomExerciseStore((state) => state.exercises);
   const [wakeLockEnabled, setWakeLockEnabled] = useState(true);
 
   useWakeLock(workout.workoutActive && wakeLockEnabled);
@@ -53,14 +44,86 @@ export function WorkoutScreen({
           </h1>
         </header>
         <div className="surface-card p-6 text-sm text-text-muted">
-          Start today&apos;s planned workout from Today or choose a legacy plan from Program.
+          Start the next planned workout from Today.
         </div>
       </div>
     );
   }
 
-  if (workout.activeV2Workout) {
+  const session = workout.activeV2Workout;
+  if (!session) {
     return (
+      <div className="surface-card p-6 text-sm leading-6 text-text-secondary" role="status">
+        This saved session is being upgraded to the current workout format. Reload the app
+        once; the persisted session data will remain on this device.
+      </div>
+    );
+  }
+
+  const currentPerformance = session.exercisePerformances[workout.selectedExIndex];
+  const exercise = currentPerformance
+    ? getExerciseById(currentPerformance.exerciseId, customExercises)
+    : undefined;
+  const constraints = effectiveTrainingConstraints(
+    userConstraints,
+    legacyInjuries,
+  );
+  const constraintResult = exercise
+    ? evaluateExerciseConstraints(
+        exercise,
+        constraints,
+        new Date().toISOString().slice(0, 10),
+      )
+    : undefined;
+
+  return (
+    <div className="space-y-4">
+      {constraintResult && constraintResult.level !== "clear" ? (
+        <section
+          className={`rounded-lg p-4 ${
+            constraintResult.level === "avoid"
+              ? "bg-negative-soft"
+              : "bg-caution-soft"
+          }`}
+          role="status"
+        >
+          <div className="flex items-start gap-3">
+            {constraintResult.level === "avoid" ? (
+              <ShieldAlert
+                className="mt-0.5 h-5 w-5 shrink-0 text-negative"
+                aria-hidden="true"
+              />
+            ) : (
+              <AlertTriangle
+                className="mt-0.5 h-5 w-5 shrink-0 text-caution"
+                aria-hidden="true"
+              />
+            )}
+            <div className="min-w-0">
+              <p
+                className={`text-sm font-bold ${
+                  constraintResult.level === "avoid"
+                    ? "text-negative"
+                    : "text-caution"
+                }`}
+              >
+                {constraintResult.level === "avoid"
+                  ? "Active training constraint"
+                  : "Training constraint caution"}
+              </p>
+              <p className="mt-1 text-sm leading-5 text-text-secondary">
+                {exercise?.name} is flagged by {constraintResult.matches.length} active
+                constraint{constraintResult.matches.length === 1 ? "" : "s"}. Use
+                Substitute if you want a different programmed movement.
+              </p>
+              <p className="mt-2 text-xs leading-5 text-text-muted">
+                {constraintResult.matches.map((match) => match.label).join(" · ")}
+              </p>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
       <PlannedWorkoutExecution
         onFinish={onFinish}
         onSetCompleted={onSetCompleted}
@@ -68,129 +131,6 @@ export function WorkoutScreen({
         wakeLockActive={wakeLockEnabled}
         onToggleWakeLock={() => setWakeLockEnabled((value) => !value)}
       />
-    );
-  }
-
-  const selectedExerciseId = workout.activeWorkoutList[workout.selectedExIndex];
-  const selectedSets = workout.workoutSets[selectedExerciseId] ?? [];
-  const selectedSet = selectedSets[workout.selectedSetIndex] ?? selectedSets[0];
-  const selectedPrescription = getExercisePrescription(
-    selectedExerciseId,
-    customExercises,
-  );
-  const conflict = getExerciseConflict(selectedExerciseId, injuries);
-  const lastSetText = selectedSet?.last;
-  const showLastSet =
-    lastSetText && lastSetText !== "-" && /[×x@]/.test(lastSetText);
-
-  const toggleComplete = (exerciseId: string, setIndex: number) => {
-    const completedNow = workout.toggleComplete(exerciseId, setIndex);
-    if (completedNow) {
-      const { workoutSets, activeWorkoutList } = useWorkoutStore.getState();
-      const allSetsComplete = activeWorkoutList.every((id) =>
-        (workoutSets[id] ?? []).every((set) => set.completed),
-      );
-      if (allSetsComplete) {
-        vibrate([20, 60, 20]);
-        showToast("All sets complete · Session done", {
-          label: "Finish",
-          onAction: onFinish,
-        });
-      } else {
-        vibrate(15);
-        const advanceAfterRest = setIndex === selectedSets.length - 1;
-        onSetCompleted({ advanceAfterRest });
-        showToast(`Set ${setIndex + 1} logged`, {
-          label: "Undo",
-          onAction: () => workout.toggleComplete(exerciseId, setIndex),
-        });
-      }
-    }
-    return completedNow;
-  };
-
-  const updateSet = <K extends keyof SetEntry>(
-    setIndex: number,
-    field: K,
-    value: SetEntry[K],
-  ) => workout.updateSetField(selectedExerciseId, setIndex, field, value);
-
-  return (
-    <div className="animate-fadeIn">
-      <WorkoutActionsBar
-        isMinimumSession={workout.isMinimumSession}
-        wakeLockActive={wakeLockEnabled}
-        onAddExercise={() => setShowAddExercise(true)}
-        onStartWarmup={onStartWarmup}
-        onToggleMinimum={() =>
-          workout.setIsMinimumSession(!workout.isMinimumSession)
-        }
-        onToggleWakeLock={() => setWakeLockEnabled((prev) => !prev)}
-        onFinish={onFinish}
-      />
-
-      <ExerciseTabs
-        exercises={workout.activeWorkoutList}
-        selectedIndex={workout.selectedExIndex}
-        injuries={injuries}
-        onSelect={workout.setSelectedExIndex}
-      />
-
-      {conflict && (
-        <InjuryConflictBanner
-          conflict={conflict}
-          exerciseId={selectedExerciseId}
-          onSubstitute={workout.substituteExercise}
-        />
-      )}
-
-      <WorkoutSetTable
-        sets={selectedSets}
-        selectedSetIndex={workout.selectedSetIndex}
-        prescription={selectedPrescription}
-        settings={settings}
-        suggestion={workout.loadSuggestions?.[selectedExerciseId]}
-        onSelectSet={workout.setSelectedSetIndex}
-        onToggleComplete={(index) => toggleComplete(selectedExerciseId, index)}
-        onUpdateSet={updateSet}
-        onAppendSet={() => workout.appendSet(selectedExerciseId)}
-      />
-
-      {showLastSet && (
-        <div className="mb-3 flex items-baseline justify-between gap-3 border-t border-edge pt-2.5">
-          <span className="font-mono text-[10px] uppercase tracking-widest text-neutral-500">
-            Last time
-          </span>
-          <span className="truncate font-mono text-xs text-neutral-400">
-            {lastSetText}
-          </span>
-        </div>
-      )}
-
-      <div className="mb-3 border-t border-edge pt-2.5">
-        <label className="mb-1 block font-mono text-[10px] uppercase tracking-widest text-neutral-500">
-          Notes
-        </label>
-        <textarea
-          value={workout.exerciseNotes[selectedExerciseId] ?? ""}
-          onChange={(e) =>
-            workout.setExerciseNote(selectedExerciseId, e.target.value)
-          }
-          placeholder="Form cues, observations, upgrades..."
-          rows={2}
-          className="w-full resize-none border border-edge bg-black p-2 font-mono text-[11px] text-neutral-300 placeholder-neutral-700 focus:border-neutral-600 focus:outline-none"
-        />
-      </div>
-
-      {selectedSet &&
-        selectedPrescription.showPlateVisualizer &&
-        selectedSet.weight > 0 && (
-          <PlateVisualizer weight={selectedSet.weight} units={settings.units} />
-        )}
-
-      {showAddExercise && (
-        <AddExerciseModal onClose={() => setShowAddExercise(false)} />
-      )}
     </div>
   );
 }
