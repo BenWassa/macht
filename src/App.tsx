@@ -12,6 +12,7 @@ import { ProfileScreen } from "@/screens/profile";
 import { ProgressScreen } from "@/screens/ProgressScreen";
 import { TemplatesScreen } from "@/screens/TemplatesScreen";
 import { WorkoutScreen } from "@/screens/WorkoutScreen";
+import { useSettingsStore } from "@/state/useSettingsStore";
 import { useToastStore } from "@/state/useToastStore";
 import { useUiStore } from "@/state/useUiStore";
 import { useWorkoutStore } from "@/state/useWorkoutStore";
@@ -23,6 +24,7 @@ export default function App() {
   const activeTab = useUiStore((state) => state.activeTab);
   const setActiveTab = useUiStore((state) => state.setActiveTab);
   const [showFinishModal, setShowFinishModal] = useState(false);
+  const units = useSettingsStore((state) => state.units);
   const showToast = useToastStore((state) => state.show);
   const workoutActive = useWorkoutStore((state) => state.workoutActive);
   const workoutName = useWorkoutStore((state) => state.workoutName);
@@ -127,11 +129,15 @@ export default function App() {
           onSaved={(summary) => {
             setShowFinishModal(false);
             clear();
-            const receipt = summary.targetsModified
-              ? "Targets modified mid-session. Next forecasts re-anchored based on logged effort."
-              : "Next forecasts re-anchored based on logged effort.";
+            const prReceipt =
+              summary.personalRecords > 0
+                ? `${summary.personalRecords} new PR${summary.personalRecords === 1 ? "" : "s"} · `
+                : "";
+            const targetReceipt = summary.targetsModified
+              ? "Logged changes will inform the next recommendation."
+              : "Performance saved for the next recommendation.";
             showToast(
-              `Session saved · ${summary.duration} · ${summary.sets} sets · ${summary.volume.toLocaleString()} lbs · ${receipt}`,
+              `${prReceipt}Session saved · ${summary.duration} · ${summary.sets} sets · ${summary.volume.toLocaleString()} ${units} · ${targetReceipt}`,
             );
             setActiveTab("home");
           }}
